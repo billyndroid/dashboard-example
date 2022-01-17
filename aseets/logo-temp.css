@@ -1,0 +1,61 @@
+@charset "utf-8";
+	.st0
+{
+	background : #FF00FF;
+	background : rgba(255, 0, 255, 1);
+	position : absolute ;
+	left : 27px;
+	top : 88px;
+	width : 96px;
+	height : 18px;
+}
+.st1
+{
+	background : #35679B;
+	background : rgba(53, 103, 155, 1);
+	position : absolute ;
+	left : 23px;
+	top : 85px;
+	width : 103px;
+	height : 19px;
+}
+.image
+{
+	background-image : url(image.png);
+	background-repeat : no-repeat;
+	position : absolute ;
+	left : 10px;
+	top : 90px;
+	width : 134px;
+	height : 56px;
+}
+.st2
+{
+	background : #5C8FFF;
+	background : rgba(92, 143, 255, 1);
+	position : absolute ;
+	left : 16px;
+	top : 23px;
+	width : 52px;
+	height : 89px;
+}
+.st3
+{
+	background : #5C8FFF;
+	background : rgba(92, 143, 255, 1);
+	position : absolute ;
+	left : 56px;
+	top : 21px;
+	width : 38px;
+	height : 97px;
+}
+.st4
+{
+	background : #5C8FFF;
+	background : rgba(92, 143, 255, 1);
+	position : absolute ;
+	left : 83px;
+	top : 23px;
+	width : 52px;
+	height : 89px;
+}
