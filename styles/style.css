@@ -37,6 +37,7 @@
     text-decoration: none;
     list-style: none;
     box-sizing: border-box;
+    
 
 }
 
@@ -52,7 +53,7 @@ body {
     font-size: 0.88rem;
     background: var(--color-background);
     user-select: none;
-    overflow-x: hidden;
+   /* overflow-x: hidden;*/
     color: var(--color-dark);
 }
 
@@ -166,7 +167,7 @@ aside .sidebar {
     background: white;
     display: flex;
     flex-direction: column;
-    height: 86vh;
+    height: 150vh;
     position: relative;
     top: 3rem;
 }
@@ -240,7 +241,7 @@ main .date {
     background: var(--color-light);
     border-radius: var(--border-radius-1);
     margin-top: 1rem;
-    padding: 5rem 1.6rem;
+    padding: 1rem 1.6rem;
     
 }
 
@@ -276,6 +277,10 @@ main .insights > div span {
     border-radius: 50%;
     color: var(--color-white);
     font-size: 2rem; 
+
+}
+main .insights > div.sales span {
+    background: var(--color-warning);
 
 }
 
@@ -354,3 +359,44 @@ main .insights small {
     margin-top: 1.6rem;
     display: block;
 }
+
+
+/*(((((((((((((Recent Orders))))))))))*/
+main .recent-orders {
+    margin-top: 2rem;
+}
+
+main .recent-orders table {
+    background: var(--color-white);
+    width: 100%;
+    border-radius: var(--card-border-radius);
+    padding: var(--card-padding);
+    text-align: center;
+    box-shadow: var(--box-shadow);
+    transition: all 300ms ease;
+}
+
+main .recent-orders table:hover {
+    box-shadow: none;
+}
+
+main table tbody td {
+    height: 2.8rem;
+    border-bottom: 1px solid var(--color-light);
+    color: var(--color-dark-variant);
+
+}
+
+main table tbody tr:last-child td {
+    border: none;
+}
+
+main .recent-orders a {
+    text-align: center;
+    display: block;
+    margin: 1rem auto;
+    color: var(--color-primary);
+}
+
+/*(((((((((((((((End of Main)))))))))))))))*/
+
