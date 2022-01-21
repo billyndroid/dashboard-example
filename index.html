@@ -81,6 +81,9 @@
             <div class="date">
                 <input type="date">
             </div>
+
+ <!--((((((((((((((End of Date))))))))))))))-->
+
             <div class="insights">
                 <div class="sales">
                     <span class="material-icons-sharp">attach_money</span>
@@ -89,6 +92,8 @@
                             <h3>Total Sales</h3>
                             <h1>£25,058</h1>
                         </div>
+
+                        
                         <div class="progress">
                             <svg>
                                 <circle cx=38 cy=36 r=36 ></circle>
@@ -129,7 +134,11 @@
                     <div class="middle">
                         <div class="left">
                             <h3>Total Income</h3>
-                            <h1>£13,000</h1>
+                            <h1>
+                                <div class="countup">13000
+                                    <button onclick="runAnimations()">Animate</button>
+                                </div>
+                            </h1>
                         </div>
                         <div class="progress">
                             <svg>
@@ -280,6 +289,7 @@
             </div>
         </div>
     </div>
+    <script src="scripts/countup.js"></script>
     <script src="scripts/orders.js"></script>
     <script src="scripts/main.js"></script>
     

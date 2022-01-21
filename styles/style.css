@@ -331,7 +331,7 @@ main .insights svg {
 main .insights svg circle {
     fill: none;
     stroke: var(--color-primary);
-    stroke-width: 14;
+    stroke-width: 10;
     stroke-linecap: round;
     transform: translate(5px, 5px);
     stroke-dasharray: 110;
@@ -339,18 +339,28 @@ main .insights svg circle {
 }
 
 main .insights .sales svg circle {
-    stroke-dashoffset: -30;
     stroke-dasharray: 200;
+    stroke-dashoffset: -30;
+    animation: dash 4s linear forwards;
 }
 
 main .insights .expenses svg circle {
-    stroke-dashoffset: 20;
-    stroke-dashoffset: 80;
+    stroke-dasharray: 110;
+    stroke-dashoffset: 92;
+    animation: dash 4.5s linear forwards;
+
 }
 
 main .insights .income svg circle {
-    stroke-dashoffset: 35;
-    stroke-dashoffset: 110;
+    stroke-dasharray: 135;
+    stroke-dashoffset: 50;
+    animation: dash 5s linear forwards;
+
+}
+@keyframes dash {
+    to {
+      stroke-dashoffset: 30;
+    }
 }
 
 main .insights .progress .number {
@@ -727,6 +737,10 @@ main .recent-orders table {
     font-size: 2rem;
 }
 
+.right .profile-pic {
+    justify-content: right;
+}
 }
 
-/*(((((((((((((
+/*(((((((((((((animation))))))))))))))))*/
+
