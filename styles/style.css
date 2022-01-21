@@ -150,7 +150,7 @@ aside {
 }
 
 aside .top {
-    background: white;
+    
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -160,7 +160,7 @@ aside .top {
 aside .logo {
     display: flex;
     gap: 0.8rem;
-    background: white;
+    
 }
 
 aside .logo img {
@@ -174,7 +174,7 @@ aside .close {
 
 /*sidebar*/
 aside .sidebar {
-    background: white;
+    
     display: flex;
     flex-direction: column;
     height: 150vh;
@@ -541,7 +541,10 @@ main .recent-orders a {
     align-items: center;
     justify-content: center;
 }
-
+.right .sales-analytics .add-product:hover {
+    background var(--color-primary);
+    color: white;
+}
 .right .sales-analytics .add-product div {
     display: flex;
     align-items: center;
@@ -725,3 +728,5 @@ main .recent-orders table {
 }
 
 }
+
+/*(((((((((((((
