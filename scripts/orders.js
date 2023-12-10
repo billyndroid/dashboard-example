@@ -1,37 +1,37 @@
 const Orders = [
     {
-        productName: `Foldable Mini Drone`,
-        productNumber: `85631`,
+        productName: `S&P`,
+        productNumber: `£33.94`,
         paymentStatus: `Due`,
         shipping: `Pending`
     },
     {
-        productName: `LAVENDER KF102 Drone`,
-        productNumber: `36378`,
+        productName: `QQQ`,
+        productNumber: `£33.94`,
         paymentStatus: `Refunded`,
         shipping: `Declined`
     },
     {
-        productName: `Ruko F11 Pro Drone`,
-        productNumber: `49347`,
+        productName: `Ruko F11 Pro FTSE`,
+        productNumber: `£33.94`,
         paymentStatus: `Due`,
         shipping: `Pending`
     },
     {
-        productName: `Drone with Camera Drone`,
-        productNumber: `96936`,
+        productName: `Oil`,
+        productNumber: `£33.94`,
         paymentStatus: `Paid`,
         shipping: `Delivered`
     },
     {
-        productName: `GPS 4k Drone`,
-        productNumber: `22821`,
+        productName: `Gold`,
+        productNumber: `£33.94`,
         paymentStatus: `Due`,
-        shipping: `Pending`
+        shipping: `Natural Gas`
     },
     {
-        productName: `Foldable Mini Drone`,
-        productNumber: `85631`,
+        productName: `Natural Gas`,
+        productNumber: `£33.94`,
         paymentStatus: `Due`,
         shipping: `Pending`
     },
