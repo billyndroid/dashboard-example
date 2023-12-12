@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics</title>
+    <title>Orders</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp"
       rel="stylesheet">
       <link rel="stylesheet" href="../styles/style.css">
@@ -64,7 +64,7 @@
 
                 <a href="#">
                     <span class="material-icons-sharp">add</span>
-                    <h3>Add Commodity</h3>
+                    <h3>Add Product</h3>
                 </a>
 
                 <a href="#">
@@ -75,26 +75,97 @@
 
         </aside>
     </div>
-    
-</div>
-
+    <div>
+        <div>
+            <canvas id="myChart"></canvas>
+          </div>
+          
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          
+          <script>
+            const ctx = document.getElementById('myChart');
+          
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: ['Mon', 'Tues', 'Weds', 'Thurs', 'Fri', 'Sat'],
+                datasets: [{
+                  label: '# of Votes',
+                  data: [2, 3, 5, 3, 4, 3],
+                  borderWidth: 5
+                }]
+              },
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: false
+                  }
+                }
+              }
+            });
+          </script>
+<!--Candlechart-->> 
 <div>
-    <!--First iteration will call price, second will call price and execute trade-->
-    <button id="bigExecutionButton"></button>
-</div>
+    <canvas id="candleChart"></canvas>
+  </div>         
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <script>
-    const button = document.getElementById('bigExecutionButton');
+     var options = {
+  chart: {
+    type: 'line'
+  },
+  series: [{
+    name: 'sales',
+    data: [30,40,35,50,49,60,70,91,125]
+  }],
+  xaxis: {
+    categories: [1991,1992,1993,1994,1995,1996,1997, 1998,1999]
+  }
+}
 
-    button.addEventListener("click", function () {
-        fetch("https://insertapi.com.path.id")
-        .then(function (result) {
-            console.log(result);
-        })
-        .catch(function (err){
-            console.error(err);;
-        });
-    });
+var chart = new ApexCharts(document.querySelector("#chart"), options);
+
+chart.render();
+      
 </script>
+
+<!--Linechart-->>          
+        <div>
+            <canvas id="lineChart"></canvas>
+          </div>
+          
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          
+          <script>
+            const ctx = document.getElementById('myChart');
+          
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: ['Mon', 'Tues', 'Weds', 'Thurs', 'Fri', 'Sat'],
+                datasets: [{
+                  label: '# of Votes',
+                  data: [2, 3, 5, 3, 4, 3],
+                  borderWidth: 5
+                }]
+              },
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: false
+                  }
+                }
+              }
+            });
+          </script>
+    </div>
+    <script src="scripts/testlinechart.js"></script>
+    <script src="scripts/candlechart.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+
+
 </body>
 </html>

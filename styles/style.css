@@ -622,6 +622,18 @@ main table tbody tr th:first-child {
     display: none;
 }
 }
+
+
+body {
+  font-family: poppins, sans-serif;
+}
+
+#chart {
+  max-width: 650px;
+  margin: 35px auto;
+}
+
+
 /*(((((((((((((((Media Queries 2)))))))))))))))*/
 
 @media screen and (max-width: 768px) {
@@ -744,3 +756,16 @@ main .recent-orders table {
 
 /*(((((((((((((animation))))))))))))))))*/
 
+/*Charts*/
+#chart {
+    max-width: 650px;
+    margin: 35px auto;
+  }
+  
+  canvas#myChart {
+      display:flex;
+      flex-direction: column;
+      margin: 0;
+      padding: 12%;
+      position: absolute;
+  }

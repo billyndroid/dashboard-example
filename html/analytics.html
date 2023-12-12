@@ -64,7 +64,7 @@
 
                 <a href="#">
                     <span class="material-icons-sharp">add</span>
-                    <h3>Add Product</h3>
+                    <h3>Add Commodity</h3>
                 </a>
 
                 <a href="#">
@@ -75,5 +75,51 @@
 
         </aside>
     </div>
+    
+<!--candleChart ONE-------------------------------------------------------------------------------------------->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<div id="chart">
+    <script>
+    var options = {
+        chart: {
+          type: 'bar'
+        },
+        series: [{
+          name: 'sales',
+          data: [30,40,45,34,49,60,70,91,30]
+        }],
+        xaxis: {
+          categories: [1991,1992,1993,1994,1995,1996,1997, 1998,1999]
+        }
+      }
+      
+      var chart = new ApexCharts(document.querySelector("#chart"), options);
+      
+      chart.render();</script>
+</div>
+<!--candleChart ONE-------------------------------------------------------------------------------------------->
+
+<div id="chart">
+    <script>var options = {
+        chart: {
+          type: 'bar'
+        },
+        series: [{
+          name: 'sales',
+          data: [30,40,45,50,49,60,70,91,125]
+        }],
+        xaxis: {
+          categories: [1991,1992,1993,1994,1995,1996,1997, 1998,1999]
+        }
+      }
+      
+      var chart = new ApexCharts(document.querySelector("#chart"), options);
+      
+      chart.render();</script>
+</div>
+
+
+
+
 </body>
 </html>
