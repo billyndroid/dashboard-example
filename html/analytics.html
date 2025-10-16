@@ -10,17 +10,20 @@
       <link rel="stylesheet" href="../styles/style.css">
 </head>
 <body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
     <div class="container">
         <aside class="top">
             <div class="logo">
-                <img src="../assets/logo-temp.png">
+                <img src="../assets/logo-temp.png" alt="SQU^RE DOFF Trading Dashboard Logo">
                 <h2>SQU^RE<span class="danger">DOFF</span></h2>
             </div>
-            <div class="close" id="close-btn">
-                <span class="material-icons-sharp">close</span>
+            <div class="close" id="close-btn" role="button" aria-label="Close sidebar" tabindex="0">
+                <span class="material-icons-sharp" aria-hidden="true">close</span>
             </div>
 
-            <div class="sidebar">
+            <nav class="sidebar" role="navigation" aria-label="Main navigation">
                 <a href="../index.html">
                     <span class="material-icons-sharp">grid_view</span>
                     <h3>Dashboard</h3>
@@ -71,18 +74,18 @@
                     <span class="material-icons-sharp">logout</span>
                     <h3>Logout</h3>
                 </a>
-            </div>
+            </nav>
 
         </aside>
 
-        <main>
+        <main id="main-content" role="main" aria-label="Analytics content">
             <h1>Market Analytics</h1>
-            <div class="date">
-                <input type="date" id="startDate">
+            <div class="date" role="group" aria-label="Date range selection">
+                <input type="date" id="startDate" aria-label="Start date">
                 <span style="margin: 0 0.5rem;">to</span>
-                <input type="date" id="endDate">
-                <button class="btn btn-primary" id="applyDateRange" style="margin-left: 1rem;">Apply</button>
-                <select id="presetRanges" class="btn btn-outline" style="margin-left: 0.5rem;">
+                <input type="date" id="endDate" aria-label="End date">
+                <button class="btn btn-primary" id="applyDateRange" style="margin-left: 1rem;" aria-label="Apply selected date range">Apply</button>
+                <select id="presetRanges" class="btn btn-outline" style="margin-left: 0.5rem;" aria-label="Quick date range presets">
                     <option value="">Quick Ranges</option>
                     <option value="7">Last 7 Days</option>
                     <option value="30">Last 30 Days</option>

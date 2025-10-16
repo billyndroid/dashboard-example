@@ -10,18 +10,21 @@
       <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
     <div class="container">
         <aside class="top">
             <div class="logo">
-                <img src="assets/logo-temp.png">
+                <img src="assets/logo-temp.png" alt="SQU^RE DOFF Trading Dashboard Logo">
                 <h2>SQU^RE<span class="danger">DOFF</span></h2>
             </div>
-            <div class="close" id="close-btn">
-                <span class="material-icons-sharp">close</span>
+            <div class="close" id="close-btn" role="button" aria-label="Close sidebar" tabindex="0">
+                <span class="material-icons-sharp" aria-hidden="true">close</span>
             </div>
 
-            <div class="sidebar">
-                <a href="#">
+            <nav class="sidebar" role="navigation" aria-label="Main navigation">
+                <a href="#" aria-current="page">
                     <span class="material-icons-sharp">grid_view</span>
                     <h3>Dashboard</h3>
                 </a>
@@ -42,9 +45,9 @@
                 </a>
 
                 <a href="html/messages.html">
-                    <span class="material-icons-sharp">mail_outline</span>
+                    <span class="material-icons-sharp" aria-hidden="true">mail_outline</span>
                     <h3>Messages</h3>
-                    <span class="message-count">21</span>
+                    <span class="message-count" aria-label="21 unread messages">21</span>
                 </a>
 
                 <a href="html/orders.html">
@@ -71,26 +74,26 @@
                     <span class="material-icons-sharp">logout</span>
                     <h3>Logout</h3>
                 </a>
-            </div>
+            </nav>
 
         </aside>
         <!--((((((((((((((End of Aside Section))))))))))))))-->
-        <main>
+        <main id="main-content" role="main" aria-label="Dashboard content">
             <h1>Main Dashboard</h1>
             <h2>Positions *Live/Historical</h2>
 
             <div class="date">
-                <input type="date">
+                <input type="date" aria-label="Select date for historical data" id="date-picker">
             </div>
 
  <!--((((((((((((((End of Date))))))))))))))-->
 
-            <div class="insights">
-                <div class="sales">
-                    <span class="material-icons-sharp">attach_money</span>
+            <div class="insights" role="region" aria-label="Portfolio metrics">
+                <div class="sales" role="article" aria-labelledby="total-position-label">
+                    <span class="material-icons-sharp" aria-hidden="true">attach_money</span>
                     <div class="middle">
                         <div class="left">
-                            <h3>Total Position</h3>
+                            <h3 id="total-position-label">Total Position</h3>
                             <h3>USD</h3>
                             <h1 data-live-update data-format="currency" data-base-value="247850" data-variance="0.02">$247.8K</h1>
                         </div>
@@ -109,11 +112,11 @@
                 </div>
                 <!--(((((((((((((End of Sales)))))))))))))-->
 
-                <div class="expenses">
-                    <span class="material-icons-sharp">trending_up</span>
+                <div class="expenses" role="article" aria-labelledby="pnl-label">
+                    <span class="material-icons-sharp" aria-hidden="true">trending_up</span>
                     <div class="middle">
                         <div class="left">
-                            <h3>Total P&L</h3>
+                            <h3 id="pnl-label">Total P&L</h3>
                             <h3>USD</h3>
                             <h1 data-live-update data-format="currency" data-base-value="12058" data-variance="0.05">+$12.1K</h1>
                         </div>
@@ -130,13 +133,13 @@
                 </div>
                 <!--(((((((((((((End of Expenses)))))))))))))-->
 
-                <div class="income">
+                <div class="income" role="article" aria-labelledby="win-rate-label">
                     
-                    <span class="material-icons-sharp">assessment</span>
+                    <span class="material-icons-sharp" aria-hidden="true">assessment</span>
 
                     <div class="middle">
                         <div class="left">
-                            <h3>Win Rate</h3>
+                            <h3 id="win-rate-label">Win Rate</h3>
                             <h1 data-live-update data-format="percentage" data-base-value="0.73" data-variance="0.05">73%</h1>
                         </div>
                         <div class="progress">
@@ -153,9 +156,9 @@
                 <!--(((((((((((((End of Income)))))))))))))-->
             </div>
             <!--(((((((((((((End of Insights)))))))))))))-->
-                <div class="recent-orders">
-                    <h2>Indices & Commodities</h2>
-                    <table>
+                <div class="recent-orders" role="region" aria-labelledby="orders-heading">
+                    <h2 id="orders-heading">Indices & Commodities</h2>
+                    <table role="table" aria-label="Trading positions and orders">
                         <thead>
                             <tr>
                                 <th>Asset</th>
@@ -175,12 +178,12 @@
         <!--(((((((((((((End of MAIN)))))))))))))-->
         <div class="right">
             <div class="top">
-                <button id="menu-btn">
-                    <span class="material-icons-sharp">menu</span>
+                <button id="menu-btn" aria-label="Open menu" aria-expanded="false">
+                    <span class="material-icons-sharp" aria-hidden="true">menu</span>
                 </button>    
-                    <div class="theme-toggler">
-                        <span class="material-icons-sharp active">light_mode</span>
-                        <span class="material-icons-sharp">dark_mode</span>
+                    <div class="theme-toggler" role="group" aria-label="Theme selection">
+                        <span class="material-icons-sharp active" role="button" aria-label="Light mode" aria-pressed="true" tabindex="0">light_mode</span>
+                        <span class="material-icons-sharp" role="button" aria-label="Dark mode" aria-pressed="false" tabindex="0">dark_mode</span>
                     </div>
                     <div class="profile">
                         <div class="info">
@@ -188,7 +191,7 @@
                             <small class="text-muted">Admin</small>
                         </div>
                         <div class="profile-pic">
-                            <img src="assets/profile-pic-1.png" height="50px" width="50px">
+                            <img src="assets/profile-pic-1.png" alt="Gavin's profile picture" height="50px" width="50px">
                         </div>
                     </div>
                 
@@ -196,13 +199,13 @@
         
             <!--(((((((((((((End of Top)))))))))))))-->
 
-            <div class="recent-updates">
-                <h2>Recent Updates</h2>
+            <div class="recent-updates" role="region" aria-labelledby="updates-heading">
+                <h2 id="updates-heading">Recent Updates</h2>
 
-                <div class="updates" id="recentUpdates">
-                    <div class="update">
+                <div class="updates" id="recentUpdates" aria-live="polite" aria-atomic="false">
+                    <div class="update" role="article">
                         <div class="profile-photo">
-                            <img src="assets/profile-pic-2.png">
+                            <img src="assets/profile-pic-2.png" alt="Gold asset icon">
                         </div>
                         <div class="message">
                             <p><b>Gold</b> position opened at $1,942.70 - currently +1.74%</p>
@@ -210,9 +213,9 @@
                         </div>
                     </div>
                     
-                    <div class="update">
+                    <div class="update" role="article">
                         <div class="profile-photo">
-                            <img src="assets/profile-pic-3.png">
+                            <img src="assets/profile-pic-3.png" alt="S&P 500 index icon">
                         </div>
                         <div class="message">
                             <p><b>S&P 500</b> showing strong momentum - up +0.24% today</p>
@@ -220,9 +223,9 @@
                         </div>
                     </div>
                     
-                    <div class="update">
+                    <div class="update" role="article">
                         <div class="profile-photo">
-                            <img src="assets/profile-pic-4.png">
+                            <img src="assets/profile-pic-4.png" alt="Bitcoin cryptocurrency icon">
                         </div>
                         <div class="message">
                             <p><b>Bitcoin</b> order pending execution at $65,230.50</p>
@@ -235,16 +238,16 @@
 
             <!--(((((((((((((End of Recent Updates)))))))))))))-->
 
-            <div class="sales-analytics">
-                <h2>Market Analytics</h2>
+            <div class="sales-analytics" role="region" aria-labelledby="analytics-heading">
+                <h2 id="analytics-heading">Market Analytics</h2>
 
-                <div class="item customers" id="bestPerformer">
+                <div class="item customers" id="bestPerformer" role="article" aria-labelledby="top-performer-label">
                     <div class="icon">
-                        <span class="material-icons-sharp">trending_up</span>
+                        <span class="material-icons-sharp" aria-hidden="true">trending_up</span>
                     </div>
                     <div class="right">
                         <div class="info">
-                            <h3>TOP PERFORMER</h3>
+                            <h3 id="top-performer-label">TOP PERFORMER</h3>
                             <small class="text-muted">Gold</small>
                         </div>
                         <h5 class="success">+1.74%</h5>
@@ -252,13 +255,13 @@
                     </div>   
                 </div>
 
-                <div class="item offline" id="worstPerformer">
+                <div class="item offline" id="worstPerformer" role="article" aria-labelledby="needs-attention-label">
                     <div class="icon">
-                        <span class="material-icons-sharp">trending_down</span>
+                        <span class="material-icons-sharp" aria-hidden="true">trending_down</span>
                     </div>
                     <div class="right">
                         <div class="info">
-                            <h3>NEEDS ATTENTION</h3>
+                            <h3 id="needs-attention-label">NEEDS ATTENTION</h3>
                             <small class="text-muted">Crude Oil</small>
                         </div>
                         <h5 class="danger">-1.04%</h5>
@@ -266,9 +269,9 @@
                     </div>
                 </div>   
 
-                <div class="item add-product">
+                <div class="item add-product" role="button" tabindex="0" aria-label="Add new trading position">
                     <div>
-                        <span class="material-icons-sharp">add</span>
+                        <span class="material-icons-sharp" aria-hidden="true">add</span>
                         <h3>Add Position</h3>
                     </div>
                 </div>
