@@ -2,47 +2,23 @@
 
 ## 🚨 High Priority - Critical Issues
 
-### 1. Navigation & Routing Issues
-- [ ] **Fix broken navigation links** in main dashboard
-  - Links point to `/html/filename.html` but should be relative paths `html/filename.html`
-  - Update all sidebar navigation links in `index.html`
-  - Test navigation from GitHub Pages deployment
-
 ### 2. Missing/Broken Pages
-- [ ] **Create missing HTML pages** referenced in navigation:
-  - `html/messages.html` (referenced but doesn't exist)
-  - `html/reports.html` (referenced but doesn't exist)  
-  - `html/settings.html` (referenced but doesn't exist)
-- [ ] **Fix incomplete pages**:
-  - `html/customers.html` - only has sidebar, no main content
-  - `html/products.html` - check if exists and has content
-  - `html/indecescommodities.html` - verify content matches navigation purpose
+- [x] **Create missing HTML pages** referenced in navigation
+- [x] **Fix incomplete pages**:
+  - `html/customers.html` - populated with content
+  - `html/products.html` - populated with content
+  - `html/indecescommodities.html` - rebuilt with Market Indices & Commodities content
 
 ### 3. Asset Path Issues
-- [ ] **Fix broken image references**:
-  - Logo images in HTML pages reference `assets/logo-temp.png` with incorrect relative paths
-  - Profile images may have path issues in subpages
-  - Test all image loading from different page locations
+- [ ] **Smoke test image loading across pages**
+  - Logo and profile images should resolve wherever used
 
 ## 🔧 Functionality & JavaScript Issues
 
 ### 4. JavaScript Errors & Improvements
-- [ ] **Fix orders.js integration**:
-  - Ensure Orders array is properly loaded in pages that need it
-  - Main dashboard table is empty - connect to orders data
-- [ ] **Complete analytics.html functionality**:
-  - Fix duplicate chart IDs (both charts use same `#chart` ID)
-  - Separate chart containers with unique IDs
-  - Add proper chart data and configuration
 - [ ] **Orders page functionality**:
-  - Complete the trade execution button implementation
-  - Replace placeholder API URL `"https://insertapi.com.path.id"`
-  - Add proper error handling and user feedback
+  - Replace placeholder API URL with real endpoint when available
 
-### 5. Theme & UI Consistency
-- [ ] **Standardize branding across pages**:
-  - Main page uses "SQU^RE DOFF" but other pages use "YOUR LOGO"
-  - Decide on consistent branding and apply everywhere
 - [ ] **Fix dark/light theme toggle**:
   - Ensure theme toggler works on all pages
   - Test theme persistence across navigation
@@ -60,23 +36,11 @@
 ## 📊 Data & Content
 ### 7. Dynamic Data Integration
 - [ ] **Enhance data visualization**:
-  - Add real-time data updates for financial dashboard
   - Implement proper chart data sources
   - Add date range functionality for historical data
-- [ ] **Complete dashboard metrics**:
-  - Connect countup animations to real data
-  - Add proper calculation for progress circles
-  - Implement live price updates
 
 ### 8. Content Completion
-- [ ] **Add meaningful content to empty pages**:
-  - Customer management interface
-  - Product catalog
-  - Settings page with user preferences
-  - Messages/notifications system
-- [ ] **Improve dashboard content**:
-  - Add more realistic financial data
-  - Implement proper commodity/indices data structure
+- [ ] **Messages/notifications system** (extend beyond basic examples)
 
 ## 🔐 Security & Performance
 ### 9. Code Quality & Security
@@ -149,9 +113,9 @@
 ---
 
 ## Priority Order Recommendation:
-1. Fix navigation and routing (Items 1, 2, 3)
-2. Complete missing pages and fix JavaScript errors (Items 4, 5)
-3. Mobile optimization and content completion (Items 6, 7, 8)
+1. Finalize remaining page verification and assets (Item 2 and 3)
+2. Orders API wiring and theme persistence checks (Item 4 and 5)
+3. Mobile optimization and data visualization (Items 6 and 7)
 4. Code quality and documentation (Items 9, 11, 12)
 5. Testing and future enhancements (Items 10, 13, 14)
 

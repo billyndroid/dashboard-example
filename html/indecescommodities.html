@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orders</title>
+    <title>Indices & Commodities</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp"
       rel="stylesheet">
       <link rel="stylesheet" href="../styles/style.css">
@@ -13,58 +13,58 @@
     <div class="container">
         <aside class="top">
             <div class="logo">
-                <img src="assets/logo-temp.png">
-                <h2>YOUR<span class="danger">LOGO</span></h2>
+                <img src="../assets/logo-temp.png">
+                <h2>SQU^RE<span class="danger">DOFF</span></h2>
             </div>
             <div class="close" id="close-btn">
                 <span class="material-icons-sharp">close</span>
             </div>
 
             <div class="sidebar">
-                <a href="#">
+                <a href="../index.html">
                     <span class="material-icons-sharp">grid_view</span>
                     <h3>Dashboard</h3>
                 </a>
 
-                <a href="#">
+                <a href="customers.html">
                     <span class="material-icons-sharp">person_outline</span>
                     <h3>Customers</h3>
                 </a>
 
-                <a href="#">
+                <a href="orders.html">
                     <span class="material-icons-sharp">receipt_long</span>
                     <h3>Orders</h3>
                 </a>
 
-                <a href="#">
+                <a href="analytics.html">
                     <span class="material-icons-sharp">insights</span>
                     <h3>Analytics</h3>
                 </a>
 
-                <a href="#">
+                <a href="messages.html">
                     <span class="material-icons-sharp">mail_outline</span>
                     <h3>Messages</h3>
                     <span class="message-count">21</span>
                 </a>
 
-                <a href="#">
+                <a href="products.html">
                     <span class="material-icons-sharp">inventory</span>
                     <h3>Products</h3>
                 </a>
 
-                <a href="#">
+                <a href="reports.html">
                     <span class="material-icons-sharp">error</span>
                     <h3>Reports</h3>
                 </a>
 
-                <a href="#">
+                <a href="settings.html">
                     <span class="material-icons-sharp">settings</span>
                     <h3>Settings</h3>
                 </a>
 
                 <a href="#">
                     <span class="material-icons-sharp">add</span>
-                    <h3>Add Product</h3>
+                    <h3>Add Commodity</h3>
                 </a>
 
                 <a href="#">
@@ -74,98 +74,293 @@
             </div>
 
         </aside>
+
+        <main>
+            <h1>Market Indices & Commodities</h1>
+            <div class="date">
+                <input type="date">
+            </div>
+
+            <div class="insights">
+                <div class="sales">
+                    <span class="material-icons-sharp">trending_up</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3>Global Indices</h3>
+                            <h1>5</h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx=38 cy=36 r=36></circle>
+                            </svg>
+                            <div class="number">
+                                <p>+2.4%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Average Daily Change</small>
+                </div>
+
+                <div class="expenses">
+                    <span class="material-icons-sharp">spa</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3>Commodities</h3>
+                            <h1>8</h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx=38 cy=36 r=36></circle>
+                            </svg>
+                            <div class="number">
+                                <p>+1.2%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Market Volatility</small>
+                </div>
+
+                <div class="income">
+                    <span class="material-icons-sharp">show_chart</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3>Active Trades</h3>
+                            <h1>142</h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx=38 cy=36 r=36></circle>
+                            </svg>
+                            <div class="number">
+                                <p>Live</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Trading Volume</small>
+                </div>
+            </div>
+
+            <div class="recent-orders">
+                <h2>Market Indices</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Index</th>
+                            <th>Price</th>
+                            <th>Change</th>
+                            <th>% Change</th>
+                            <th>Volume</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>S&P 500</td>
+                            <td class="numeric">4,247.50</td>
+                            <td class="numeric success">+42.75</td>
+                            <td class="numeric success">+1.02%</td>
+                            <td class="numeric">3.2B</td>
+                            <td class="success">Active</td>
+                        </tr>
+                        <tr>
+                            <td>NASDAQ</td>
+                            <td class="numeric">13,045.25</td>
+                            <td class="numeric success">+125.50</td>
+                            <td class="numeric success">+0.97%</td>
+                            <td class="numeric">5.1B</td>
+                            <td class="success">Active</td>
+                        </tr>
+                        <tr>
+                            <td>FTSE 100</td>
+                            <td class="numeric">7,512.80</td>
+                            <td class="numeric danger">-18.30</td>
+                            <td class="numeric danger">-0.24%</td>
+                            <td class="numeric">1.8B</td>
+                            <td class="success">Active</td>
+                        </tr>
+                        <tr>
+                            <td>Nikkei 225</td>
+                            <td class="numeric">32,450.15</td>
+                            <td class="numeric success">+215.80</td>
+                            <td class="numeric success">+0.67%</td>
+                            <td class="numeric">2.4B</td>
+                            <td class="warning">Closed</td>
+                        </tr>
+                        <tr>
+                            <td>DAX</td>
+                            <td class="numeric">15,780.40</td>
+                            <td class="numeric success">+95.20</td>
+                            <td class="numeric success">+0.61%</td>
+                            <td class="numeric">1.5B</td>
+                            <td class="success">Active</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="recent-orders" style="margin-top: 2rem;">
+                <h2>Commodities</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Commodity</th>
+                            <th>Price</th>
+                            <th>Change</th>
+                            <th>% Change</th>
+                            <th>Unit</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Gold</td>
+                            <td class="numeric">$1,980.25</td>
+                            <td class="numeric success">+12.50</td>
+                            <td class="numeric success">+0.64%</td>
+                            <td>oz</td>
+                            <td class="success">Active</td>
+                        </tr>
+                        <tr>
+                            <td>Silver</td>
+                            <td class="numeric">$23.45</td>
+                            <td class="numeric danger">-0.35</td>
+                            <td class="numeric danger">-1.47%</td>
+                            <td>oz</td>
+                            <td class="success">Active</td>
+                        </tr>
+                        <tr>
+                            <td>Crude Oil (WTI)</td>
+                            <td class="numeric">$89.45</td>
+                            <td class="numeric success">+2.15</td>
+                            <td class="numeric success">+2.46%</td>
+                            <td>barrel</td>
+                            <td class="success">Active</td>
+                        </tr>
+                        <tr>
+                            <td>Natural Gas</td>
+                            <td class="numeric">$2.87</td>
+                            <td class="numeric danger">-0.08</td>
+                            <td class="numeric danger">-2.71%</td>
+                            <td>MMBtu</td>
+                            <td class="success">Active</td>
+                        </tr>
+                        <tr>
+                            <td>Copper</td>
+                            <td class="numeric">$3.85</td>
+                            <td class="numeric success">+0.05</td>
+                            <td class="numeric success">+1.32%</td>
+                            <td>lb</td>
+                            <td class="success">Active</td>
+                        </tr>
+                        <tr>
+                            <td>Wheat</td>
+                            <td class="numeric">$645.50</td>
+                            <td class="numeric danger">-12.25</td>
+                            <td class="numeric danger">-1.86%</td>
+                            <td>bushel</td>
+                            <td class="success">Active</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <a href="#">View All Markets</a>
+            </div>
+        </main>
+
+        <div class="right">
+            <div class="top">
+                <button id="menu-btn">
+                    <span class="material-icons-sharp">menu</span>
+                </button>
+                <div class="theme-toggler">
+                    <span class="material-icons-sharp active">light_mode</span>
+                    <span class="material-icons-sharp">dark_mode</span>
+                </div>
+                <div class="profile">
+                    <div class="info">
+                        <p>Key: <b>Gavin</b></p>
+                        <small class="text-muted">Admin</small>
+                    </div>
+                    <div class="profile-pic">
+                        <img src="../assets/profile-pic-1.png" height="50px" width="50px">
+                    </div>
+                </div>
+            </div>
+
+            <div class="recent-updates">
+                <h2>Market Updates</h2>
+                <div class="updates">
+                    <div class="update">
+                        <div class="profile-photo">
+                            <img src="../assets/profile-pic-1.png">
+                        </div>
+                        <div class="message">
+                            <p><b>S&P 500</b> reached new high at 4,250</p>
+                            <small class="text-muted">5 minutes ago</small>
+                        </div>
+                    </div>
+                    <div class="update">
+                        <div class="profile-photo">
+                            <img src="../assets/profile-pic-2.png">
+                        </div>
+                        <div class="message">
+                            <p><b>Gold</b> trading above $1,980/oz</p>
+                            <small class="text-muted">18 minutes ago</small>
+                        </div>
+                    </div>
+                    <div class="update">
+                        <div class="profile-photo">
+                            <img src="../assets/profile-pic-3.png">
+                        </div>
+                        <div class="message">
+                            <p><b>Oil prices</b> surge on supply concerns</p>
+                            <small class="text-muted">45 minutes ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sales-analytics">
+                <h2>Market Movers</h2>
+                <div class="item online">
+                    <div class="icon">
+                        <span class="material-icons-sharp">trending_up</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3>Top Gainer</h3>
+                            <small class="text-muted">Crude Oil +2.46%</small>
+                        </div>
+                        <h5 class="success">+2.46%</h5>
+                    </div>
+                </div>
+                <div class="item offline">
+                    <div class="icon">
+                        <span class="material-icons-sharp">trending_down</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3>Top Loser</h3>
+                            <small class="text-muted">Natural Gas -2.71%</small>
+                        </div>
+                        <h5 class="danger">-2.71%</h5>
+                    </div>
+                </div>
+                <div class="item customers">
+                    <div class="icon">
+                        <span class="material-icons-sharp">bar_chart</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3>Most Active</h3>
+                            <small class="text-muted">NASDAQ 5.1B Vol</small>
+                        </div>
+                        <h5 class="success">High</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-        <div>
-            <canvas id="myChart"></canvas>
-          </div>
-          
-          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-          
-          <script>
-            const ctx = document.getElementById('myChart');
-          
-            new Chart(ctx, {
-              type: 'line',
-              data: {
-                labels: ['Mon', 'Tues', 'Weds', 'Thurs', 'Fri', 'Sat'],
-                datasets: [{
-                  label: '# of Votes',
-                  data: [2, 3, 5, 3, 4, 3],
-                  borderWidth: 5
-                }]
-              },
-              options: {
-                scales: {
-                  y: {
-                    beginAtZero: false
-                  }
-                }
-              }
-            });
-          </script>
-<!--Candlechart-->> 
-<div>
-    <canvas id="candleChart"></canvas>
-  </div>         
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-<script>
-     var options = {
-  chart: {
-    type: 'line'
-  },
-  series: [{
-    name: 'sales',
-    data: [30,40,35,50,49,60,70,91,125]
-  }],
-  xaxis: {
-    categories: [1991,1992,1993,1994,1995,1996,1997, 1998,1999]
-  }
-}
-
-var chart = new ApexCharts(document.querySelector("#chart"), options);
-
-chart.render();
-      
-</script>
-
-<!--Linechart-->>          
-        <div>
-            <canvas id="lineChart"></canvas>
-          </div>
-          
-          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-          
-          <script>
-            const ctx = document.getElementById('myChart');
-          
-            new Chart(ctx, {
-              type: 'line',
-              data: {
-                labels: ['Mon', 'Tues', 'Weds', 'Thurs', 'Fri', 'Sat'],
-                datasets: [{
-                  label: '# of Votes',
-                  data: [2, 3, 5, 3, 4, 3],
-                  borderWidth: 5
-                }]
-              },
-              options: {
-                scales: {
-                  y: {
-                    beginAtZero: false
-                  }
-                }
-              }
-            });
-          </script>
-    </div>
-    <script src="scripts/testlinechart.js"></script>
-    <script src="scripts/candlechart.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
-
-
+<script src="../scripts/main.js"></script>
 </body>
 </html>
