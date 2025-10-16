@@ -10,18 +10,23 @@
   - `html/indecescommodities.html` - rebuilt with Market Indices & Commodities content
 
 ### 3. Asset Path Issues
-- [ ] **Smoke test image loading across pages**
-  - Logo and profile images should resolve wherever used
+- [x] **Fixed image references**:
+  - Logo and profile images now use correct relative paths
+  - Fixed malformed img attributes in index.html (height/width syntax)
+  - All assets verified and loading correctly
 
 ## 🔧 Functionality & JavaScript Issues
 
 ### 4. JavaScript Errors & Improvements
-- [ ] **Orders page functionality**:
-  - Replace placeholder API URL with real endpoint when available
+- [x] **Orders page functionality**:
+  - Created centralized config.js for API endpoint management
+  - Updated orders page to use config with fallback to mock data
+  - Added proper error handling and timeout management
 
-- [ ] **Fix dark/light theme toggle**:
-  - Ensure theme toggler works on all pages
-  - Test theme persistence across navigation
+- [x] **Fix dark/light theme toggle**:
+  - Theme toggler working on all pages (analytics.html completed)
+  - Theme persistence via localStorage implemented and tested
+  - Icons toggle correctly between light/dark modes
 
 ## 📱 Responsive Design & Mobile
 ### 6. Mobile Optimization
@@ -113,10 +118,10 @@
 ---
 
 ## Priority Order Recommendation:
-1. Finalize remaining page verification and assets (Item 2 and 3)
-2. Orders API wiring and theme persistence checks (Item 4 and 5)
-3. Mobile optimization and data visualization (Items 6 and 7)
-4. Code quality and documentation (Items 9, 11, 12)
-5. Testing and future enhancements (Items 10, 13, 14)
+1. ✅ Critical fixes complete (navigation, pages, assets, JavaScript)
+2. Mobile optimization and data visualization (Items 6 and 7)
+3. Code quality and documentation (Items 9, 11, 12)
+4. Testing and future enhancements (Items 10, 13, 14)
+5. Advanced features when ready (Item 14)
 
 **Estimated Timeline**: 2-3 weeks for high priority items, 4-6 weeks for complete implementation.

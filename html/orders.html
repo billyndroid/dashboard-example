@@ -273,8 +273,33 @@
         this.textContent = 'Executing...';
         
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Check if we should use real API or mock data
+            const apiUrl = window.AppConfig ? AppConfig.getApiUrl(AppConfig.api.endpoints.execute) : null;
+            
+            if (apiUrl && !AppConfig.useMockData) {
+                // Real API call
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orders: selectedOrders.map(o => ({ id: o.id, asset: o.asset, type: o.type, quantity: o.quantity }))
+                    }),
+                    signal: AbortSignal.timeout(AppConfig.api.timeout)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('Execution result:', result);
+            } else {
+                // Mock/simulation mode
+                console.log('[Mock Mode] Simulating order execution...');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
             
             // Update order statuses
             selectedOrders.forEach(order => {
@@ -287,6 +312,7 @@
             showStatus(`Successfully executed ${selectedOrders.length} orders!`, 'success');
             
         } catch (error) {
+            console.error('Order execution error:', error);
             showStatus('Error executing orders. Please try again.', 'error');
         } finally {
             this.disabled = false;
@@ -300,22 +326,50 @@
         this.textContent = 'Refreshing...';
         
         try {
-            // Simulate price updates
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Check if we should use real API or mock data
+            const apiUrl = window.AppConfig ? AppConfig.getApiUrl(AppConfig.api.endpoints.prices) : null;
             
-            activeOrders.forEach(order => {
-                if (order.status === 'Pending') {
-                    // Simulate small price changes
-                    const change = (Math.random() - 0.5) * 0.02; // ±1%
-                    order.price = order.price * (1 + change);
+            if (apiUrl && !AppConfig.useMockData) {
+                // Real API call
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    signal: AbortSignal.timeout(AppConfig.api.timeout)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
                 }
-            });
+                
+                const prices = await response.json();
+                // Update prices from API response
+                activeOrders.forEach(order => {
+                    if (order.status === 'Pending' && prices[order.asset]) {
+                        order.price = prices[order.asset];
+                    }
+                });
+            } else {
+                // Mock/simulation mode
+                console.log('[Mock Mode] Simulating price refresh...');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                activeOrders.forEach(order => {
+                    if (order.status === 'Pending') {
+                        // Simulate small price changes
+                        const change = (Math.random() - 0.5) * 0.02; // ±1%
+                        order.price = order.price * (1 + change);
+                    }
+                });
+            }
             
             populateOrdersTable();
             updateOrderUpdates('Prices refreshed');
             showStatus('Prices updated successfully!', 'success');
             
         } catch (error) {
+            console.error('Price refresh error:', error);
             showStatus('Error refreshing prices.', 'error');
         } finally {
             this.disabled = false;
@@ -351,6 +405,7 @@
     // Initial updates
     updateOrderUpdates('Order management system initialized');
 </script>
+<script src="../scripts/config.js"></script>
 <script src="../scripts/utils.js"></script>
 <script src="../scripts/data-utils.js"></script>
 <script src="../scripts/orders.js"></script>

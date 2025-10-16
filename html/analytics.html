@@ -74,21 +74,110 @@
             </div>
 
         </aside>
+
+        <main>
+            <h1>Market Analytics</h1>
+            <div class="date">
+                <input type="date">
+            </div>
+
+            <!--Trading Volume Chart-------------------------------------------------------------------------------------------->
+            <div style="margin: 20px 0;">
+                <h2>Trading Volume Analysis</h2>
+                <div id="volumeChart"></div>
+            </div>
+
+            <!--Price Movement Chart-------------------------------------------------------------------------------------------->
+            <div style="margin: 20px 0;">
+                <h2>Price Movement Trends</h2>
+                <div id="priceChart"></div>
+            </div>
+        </main>
+
+        <div class="right">
+            <div class="top">
+                <button id="menu-btn">
+                    <span class="material-icons-sharp">menu</span>
+                </button>
+                <div class="theme-toggler">
+                    <span class="material-icons-sharp active">light_mode</span>
+                    <span class="material-icons-sharp">dark_mode</span>
+                </div>
+                <div class="profile">
+                    <div class="info">
+                        <p>Key: <b>Gavin</b></p>
+                        <small class="text-muted">Admin</small>
+                    </div>
+                    <div class="profile-pic">
+                        <img src="../assets/profile-pic-1.png" height="50px" width="50px">
+                    </div>
+                </div>
+            </div>
+
+            <div class="recent-updates">
+                <h2>Analytics Updates</h2>
+                <div class="updates">
+                    <div class="update">
+                        <div class="profile-photo">
+                            <img src="../assets/profile-pic-1.png">
+                        </div>
+                        <div class="message">
+                            <p><b>Volume Analysis</b> updated with latest data</p>
+                            <small class="text-muted">2 minutes ago</small>
+                        </div>
+                    </div>
+                    <div class="update">
+                        <div class="profile-photo">
+                            <img src="../assets/profile-pic-2.png">
+                        </div>
+                        <div class="message">
+                            <p><b>Price Trends</b> showing bullish signals</p>
+                            <small class="text-muted">15 minutes ago</small>
+                        </div>
+                    </div>
+                    <div class="update">
+                        <div class="profile-photo">
+                            <img src="../assets/profile-pic-3.png">
+                        </div>
+                        <div class="message">
+                            <p><b>Market Summary</b> report generated</p>
+                            <small class="text-muted">1 hour ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sales-analytics">
+                <h2>Quick Stats</h2>
+                <div class="item online">
+                    <div class="icon">
+                        <span class="material-icons-sharp">trending_up</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3>Market Trend</h3>
+                            <small class="text-muted">Overall Bullish</small>
+                        </div>
+                        <h5 class="success">+2.4%</h5>
+                    </div>
+                </div>
+                <div class="item customers">
+                    <div class="icon">
+                        <span class="material-icons-sharp">show_chart</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3>Volume</h3>
+                            <small class="text-muted">Trading Activity</small>
+                        </div>
+                        <h5 class="success">High</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
-<!--Trading Volume Chart-------------------------------------------------------------------------------------------->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-<div style="margin: 20px 0;">
-    <h2>Trading Volume Analysis</h2>
-    <div id="volumeChart"></div>
-</div>
-
-<!--Price Movement Chart-------------------------------------------------------------------------------------------->
-<div style="margin: 20px 0;">
-    <h2>Price Movement Trends</h2>
-    <div id="priceChart"></div>
-</div>
-
 <script>
 // Volume Chart
 var volumeOptions = {
@@ -103,7 +192,7 @@ var volumeOptions = {
     xaxis: {
         categories: ['S&P', 'QQQ', 'FTSE', 'Oil', 'Gold', 'Natural Gas', 'Silver', 'Bitcoin', 'Ethereum']
     },
-    colors: ['#7380cc'],
+    colors: ['#2d6cdf'],
     title: {
         text: 'Daily Trading Volume by Asset'
     }
@@ -125,7 +214,7 @@ var priceOptions = {
     xaxis: {
         categories: ['S&P', 'QQQ', 'FTSE', 'Oil', 'Gold', 'Natural Gas', 'Silver', 'Bitcoin', 'Ethereum']
     },
-    colors: ['#41f1b6'],
+    colors: ['#10b981'],
     title: {
         text: 'Price Change Percentage'
     },
@@ -139,8 +228,6 @@ var priceChart = new ApexCharts(document.querySelector("#priceChart"), priceOpti
 priceChart.render();
 </script>
 
-
-
-
+<script src="../scripts/main.js"></script>
 </body>
 </html>
