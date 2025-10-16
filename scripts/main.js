@@ -184,11 +184,22 @@ function populateOrdersTable() {
                     order.shipping === 'Declined' ? 'danger' : 
                     order.shipping === 'Pending' ? 'warning' : 'success';
                 
+                // Calculate P&L for display
+                const pnl = order.currentPrice && order.entryPrice ? 
+                    (order.currentPrice - order.entryPrice) * order.quantity : 0;
+                const pnlPercentage = order.entryPrice ? 
+                    ((order.currentPrice - order.entryPrice) / order.entryPrice * 100) : 0;
+                const actualPnL = order.orderType === 'Long' ? pnl : -pnl;
+                const actualPercentage = order.orderType === 'Long' ? pnlPercentage : -pnlPercentage;
+                
+                const pnlClass = actualPnL >= 0 ? 'success' : 'danger';
+                const pnlSign = actualPnL >= 0 ? '+' : '';
+                
                 tr.innerHTML = `
-                    <td>${order.productName || 'N/A'}</td>
-                    <td>${order.productNumber || 'N/A'}</td>
-                    <td>${order.paymentStatus || 'N/A'}</td>
-                    <td class="${statusClass}">${order.shipping || 'Unknown'}</td>
+                    <td><strong>${order.productName || 'N/A'}</strong><br><small>${order.sector || ''}</small></td>
+                    <td>${order.productNumber || 'N/A'}<br><small>Qty: ${order.quantity || 0}</small></td>
+                    <td class="${pnlClass}">${pnlSign}$${Math.abs(actualPnL).toFixed(2)}<br><small>(${pnlSign}${actualPercentage.toFixed(2)}%)</small></td>
+                    <td class="${statusClass}">${order.shipping || 'Unknown'}<br><small>${order.orderType || 'N/A'}</small></td>
                     <td><button class="primary" onclick="showOrderDetails(${index})">Details</button></td>
                 `;
                 
@@ -205,28 +216,61 @@ function populateOrdersTable() {
     }
 }
 
-// Show order details function
+// Show order details function with enhanced information
 function showOrderDetails(orderIndex) {
     try {
         if (typeof Orders === 'undefined' || !Orders[orderIndex]) {
-            alert('Order details not available.');
+            if (typeof DashboardUtils !== 'undefined') {
+                DashboardUtils.showNotification('Order details not available.', 'error');
+            } else {
+                alert('Order details not available.');
+            }
             return;
         }
         
         const order = Orders[orderIndex];
+        const pnl = order.currentPrice && order.entryPrice ? 
+            (order.currentPrice - order.entryPrice) * order.quantity : 0;
+        const pnlPercentage = order.entryPrice ? 
+            ((order.currentPrice - order.entryPrice) / order.entryPrice * 100) : 0;
+        const actualPnL = order.orderType === 'Long' ? pnl : -pnl;
+        const actualPercentage = order.orderType === 'Long' ? pnlPercentage : -pnlPercentage;
+        
+        const orderAge = order.timestamp ? 
+            Math.floor((Date.now() - new Date(order.timestamp).getTime()) / (1000 * 60)) : 'Unknown';
+        
         const details = `
-Order Details:
+═══════════════════════════════════
+           ORDER DETAILS
+═══════════════════════════════════
 
-Asset: ${order.productName}
-Price: ${order.productNumber}
-Status: ${order.paymentStatus}
-Shipping: ${order.shipping}
+🏷️  Asset: ${order.productName}
+📊  Sector: ${order.sector || 'N/A'}
+💰  Current Price: ${order.productNumber}
+📈  Order Type: ${order.orderType || 'N/A'}
+📊  Quantity: ${order.quantity || 0}
+
+💵  Entry Price: $${order.entryPrice?.toFixed(2) || 'N/A'}
+💵  Current Price: $${order.currentPrice?.toFixed(2) || 'N/A'}
+
+📈  P&L: ${actualPnL >= 0 ? '+' : ''}$${actualPnL.toFixed(2)}
+📊  P&L %: ${actualPercentage >= 0 ? '+' : ''}${actualPercentage.toFixed(2)}%
+
+🔄  Status: ${order.shipping}
+📊  Volume: ${order.volume?.toLocaleString() || 'N/A'}
+⏰  Age: ${orderAge} minutes
+
+🆔  Order ID: ${order.id || 'N/A'}
         `;
         
         alert(details);
     } catch (error) {
         console.error('Error showing order details:', error);
-        alert('Error loading order details.');
+        if (typeof DashboardUtils !== 'undefined') {
+            DashboardUtils.showNotification('Error loading order details.', 'error');
+        } else {
+            alert('Error loading order details.');
+        }
     }
 }
 
@@ -237,5 +281,99 @@ if (document.readyState === 'loading') {
     populateOrdersTable();
 }
 
-// Make function globally available
+// Update dashboard metrics with real calculated data
+function updateDashboardMetrics() {
+    try {
+        if (typeof DashboardData === 'undefined') {
+            console.warn('DashboardData not available');
+            return;
+        }
+        
+        // Update portfolio value
+        const portfolioElement = document.querySelector('.sales h1');
+        if (portfolioElement) {
+            const totalValue = DashboardData.getTotalPortfolioValue();
+            portfolioElement.textContent = `$${(totalValue / 1000).toFixed(1)}K`;
+        }
+        
+        // Update total P&L
+        const pnlElement = document.querySelector('.expenses h1');
+        if (pnlElement) {
+            const totalPnL = DashboardData.getTotalPnL();
+            pnlElement.textContent = `${totalPnL >= 0 ? '+' : ''}$${(totalPnL / 1000).toFixed(1)}K`;
+            
+            // Update progress indicator
+            const pnlProgress = pnlElement.closest('.expenses')?.querySelector('.number p');
+            if (pnlProgress) {
+                const percentage = Math.abs(totalPnL / DashboardData.getTotalPortfolioValue() * 100);
+                pnlProgress.textContent = `${totalPnL >= 0 ? '+' : '-'}${percentage.toFixed(1)}%`;
+            }
+        }
+        
+        // Update win rate
+        const winRateElement = document.querySelector('.income .number p');
+        if (winRateElement) {
+            const winRate = DashboardData.getWinRate();
+            winRateElement.textContent = `${winRate.toFixed(0)}%`;
+        }
+        
+        // Update counts
+        const activeCountElement = document.querySelector('#ordersTableBody')?.closest('.recent-orders')?.querySelector('h2');
+        if (activeCountElement) {
+            const activeCount = DashboardData.getActiveOrdersCount();
+            const pendingCount = DashboardData.getPendingOrdersCount();
+            activeCountElement.textContent = `Active Positions (${activeCount}) • Pending (${pendingCount})`;
+        }
+        
+        console.info('Dashboard metrics updated successfully');
+        
+    } catch (error) {
+        console.error('Error updating dashboard metrics:', error);
+    }
+}
+
+// Real-time price updates simulation
+function startRealTimeUpdates() {
+    if (typeof Orders === 'undefined') return;
+    
+    setInterval(() => {
+        try {
+            // Update prices for active orders
+            Orders.forEach(order => {
+                if (order.shipping === 'Active' && MarketData[order.productName]) {
+                    order.currentPrice = getCurrentPrice(order.productName);
+                }
+            });
+            
+            // Update dashboard metrics
+            updateDashboardMetrics();
+            
+            // Update progress circles
+            updateProgressCircles();
+            
+            // Refresh table if visible
+            if (document.querySelector('#ordersTableBody')) {
+                populateOrdersTable();
+            }
+            
+        } catch (error) {
+            console.error('Error in real-time updates:', error);
+        }
+    }, 5000); // Update every 5 seconds
+}
+
+// Initialize dashboard data when page loads
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        updateDashboardMetrics();
+        startRealTimeUpdates();
+    });
+} else {
+    updateDashboardMetrics();
+    startRealTimeUpdates();
+}
+
+// Make functions globally available
 window.showOrderDetails = showOrderDetails;
+window.updateDashboardMetrics = updateDashboardMetrics;
+window.startRealTimeUpdates = startRealTimeUpdates;

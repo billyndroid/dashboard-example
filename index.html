@@ -92,7 +92,7 @@
                         <div class="left">
                             <h3>Total Position</h3>
                             <h3>USD</h3>
-                            <h1>$2,378</h1>
+                            <h1 data-live-update data-format="currency" data-base-value="247850" data-variance="0.02">$247.8K</h1>
                         </div>
 
                         
@@ -101,58 +101,54 @@
                                 <circle cx=38 cy=36 r=36 ></circle>
                             </svg>
                             <div class="number">
-                                <p>81%</p>
+                                <p>+2.4%</p>
                             </div>
                         </div>
                     </div>
-                    <small class="text-muted">Last 24 Hrs</small>
+                    <small class="text-muted">Portfolio Growth</small>
                 </div>
                 <!--(((((((((((((End of Sales)))))))))))))-->
 
                 <div class="expenses">
-                    <span class="material-icons-sharp">analytics</span>
+                    <span class="material-icons-sharp">trending_up</span>
                     <div class="middle">
                         <div class="left">
-                            <h3>Total Position</h3>
+                            <h3>Total P&L</h3>
                             <h3>USD</h3>
-                            <h1>12,058</h1>
+                            <h1 data-live-update data-format="currency" data-base-value="12058" data-variance="0.05">+$12.1K</h1>
                         </div>
                         <div class="progress">
                             <svg>
                                 <circle cx=38 cy=36 r=36 ></circle>
                             </svg>
                             <div class="number">
-                                <p>81%</p>
+                                <p>+4.9%</p>
                             </div>
                         </div>
                     </div>
-                    <small class="text-muted">Last 24 Hrs</small>
+                    <small class="text-muted">Unrealized Gains</small>
                 </div>
                 <!--(((((((((((((End of Expenses)))))))))))))-->
 
                 <div class="income">
                     
-                    <span class="material-icons-sharp">stacked_line_chart</span>
+                    <span class="material-icons-sharp">assessment</span>
 
                     <div class="middle">
                         <div class="left">
-                            <h3>Total Income</h3>
-                            <h1>
-                                <div class="countup">13000
-                                    <button onclick="runAnimations()">Animate</button>
-                                </div>
-                            </h1>
+                            <h3>Win Rate</h3>
+                            <h1 data-live-update data-format="percentage" data-base-value="0.73" data-variance="0.05">73%</h1>
                         </div>
                         <div class="progress">
                             <svg>
                                 <circle cx=38 cy=36 r=36 ></circle>
                             </svg>
                             <div class="number">
-                                <p>81%</p>
+                                <p>73%</p>
                             </div>
                         </div>
                     </div>
-                    <small class="text-muted">Last 24 Hrs</small>
+                    <small class="text-muted">Success Rate</small>
                 </div>
                 <!--(((((((((((((End of Income)))))))))))))-->
             </div>
@@ -162,12 +158,11 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Index/Commodity</th>
-                                <th>Bid</th>
-                                <th>Ask</th>
-                                <th>Order Status</th>
-                                <th>Chart</th>
-                                <th>Volume</th>
+                                <th>Asset</th>
+                                <th>Price/Qty</th>
+                                <th>P&L</th>
+                                <th>Status</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="ordersTableBody">
@@ -205,42 +200,33 @@
             <div class="recent-updates">
                 <h2>Recent Updates</h2>
 
-                <div class="updates">
+                <div class="updates" id="recentUpdates">
                     <div class="update">
                         <div class="profile-photo">
                             <img src="assets/profile-pic-2.png">
                         </div>
                         <div class="message">
-                            <p><b>Gavin's</b> order has been filled at £30.45 .</p>
-                            <small class="text-muted">2 minutes ago</small>
+                            <p><b>Gold</b> position opened at $1,942.70 - currently +1.74%</p>
+                            <small class="text-muted">30 minutes ago</small>
                         </div>
                     </div>
-                
-            
-
-            
-                
+                    
                     <div class="update">
                         <div class="profile-photo">
                             <img src="assets/profile-pic-3.png">
                         </div>
                         <div class="message">
-                            <p><b>Steve Smith</b> received his order of Night Lion tech GPS drone.</p>
-                            <small class="text-muted">2 minutes ago</small>
+                            <p><b>S&P 500</b> showing strong momentum - up +0.24% today</p>
+                            <small class="text-muted">15 minutes ago</small>
                         </div>
                     </div>
-                
-            
-
-           
-                
-                
+                    
                     <div class="update">
                         <div class="profile-photo">
                             <img src="assets/profile-pic-4.png">
                         </div>
                         <div class="message">
-                            <p><b>Steve Smith</b> received his order of Night Lion tech GPS drone.</p>
+                            <p><b>Bitcoin</b> order pending execution at $65,230.50</p>
                             <small class="text-muted">2 minutes ago</small>
                         </div>
                     </div>
@@ -253,49 +239,46 @@
             <div class="sales-analytics">
                 <h2>Market Analytics</h2>
 
-                <div class="item offline">
+                <div class="item customers" id="bestPerformer">
                     <div class="icon">
-                        <span class="material-icons-sharp">local_mall</span>
+                        <span class="material-icons-sharp">trending_up</span>
                     </div>
                     <div class="right">
                         <div class="info">
-                            <h3>BREAKDOWNS</h3>
-                            <h4></h4>
-
-                            <small class="text-muted">Last 24 Hrs</small>
+                            <h3>TOP PERFORMER</h3>
+                            <small class="text-muted">Gold</small>
                         </div>
-                        <h5 class="danger">-17%</h5>
-                        <h3>1100</h3>
+                        <h5 class="success">+1.74%</h5>
+                        <h3>$1,976</h3>
                     </div>   
                 </div>
 
-                <div class="item customers">
+                <div class="item offline" id="worstPerformer">
                     <div class="icon">
-                        <span class="material-icons-sharp">person</span>
+                        <span class="material-icons-sharp">trending_down</span>
                     </div>
                     <div class="right">
                         <div class="info">
-                            <h3>BREAKOUTS</h3>
-                            <small class="text-muted">Last 24 Hrs</small>
+                            <h3>NEEDS ATTENTION</h3>
+                            <small class="text-muted">Crude Oil</small>
                         </div>
-                        <h5 class="success">+20%</h5>
-                        <h3>657</h3>
+                        <h5 class="danger">-1.04%</h5>
+                        <h3>$89.65</h3>
                     </div>
+                </div>   
 
-                    </div>   
-
-                    <div class="item add-product">
-                        <div>
-                            <span class="material-icons-sharp">add</span>
-                            <h3>Add Product</h3>
-                        </div>
-
+                <div class="item add-product">
+                    <div>
+                        <span class="material-icons-sharp">add</span>
+                        <h3>Add Position</h3>
+                    </div>
                 </div>
 
             </div>
         </div>
     </div>
     <script src="scripts/utils.js"></script>
+    <script src="scripts/data-utils.js"></script>
     <script src="scripts/countup-enhanced.js"></script>
     <script src="scripts/orders.js"></script>
     <script src="scripts/main.js"></script>
