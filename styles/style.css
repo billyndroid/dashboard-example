@@ -265,6 +265,24 @@ main .date {
 main .date input[type="date"] {
     background: transparent;
     color: var(--color-dark);
+    padding: 0.5rem;
+    border-radius: var(--border-radius-1);
+    border: 1px solid var(--color-info-light);
+}
+
+main .date input[type="date"]:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+main .date select {
+    background: transparent;
+    color: var(--color-dark);
+    padding: 0.6rem 1rem;
+    border-radius: var(--border-radius-1);
+    border: 1px solid var(--color-primary);
+    cursor: pointer;
+    font-weight: 600;
 }
 
 main .insights {
@@ -572,6 +590,122 @@ main .recent-orders a {
     font-weight: 500;
 }
 
+/* ============== Notification Dropdown ============== */
+.notification-dropdown {
+    position: relative;
+    display: inline-block;
+    margin-right: 1rem;
+}
+
+.notification-bell {
+    position: relative;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: var(--color-dark);
+    transition: color 0.3s ease;
+}
+
+.notification-bell:hover {
+    color: var(--color-primary);
+}
+
+.notification-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--color-danger);
+    color: var(--color-white);
+    border-radius: 50%;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    min-width: 18px;
+    text-align: center;
+}
+
+.notification-panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    width: 380px;
+    max-height: 500px;
+    background: var(--color-white);
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: none;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.notification-panel.active {
+    display: block;
+}
+
+.notification-panel-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-info-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notification-panel-header h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.notification-panel-header .view-all {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.notification-panel-body {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-panel-item {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-info-light);
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.notification-panel-item:hover {
+    background: var(--color-light);
+}
+
+.notification-panel-item.unread {
+    background: rgba(var(--color-primary-rgb), 0.05);
+}
+
+.notification-panel-item .notif-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    color: var(--color-dark);
+}
+
+.notification-panel-item .notif-message {
+    font-size: 0.85rem;
+    color: var(--color-dark-variant);
+    margin-bottom: 0.25rem;
+}
+
+.notification-panel-item .notif-time {
+    font-size: 0.75rem;
+    color: var(--color-info-dark);
+}
+
+.notification-panel-empty {
+    padding: 2rem;
+    text-align: center;
+    color: var(--color-info-dark);
+}
+
 
 /*(((((((((((((((Media Queries)))))))))))))))*/
 
@@ -604,15 +738,13 @@ aside .sidebar a:last-child {
 
 main .insights {
     grid-template-columns: 1fr;
-    gap: 0;
+    gap: 1rem;
 }
 
 main .recent-orders {
     width: 94%;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top:  2rem 0 0 8.8rem;
+    position: relative;
+    margin: 2rem auto 0;
 }
 main .recent-orders table {
     width: 83vw;
@@ -646,19 +778,46 @@ body {
     .container {
         width: 100%;
         grid-template-columns: 1fr;
+        padding: 0;
+    }
+
+    /* Improved insights grid for mobile */
+    main .insights {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0 1rem;
+    }
+
+    main .insights > div {
+        margin-top: 0.5rem;
+    }
+
+    /* Date picker improvements */
+    main .date {
+        margin-top: 0.5rem;
+        padding: 0.75rem 1rem;
+    }
+
+    main .date input[type="date"] {
+        font-size: 1rem;
+        min-height: 44px;
     }
 
 
 aside {
     position: fixed;
-    left:-100%;
+    left: -100%;
     background: var(--color-white);
-    z-index: 3;
+    z-index: 1000;
     box-shadow: 1rem 3rem 4rem var(--color-light);
     height: 100vh;
     padding-right: var(--card-padding);
-    display: none;
-    animation: showMenu 400ms ease forwards;
+    width: 18rem;
+    transition: left 300ms ease-in-out;
+}
+
+aside.show {
+    left: 0;
 }
 
 @keyframes showMenu {
@@ -696,7 +855,7 @@ aside .close {
 }
 
 main {
-    margin-top: 8rem;
+    margin-top: 5.5rem;
     padding: 0 1rem;
 }
 
@@ -709,7 +868,15 @@ main .recent-orders {
 main .recent-orders table {
     width: 100%;
     margin: 0;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+}
 
+main .recent-orders table thead,
+main .recent-orders table tbody {
+    display: table;
+    width: 100%;
 }
 
 .right {
@@ -748,11 +915,17 @@ main .recent-orders table {
     cursor: pointer;
     color: var(--color-dark);
     position: absolute;
-    left:  1rem;
+    left: 1rem;
+    padding: 0.5rem;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .right .top button span {
-    font-size: 2rem;
+    font-size: 1.8rem;
 }
 
 .right .profile-pic {
@@ -764,17 +937,24 @@ main .recent-orders table {
 
 /*Charts*/
 #chart {
-    max-width: 650px;
+    max-width: 100%;
     margin: 35px auto;
-  }
-  
-  canvas#myChart {
-      display: flex;
-      flex-direction: column;
-      margin: 0;
-      padding: 12%;
-      position: absolute;
-  }
+}
+
+#volumeChart,
+#priceChart {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+canvas#myChart {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 12%;
+    position: relative;
+    max-width: 100%;
+}
 
 /* Status pill badges */
 .badge {
@@ -831,4 +1011,45 @@ main .recent-orders table {
 .btn:focus-visible {
     outline: 2px solid #94b4ff;
     outline-offset: 2px;
+}
+
+/* Mobile touch target improvements */
+@media (max-width: 768px) {
+    .btn {
+        min-height: 44px;
+        padding: 0.75rem 1.25rem;
+        font-size: 1rem;
+    }
+
+    /* Make theme toggle easier to tap */
+    .right .theme-toggler {
+        min-height: 44px;
+        width: 5rem;
+    }
+
+    .right .theme-toggler span {
+        font-size: 1.4rem;
+    }
+
+    /* Improve table readability on mobile */
+    main table {
+        font-size: 0.85rem;
+    }
+
+    main table thead th,
+    main table tbody td {
+        padding: 0.5rem 0.4rem;
+    }
+
+    /* Stack analytics cards if needed */
+    .right .sales-analytics .item {
+        padding: 1rem;
+    }
+
+    /* Make charts fully responsive */
+    #volumeChart,
+    #priceChart,
+    #chart {
+        width: 100% !important;
+    }
 }

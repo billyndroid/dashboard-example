@@ -82,7 +82,24 @@ const AppConfig = {
     },
     
     // Mock data flag for development
-    useMockData: true // Set to false when real API is available
+    useMockData: true, // Set to false when real API is available
+    
+    // Error monitoring (optional)
+    monitoring: {
+        enabled: false,  // Enable in production
+        endpoint: '/api/errors/log',
+        sampleRate: 1.0  // 100% of errors (adjust as needed)
+    },
+    
+    // Security settings
+    security: {
+        enableCSP: true,
+        rateLimit: {
+            enabled: true,
+            maxAttempts: 5,
+            windowMs: 60000  // 1 minute
+        }
+    }
 };
 
 // Make config available globally

@@ -78,7 +78,16 @@
         <main>
             <h1>Market Analytics</h1>
             <div class="date">
-                <input type="date">
+                <input type="date" id="startDate">
+                <span style="margin: 0 0.5rem;">to</span>
+                <input type="date" id="endDate">
+                <button class="btn btn-primary" id="applyDateRange" style="margin-left: 1rem;">Apply</button>
+                <select id="presetRanges" class="btn btn-outline" style="margin-left: 0.5rem;">
+                    <option value="">Quick Ranges</option>
+                    <option value="7">Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                </select>
             </div>
 
             <!--Trading Volume Chart-------------------------------------------------------------------------------------------->
@@ -91,6 +100,12 @@
             <div style="margin: 20px 0;">
                 <h2>Price Movement Trends</h2>
                 <div id="priceChart"></div>
+            </div>
+
+            <!--Historical Price Chart-------------------------------------------------------------------------------------------->
+            <div style="margin: 20px 0;">
+                <h2>Historical Price Trends</h2>
+                <div id="historicalChart"></div>
             </div>
         </main>
 
@@ -177,57 +192,347 @@
         </div>
     </div>
     
+<script src="../scripts/config.js"></script>
+<script src="../scripts/data-service.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
-// Volume Chart
-var volumeOptions = {
-    chart: {
-        type: 'bar',
-        height: 350
-    },
-    series: [{
-        name: 'Trading Volume',
-        data: [30000, 40000, 45000, 34000, 49000, 60000, 70000, 91000, 30000]
-    }],
-    xaxis: {
-        categories: ['S&P', 'QQQ', 'FTSE', 'Oil', 'Gold', 'Natural Gas', 'Silver', 'Bitcoin', 'Ethereum']
-    },
-    colors: ['#2d6cdf'],
-    title: {
-        text: 'Daily Trading Volume by Asset'
-    }
+// Initialize data
+let marketData = null;
+let volumeChart = null;
+let priceChart = null;
+let historicalChart = null;
+let currentDateRange = { start: null, end: null };
+
+// Set default date range (last 30 days)
+function setDefaultDateRange() {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    document.getElementById('endDate').value = today.toISOString().split('T')[0];
+    document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+    
+    currentDateRange = {
+        start: thirtyDaysAgo.toISOString().split('T')[0],
+        end: today.toISOString().split('T')[0]
+    };
 }
 
-var volumeChart = new ApexCharts(document.querySelector("#volumeChart"), volumeOptions);
-volumeChart.render();
+// Load and render all charts
+function loadChartData() {
+    if (!window.DataService) {
+        console.error('DataService not loaded');
+        return;
+    }
+    
+    // Get market data for major assets
+    const assets = ['S&P 500', 'NASDAQ', 'FTSE', 'Oil', 'Gold', 'Natural Gas', 'Silver', 'Bitcoin', 'Ethereum'];
+    const days = currentDateRange.start && currentDateRange.end ? 
+        Math.ceil((new Date(currentDateRange.end) - new Date(currentDateRange.start)) / (1000 * 60 * 60 * 24)) : 30;
+    
+    marketData = DataService.getMarketData(assets, days);
+    
+    // Update volume chart
+    const volumeData = DataService.aggregateVolumeData(marketData);
+    updateVolumeChart(volumeData);
+    
+    // Update price change chart
+    const priceData = DataService.getPriceChanges(marketData);
+    updatePriceChart(priceData);
+    
+    // Update historical chart
+    updateHistoricalChart(marketData);
+}
+
+// Volume Chart
+function updateVolumeChart(volumeData) {
+    const options = {
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: true,
+                tools: {
+                    download: true,
+                    selection: false,
+                    zoom: false,
+                    zoomin: false,
+                    zoomout: false,
+                    pan: false,
+                    reset: false
+                }
+            }
+        },
+        series: [{
+            name: 'Trading Volume',
+            data: volumeData.data
+        }],
+        xaxis: {
+            categories: volumeData.categories,
+            labels: {
+                rotate: -45,
+                rotateAlways: false
+            }
+        },
+        yaxis: {
+            labels: {
+                formatter: function(val) {
+                    return (val / 1000).toFixed(0) + 'K';
+                }
+            }
+        },
+        colors: ['#2d6cdf'],
+        title: {
+            text: 'Total Trading Volume by Asset',
+            style: {
+                fontSize: '16px',
+                fontWeight: 600
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        responsive: [{
+            breakpoint: 768,
+            options: {
+                chart: {
+                    height: 300
+                },
+                xaxis: {
+                    labels: {
+                        rotate: -45,
+                        rotateAlways: true
+                    }
+                }
+            }
+        }]
+    };
+    
+    if (volumeChart) {
+        volumeChart.updateOptions(options);
+    } else {
+        volumeChart = new ApexCharts(document.querySelector("#volumeChart"), options);
+        volumeChart.render();
+    }
+}
 
 // Price Chart
-var priceOptions = {
-    chart: {
-        type: 'line',
-        height: 350
-    },
-    series: [{
-        name: 'Price Change %',
-        data: [2.1, 4.2, -1.5, -2.8, 1.9, 3.2, 0.7, 8.1, -3.2]
-    }],
-    xaxis: {
-        categories: ['S&P', 'QQQ', 'FTSE', 'Oil', 'Gold', 'Natural Gas', 'Silver', 'Bitcoin', 'Ethereum']
-    },
-    colors: ['#10b981'],
-    title: {
-        text: 'Price Change Percentage'
-    },
-    stroke: {
-        curve: 'smooth',
-        width: 3
+function updatePriceChart(priceData) {
+    const options = {
+        chart: {
+            type: 'line',
+            height: 350,
+            toolbar: {
+                show: true,
+                tools: {
+                    download: true,
+                    selection: false,
+                    zoom: false,
+                    zoomin: false,
+                    zoomout: false,
+                    pan: false,
+                    reset: false
+                }
+            }
+        },
+        series: [{
+            name: 'Price Change %',
+            data: priceData.data
+        }],
+        xaxis: {
+            categories: priceData.categories,
+            labels: {
+                rotate: -45,
+                rotateAlways: false
+            }
+        },
+        yaxis: {
+            labels: {
+                formatter: function(val) {
+                    return val.toFixed(1) + '%';
+                }
+            }
+        },
+        colors: ['#10b981'],
+        title: {
+            text: 'Price Change Percentage',
+            style: {
+                fontSize: '16px',
+                fontWeight: 600
+            }
+        },
+        stroke: {
+            curve: 'smooth',
+            width: 3
+        },
+        markers: {
+            size: 5,
+            colors: ['#10b981'],
+            strokeColors: '#fff',
+            strokeWidth: 2,
+            hover: {
+                size: 7
+            }
+        },
+        responsive: [{
+            breakpoint: 768,
+            options: {
+                chart: {
+                    height: 300
+                },
+                xaxis: {
+                    labels: {
+                        rotate: -45,
+                        rotateAlways: true
+                    }
+                }
+            }
+        }]
+    };
+    
+    if (priceChart) {
+        priceChart.updateOptions(options);
+    } else {
+        priceChart = new ApexCharts(document.querySelector("#priceChart"), options);
+        priceChart.render();
     }
 }
 
-var priceChart = new ApexCharts(document.querySelector("#priceChart"), priceOptions);
-priceChart.render();
+// Historical Price Chart
+function updateHistoricalChart(marketData) {
+    // Get top 5 assets for historical view
+    const topAssets = Object.keys(marketData).slice(0, 5);
+    const series = topAssets.map(asset => {
+        const data = marketData[asset];
+        return {
+            name: asset,
+            data: data.map(d => ({
+                x: new Date(d.date).getTime(),
+                y: d.price
+            }))
+        };
+    });
+    
+    const options = {
+        chart: {
+            type: 'line',
+            height: 400,
+            zoom: {
+                enabled: true
+            },
+            toolbar: {
+                show: true
+            }
+        },
+        series: series,
+        xaxis: {
+            type: 'datetime',
+            labels: {
+                datetimeUTC: false,
+                format: 'MMM dd'
+            }
+        },
+        yaxis: {
+            labels: {
+                formatter: function(val) {
+                    return '$' + val.toFixed(0);
+                }
+            }
+        },
+        title: {
+            text: 'Historical Price Comparison',
+            style: {
+                fontSize: '16px',
+                fontWeight: 600
+            }
+        },
+        stroke: {
+            curve: 'smooth',
+            width: 2
+        },
+        dataLabels: {
+            enabled: false
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'left'
+        },
+        tooltip: {
+            x: {
+                format: 'MMM dd, yyyy'
+            }
+        },
+        responsive: [{
+            breakpoint: 768,
+            options: {
+                chart: {
+                    height: 300
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
+    
+    if (historicalChart) {
+        historicalChart.updateOptions(options);
+    } else {
+        historicalChart = new ApexCharts(document.querySelector("#historicalChart"), options);
+        historicalChart.render();
+    }
+}
+
+// Date range handlers
+document.getElementById('applyDateRange').addEventListener('click', function() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    if (startDate && endDate) {
+        currentDateRange = { start: startDate, end: endDate };
+        loadChartData();
+        
+        // Show notification if available
+        if (window.showNotification) {
+            showNotification('Charts updated for selected date range', 'success');
+        }
+    }
+});
+
+// Preset range selector
+document.getElementById('presetRanges').addEventListener('change', function(e) {
+    const days = parseInt(e.target.value);
+    if (!days) return;
+    
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - days);
+    
+    document.getElementById('endDate').value = today.toISOString().split('T')[0];
+    document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+    
+    currentDateRange = {
+        start: startDate.toISOString().split('T')[0],
+        end: today.toISOString().split('T')[0]
+    };
+    
+    loadChartData();
+    e.target.value = ''; // Reset selector
+});
+
+// Initialize
+setDefaultDateRange();
+loadChartData();
+
+// Auto-refresh every 5 minutes
+setInterval(() => {
+    loadChartData();
+    console.log('Charts data refreshed');
+}, 5 * 60 * 1000);
 </script>
 
+<script src="../scripts/error-handler.js"></script>
+<script src="../scripts/security-utils.js"></script>
 <script src="../scripts/main.js"></script>
 </body>
 </html>

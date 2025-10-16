@@ -8,6 +8,147 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp"
       rel="stylesheet">
       <link rel="stylesheet" href="../styles/style.css">
+      <style>
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-bar select,
+        .filter-bar input[type="search"] {
+            padding: 0.6rem 1rem;
+            border: 1px solid var(--color-info-dark);
+            border-radius: var(--border-radius-1);
+            background: var(--color-white);
+            color: var(--color-dark);
+            font-size: 0.9rem;
+        }
+        .filter-bar input[type="search"] {
+            flex: 1;
+            min-width: 250px;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .filter-buttons .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+        .notification-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--color-info-light);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .notification-item:hover {
+            background: var(--color-light);
+        }
+        .notification-item.unread {
+            background: rgba(var(--color-primary-rgb), 0.05);
+            font-weight: 500;
+        }
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+        .notification-subject {
+            font-weight: 600;
+            color: var(--color-dark);
+            margin-bottom: 0.25rem;
+        }
+        .notification-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--color-info-dark);
+            margin-bottom: 0.5rem;
+        }
+        .notification-message {
+            color: var(--color-dark-variant);
+            font-size: 0.9rem;
+        }
+        .notification-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .notification-actions button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border: none;
+            border-radius: var(--border-radius-1);
+            cursor: pointer;
+            background: var(--color-light);
+            color: var(--color-dark);
+            transition: all 0.3s ease;
+        }
+        .notification-actions button:hover {
+            background: var(--color-primary);
+            color: var(--color-white);
+        }
+        .notification-actions .star-btn.active {
+            color: var(--color-warning);
+        }
+        .priority-badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: var(--border-radius-1);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .pagination button {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--color-info-dark);
+            background: var(--color-white);
+            color: var(--color-dark);
+            border-radius: var(--border-radius-1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .pagination button:hover:not(:disabled) {
+            background: var(--color-primary);
+            color: var(--color-white);
+            border-color: var(--color-primary);
+        }
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .notification-list {
+            background: var(--color-white);
+            border-radius: var(--card-border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-info-dark);
+        }
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+            }
+            .filter-bar select,
+            .filter-bar input[type="search"] {
+                width: 100%;
+                min-width: 100%;
+            }
+        }
+      </style>
 </head>
 <body>
     <div class="container">
@@ -76,9 +217,6 @@
 
         <main>
             <h1>Messages & Notifications</h1>
-            <div class="date">
-                <input type="date">
-            </div>
 
             <div class="insights">
                 <div class="sales">
@@ -86,14 +224,14 @@
                     <div class="middle">
                         <div class="left">
                             <h3>Total Messages</h3>
-                            <h1>147</h1>
+                            <h1 id="total-count">0</h1>
                         </div>
                         <div class="progress">
                             <svg>
                                 <circle cx=38 cy=36 r=36></circle>
                             </svg>
                             <div class="number">
-                                <p>21</p>
+                                <p id="unread-count">0</p>
                             </div>
                         </div>
                     </div>
@@ -101,81 +239,84 @@
                 </div>
 
                 <div class="expenses">
-                    <span class="material-icons-sharp">notifications</span>
+                    <span class="material-icons-sharp">warning</span>
                     <div class="middle">
                         <div class="left">
-                            <h3>Alerts</h3>
-                            <h1>8</h1>
+                            <h3>High Priority</h3>
+                            <h1 id="high-priority-count">0</h1>
                         </div>
                         <div class="progress">
                             <svg>
                                 <circle cx=38 cy=36 r=36></circle>
                             </svg>
                             <div class="number">
-                                <p>3</p>
+                                <p id="critical-count">0</p>
                             </div>
                         </div>
                     </div>
-                    <small class="text-muted">Active Alerts</small>
+                    <small class="text-muted">Critical Alerts</small>
                 </div>
 
                 <div class="income">
-                    <span class="material-icons-sharp">schedule</span>
+                    <span class="material-icons-sharp">star</span>
                     <div class="middle">
                         <div class="left">
-                            <h3>Response Time</h3>
-                            <h1>2.4h</h1>
+                            <h3>Starred</h3>
+                            <h1 id="starred-count">0</h1>
                         </div>
                         <div class="progress">
                             <svg>
                                 <circle cx=38 cy=36 r=36></circle>
                             </svg>
                             <div class="number">
-                                <p>avg</p>
+                                <p id="archived-count">0</p>
                             </div>
                         </div>
                     </div>
-                    <small class="text-muted">Average Response</small>
+                    <small class="text-muted">Archived</small>
                 </div>
             </div>
 
-            <div class="recent-orders">
-                <h2>Recent Messages</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>From</th>
-                            <th>Subject</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Trading System</td>
-                            <td>Order #12345 Executed</td>
-                            <td>2 min ago</td>
-                            <td class="success">New</td>
-                            <td class="primary">View</td>
-                        </tr>
-                        <tr>
-                            <td>Risk Management</td>
-                            <td>Position Limit Alert</td>
-                            <td>15 min ago</td>
-                            <td class="warning">Read</td>
-                            <td class="primary">View</td>
-                        </tr>
-                        <tr>
-                            <td>Market Data</td>
-                            <td>Price Alert: S&P 500</td>
-                            <td>1 hour ago</td>
-                            <td class="success">New</td>
-                            <td class="primary">View</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <a href="#">Show All Messages</a>
+            <!-- Filter Controls -->
+            <div class="filter-buttons">
+                <button class="btn btn-primary" onclick="filterNotifications('all')">All</button>
+                <button class="btn btn-secondary" onclick="filterNotifications('unread')">Unread</button>
+                <button class="btn btn-secondary" onclick="filterNotifications('starred')">Starred</button>
+                <button class="btn btn-secondary" onclick="filterNotifications('trade')">Trades</button>
+                <button class="btn btn-secondary" onclick="filterNotifications('alert')">Alerts</button>
+                <button class="btn btn-danger" style="margin-left: auto;" onclick="markAllAsRead()">Mark All Read</button>
+            </div>
+
+            <div class="filter-bar">
+                <select id="category-filter" onchange="applyFilters()">
+                    <option value="">All Categories</option>
+                    <option value="trade">Trades</option>
+                    <option value="alert">Alerts</option>
+                    <option value="market">Market</option>
+                    <option value="system">System</option>
+                </select>
+                
+                <select id="priority-filter" onchange="applyFilters()">
+                    <option value="">All Priorities</option>
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+
+                <input type="search" id="search-input" placeholder="Search messages..." oninput="applyFilters()">
+            </div>
+
+            <!-- Notification List -->
+            <div class="notification-list" id="notification-list">
+                <!-- Notifications will be rendered here -->
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button onclick="previousPage()" id="prev-btn">← Previous</button>
+                <span id="page-info">Page 1 of 1</span>
+                <button onclick="nextPage()" id="next-btn">Next →</button>
             </div>
         </main>
 
@@ -200,31 +341,16 @@
             </div>
 
             <div class="recent-updates">
-                <h2>Message Center</h2>
-                <div class="updates">
-                    <div class="update">
-                        <div class="profile-photo">
-                            <img src="../assets/profile-pic-2.png">
-                        </div>
-                        <div class="message">
-                            <p><b>System Alert:</b> Your S&P position has reached 80% of limit.</p>
-                            <small class="text-muted">5 minutes ago</small>
-                        </div>
-                    </div>
-                    <div class="update">
-                        <div class="profile-photo">
-                            <img src="../assets/profile-pic-3.png">
-                        </div>
-                        <div class="message">
-                            <p><b>Trade Confirmation:</b> Gold order executed at $1,980.50</p>
-                            <small class="text-muted">12 minutes ago</small>
-                        </div>
-                    </div>
+                <h2>Recent Notifications</h2>
+                <div class="updates" id="recent-notifications">
+                    <!-- Recent notifications will be rendered here -->
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="../scripts/notification-service.js"></script>
+    <script src="../scripts/messages.js"></script>
     <script src="../scripts/main.js"></script>
 </body>
 </html>

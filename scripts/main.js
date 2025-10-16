@@ -27,10 +27,20 @@ if (menuBtn && sideMenu) {
     menuBtn.addEventListener('click', (e) => {
         try {
             e.preventDefault();
-            sideMenu.style.display = 'block';
+            sideMenu.classList.add('show');
             // Add mobile overlay
             if (window.innerWidth <= 768) {
                 document.body.style.overflow = 'hidden';
+                // Add backdrop
+                const backdrop = document.createElement('div');
+                backdrop.id = 'sidebar-backdrop';
+                backdrop.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;';
+                backdrop.addEventListener('click', () => {
+                    sideMenu.classList.remove('show');
+                    backdrop.remove();
+                    document.body.style.overflow = 'auto';
+                });
+                document.body.appendChild(backdrop);
             }
         } catch (error) {
             console.error('Error showing sidebar:', error);
@@ -45,7 +55,11 @@ if (closeBtn && sideMenu) {
     closeBtn.addEventListener('click', (e) => {
         try {
             e.preventDefault();
-            sideMenu.style.display = 'none';
+            sideMenu.classList.remove('show');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
             document.body.style.overflow = 'auto';
         } catch (error) {
             console.error('Error hiding sidebar:', error);
@@ -82,9 +96,13 @@ if (themeToggler) {
 
 // Close sidebar when clicking outside on mobile
 document.addEventListener('click', (e) => {
-    if (window.innerWidth <= 768 && sideMenu && !sideMenu.contains(e.target) && !menuBtn.contains(e.target)) {
-        if (sideMenu.style.display === 'block') {
-            sideMenu.style.display = 'none';
+    if (window.innerWidth <= 768 && sideMenu && !sideMenu.contains(e.target) && menuBtn && !menuBtn.contains(e.target)) {
+        if (sideMenu.classList.contains('show')) {
+            sideMenu.classList.remove('show');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
             document.body.style.overflow = 'auto';
         }
     }
@@ -93,7 +111,11 @@ document.addEventListener('click', (e) => {
 // Handle window resize
 window.addEventListener('resize', () => {
     if (window.innerWidth > 768 && sideMenu) {
-        sideMenu.style.display = '';
+        sideMenu.classList.remove('show');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
         document.body.style.overflow = 'auto';
     }
 });
@@ -336,6 +358,9 @@ function updateDashboardMetrics() {
 function startRealTimeUpdates() {
     if (typeof Orders === 'undefined') return;
     
+    // Use config interval if available
+    const updateInterval = window.AppConfig?.ui?.updateInterval || 5000;
+    
     setInterval(() => {
         try {
             // Update prices for active orders
@@ -356,10 +381,60 @@ function startRealTimeUpdates() {
                 populateOrdersTable();
             }
             
+            // Log update time for debugging
+            if (window.AppConfig?.isDevelopment()) {
+                console.debug('Real-time update:', new Date().toLocaleTimeString());
+            }
+            
         } catch (error) {
             console.error('Error in real-time updates:', error);
         }
-    }, 5000); // Update every 5 seconds
+    }, updateInterval);
+}
+
+// Enhanced data refresh with DataService
+function refreshDashboardData() {
+    try {
+        if (window.DataService) {
+            // Get latest market data
+            const assets = ['S&P 500', 'NASDAQ', 'Gold', 'Oil', 'Bitcoin'];
+            const marketData = DataService.getMarketData(assets, 1);
+            
+            // Calculate top performers
+            const performers = DataService.getTopPerformers(marketData);
+            
+            // Update best/worst performer cards if they exist
+            const bestPerformer = document.querySelector('.sales-analytics .item.online .info');
+            if (bestPerformer && performers.gainers.length > 0) {
+                const top = performers.gainers[0];
+                bestPerformer.querySelector('h3').textContent = 'Top Gainer';
+                bestPerformer.querySelector('small').textContent = `${top.asset} +${top.change.toFixed(2)}%`;
+            }
+            
+            const worstPerformer = document.querySelector('.sales-analytics .item.offline .info');
+            if (worstPerformer && performers.losers.length > 0) {
+                const bottom = performers.losers[0];
+                worstPerformer.querySelector('h3').textContent = 'Top Loser';
+                worstPerformer.querySelector('small').textContent = `${bottom.asset} ${bottom.change.toFixed(2)}%`;
+            }
+            
+            console.info('Dashboard data refreshed with DataService');
+        }
+    } catch (error) {
+        console.error('Error refreshing dashboard data:', error);
+    }
+}
+
+// Update notification badge count
+function updateNotificationBadge() {
+    if (typeof NotificationService !== 'undefined') {
+        const unreadCount = NotificationService.getUnreadCount();
+        const badge = document.querySelector('.message-count');
+        if (badge) {
+            badge.textContent = unreadCount;
+            badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+        }
+    }
 }
 
 // Initialize dashboard data when page loads
@@ -367,13 +442,19 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         updateDashboardMetrics();
         startRealTimeUpdates();
+        refreshDashboardData();
+        updateNotificationBadge();
     });
 } else {
     updateDashboardMetrics();
     startRealTimeUpdates();
+    refreshDashboardData();
+    updateNotificationBadge();
 }
 
 // Make functions globally available
 window.showOrderDetails = showOrderDetails;
 window.updateDashboardMetrics = updateDashboardMetrics;
 window.startRealTimeUpdates = startRealTimeUpdates;
+window.refreshDashboardData = refreshDashboardData;
+window.updateNotificationBadge = updateNotificationBadge;
