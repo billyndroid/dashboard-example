@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics</title>
+    <title>Orders</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp"
       rel="stylesheet">
       <link rel="stylesheet" href="../styles/style.css">
@@ -13,51 +13,51 @@
     <div class="container">
         <aside class="top">
             <div class="logo">
-                <img src="assets/logo-temp.png">
-                <h2>YOUR<span class="danger">LOGO</span></h2>
+                <img src="../assets/logo-temp.png">
+                <h2>SQU^RE<span class="danger">DOFF</span></h2>
             </div>
             <div class="close" id="close-btn">
                 <span class="material-icons-sharp">close</span>
             </div>
 
             <div class="sidebar">
-                <a href="#">
+                <a href="../index.html">
                     <span class="material-icons-sharp">grid_view</span>
                     <h3>Dashboard</h3>
                 </a>
 
-                <a href="#">
+                <a href="customers.html">
                     <span class="material-icons-sharp">person_outline</span>
                     <h3>Customers</h3>
                 </a>
 
-                <a href="#">
+                <a href="orders.html">
                     <span class="material-icons-sharp">receipt_long</span>
                     <h3>Orders</h3>
                 </a>
 
-                <a href="#">
+                <a href="analytics.html">
                     <span class="material-icons-sharp">insights</span>
                     <h3>Analytics</h3>
                 </a>
 
-                <a href="#">
+                <a href="messages.html">
                     <span class="material-icons-sharp">mail_outline</span>
                     <h3>Messages</h3>
                     <span class="message-count">21</span>
                 </a>
 
-                <a href="#">
+                <a href="products.html">
                     <span class="material-icons-sharp">inventory</span>
                     <h3>Products</h3>
                 </a>
 
-                <a href="#">
+                <a href="reports.html">
                     <span class="material-icons-sharp">error</span>
                     <h3>Reports</h3>
                 </a>
 
-                <a href="#">
+                <a href="settings.html">
                     <span class="material-icons-sharp">settings</span>
                     <h3>Settings</h3>
                 </a>
@@ -74,27 +74,283 @@
             </div>
 
         </aside>
-    </div>
-    
-</div>
 
-<div>
-    <!--First iteration will call price, second will call price and execute trade-->
-    <button id="bigExecutionButton"></button>
-</div>
+        <main>
+            <h1>Order Management</h1>
+            <div class="date">
+                <input type="date">
+            </div>
+
+            <div class="insights">
+                <div class="sales">
+                    <span class="material-icons-sharp">shopping_cart</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3>Pending Orders</h3>
+                            <h1 id="pendingCount">7</h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx=38 cy=36 r=36></circle>
+                            </svg>
+                            <div class="number">
+                                <p>Active</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Awaiting Execution</small>
+                </div>
+
+                <div class="expenses">
+                    <span class="material-icons-sharp">check_circle</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3>Executed Today</h3>
+                            <h1 id="executedCount">23</h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx=38 cy=36 r=36></circle>
+                            </svg>
+                            <div class="number">
+                                <p>+5</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Successful Trades</small>
+                </div>
+
+                <div class="income">
+                    <span class="material-icons-sharp">trending_up</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3>Total Volume</h3>
+                            <h1 id="totalVolume">$147K</h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx=38 cy=36 r=36></circle>
+                            </svg>
+                            <div class="number">
+                                <p>High</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Trading Volume</small>
+                </div>
+            </div>
+
+            <div class="recent-orders">
+                <h2>Active Orders</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Type</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTable">
+                        <!-- Orders populated by JavaScript -->
+                    </tbody>
+                </table>
+                
+                <div style="margin-top: 20px;">
+                    <button id="executeOrdersBtn" class="btn-primary" style="padding: 10px 20px; background: var(--color-primary); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Execute Selected Orders
+                    </button>
+                    <button id="refreshOrdersBtn" class="btn-secondary" style="padding: 10px 20px; background: var(--color-info-dark); color: white; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+                        Refresh Prices
+                    </button>
+                </div>
+                
+                <div id="statusMessage" style="margin-top: 10px; padding: 10px; border-radius: 5px; display: none;"></div>
+            </div>
+        </main>
+
+        <div class="right">
+            <div class="top">
+                <button id="menu-btn">
+                    <span class="material-icons-sharp">menu</span>
+                </button>
+                <div class="theme-toggler">
+                    <span class="material-icons-sharp active">light_mode</span>
+                    <span class="material-icons-sharp">dark_mode</span>
+                </div>
+                <div class="profile">
+                    <div class="info">
+                        <p>Key: <b>Gavin</b></p>
+                        <small class="text-muted">Admin</small>
+                    </div>
+                    <div class="profile-pic">
+                        <img src="../assets/profile-pic-1.png" height="50px" width="50px">
+                    </div>
+                </div>
+            </div>
+
+            <div class="recent-updates">
+                <h2>Order Updates</h2>
+                <div class="updates" id="orderUpdates">
+                    <!-- Updates populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
 
 <script>
-    const button = document.getElementById('bigExecutionButton');
+    // Sample order data
+    const activeOrders = [
+        { id: 1, asset: 'S&P 500', type: 'Buy', quantity: 100, price: 4247.50, status: 'Pending', selected: false },
+        { id: 2, asset: 'Gold', type: 'Sell', quantity: 50, price: 1980.25, status: 'Pending', selected: false },
+        { id: 3, asset: 'Bitcoin', type: 'Buy', quantity: 0.5, price: 67450, status: 'Pending', selected: false },
+        { id: 4, asset: 'Oil', type: 'Sell', quantity: 200, price: 89.45, status: 'Filled', selected: false }
+    ];
 
-    button.addEventListener("click", function () {
-        fetch("https://insertapi.com.path.id")
-        .then(function (result) {
-            console.log(result);
-        })
-        .catch(function (err){
-            console.error(err);;
+    // Populate orders table
+    function populateOrdersTable() {
+        const tableBody = document.getElementById('ordersTable');
+        tableBody.innerHTML = '';
+        
+        activeOrders.forEach(order => {
+            const row = document.createElement('tr');
+            const statusClass = order.status === 'Filled' ? 'success' : order.status === 'Pending' ? 'warning' : 'primary';
+            
+            row.innerHTML = `
+                <td>${order.asset}</td>
+                <td>${order.type}</td>
+                <td>${order.quantity}</td>
+                <td>$${order.price.toFixed(2)}</td>
+                <td class="${statusClass}">${order.status}</td>
+                <td>
+                    ${order.status === 'Pending' ? 
+                        `<input type="checkbox" onchange="toggleOrderSelection(${order.id}, this.checked)"> Select` : 
+                        '<span class="success">Complete</span>'
+                    }
+                </td>
+            `;
+            tableBody.appendChild(row);
         });
+    }
+
+    // Toggle order selection
+    function toggleOrderSelection(orderId, selected) {
+        const order = activeOrders.find(o => o.id === orderId);
+        if (order) {
+            order.selected = selected;
+        }
+    }
+
+    // Show status message
+    function showStatus(message, type = 'info') {
+        const statusDiv = document.getElementById('statusMessage');
+        statusDiv.textContent = message;
+        statusDiv.className = type;
+        statusDiv.style.display = 'block';
+        statusDiv.style.backgroundColor = 
+            type === 'success' ? 'var(--color-success)' : 
+            type === 'error' ? 'var(--color-danger)' : 
+            'var(--color-info-light)';
+        statusDiv.style.color = type === 'info' ? 'var(--color-dark)' : 'white';
+        
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    // Execute selected orders
+    document.getElementById('executeOrdersBtn').addEventListener('click', async function() {
+        const selectedOrders = activeOrders.filter(o => o.selected && o.status === 'Pending');
+        
+        if (selectedOrders.length === 0) {
+            showStatus('Please select at least one pending order to execute.', 'error');
+            return;
+        }
+        
+        this.disabled = true;
+        this.textContent = 'Executing...';
+        
+        try {
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Update order statuses
+            selectedOrders.forEach(order => {
+                order.status = 'Filled';
+                order.selected = false;
+            });
+            
+            populateOrdersTable();
+            updateOrderUpdates(`${selectedOrders.length} orders executed successfully`);
+            showStatus(`Successfully executed ${selectedOrders.length} orders!`, 'success');
+            
+        } catch (error) {
+            showStatus('Error executing orders. Please try again.', 'error');
+        } finally {
+            this.disabled = false;
+            this.textContent = 'Execute Selected Orders';
+        }
     });
+
+    // Refresh prices
+    document.getElementById('refreshOrdersBtn').addEventListener('click', async function() {
+        this.disabled = true;
+        this.textContent = 'Refreshing...';
+        
+        try {
+            // Simulate price updates
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            activeOrders.forEach(order => {
+                if (order.status === 'Pending') {
+                    // Simulate small price changes
+                    const change = (Math.random() - 0.5) * 0.02; // ±1%
+                    order.price = order.price * (1 + change);
+                }
+            });
+            
+            populateOrdersTable();
+            updateOrderUpdates('Prices refreshed');
+            showStatus('Prices updated successfully!', 'success');
+            
+        } catch (error) {
+            showStatus('Error refreshing prices.', 'error');
+        } finally {
+            this.disabled = false;
+            this.textContent = 'Refresh Prices';
+        }
+    });
+
+    // Update order updates section
+    function updateOrderUpdates(message) {
+        const updatesDiv = document.getElementById('orderUpdates');
+        const updateDiv = document.createElement('div');
+        updateDiv.className = 'update';
+        updateDiv.innerHTML = `
+            <div class="profile-photo">
+                <img src="../assets/profile-pic-1.png">
+            </div>
+            <div class="message">
+                <p><b>System:</b> ${message}</p>
+                <small class="text-muted">Just now</small>
+            </div>
+        `;
+        updatesDiv.insertBefore(updateDiv, updatesDiv.firstChild);
+        
+        // Keep only last 3 updates
+        while (updatesDiv.children.length > 3) {
+            updatesDiv.removeChild(updatesDiv.lastChild);
+        }
+    }
+
+    // Initialize page
+    populateOrdersTable();
+    
+    // Initial updates
+    updateOrderUpdates('Order management system initialized');
 </script>
+<script src="../scripts/main.js"></script>
 </body>
 </html>

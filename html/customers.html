@@ -13,51 +13,51 @@
     <div class="container">
         <aside class="top">
             <div class="logo">
-                <img src="assets/logo-temp.png">
-                <h2>YOUR<span class="danger">LOGO</span></h2>
+                <img src="../assets/logo-temp.png">
+                <h2>SQU^RE<span class="danger">DOFF</span></h2>
             </div>
             <div class="close" id="close-btn">
                 <span class="material-icons-sharp">close</span>
             </div>
 
             <div class="sidebar">
-                <a href="#">
+                <a href="../index.html">
                     <span class="material-icons-sharp">grid_view</span>
                     <h3>Dashboard</h3>
                 </a>
 
-                <a href="#">
+                <a href="customers.html">
                     <span class="material-icons-sharp">person_outline</span>
                     <h3>Customers</h3>
                 </a>
 
-                <a href="#">
+                <a href="orders.html">
                     <span class="material-icons-sharp">receipt_long</span>
                     <h3>Orders</h3>
                 </a>
 
-                <a href="#">
+                <a href="analytics.html">
                     <span class="material-icons-sharp">insights</span>
                     <h3>Analytics</h3>
                 </a>
 
-                <a href="#">
+                <a href="messages.html">
                     <span class="material-icons-sharp">mail_outline</span>
                     <h3>Messages</h3>
                     <span class="message-count">21</span>
                 </a>
 
-                <a href="#">
+                <a href="products.html">
                     <span class="material-icons-sharp">inventory</span>
                     <h3>Products</h3>
                 </a>
 
-                <a href="#">
+                <a href="reports.html">
                     <span class="material-icons-sharp">error</span>
                     <h3>Reports</h3>
                 </a>
 
-                <a href="#">
+                <a href="settings.html">
                     <span class="material-icons-sharp">settings</span>
                     <h3>Settings</h3>
                 </a>
@@ -74,6 +74,196 @@
             </div>
 
         </aside>
+
+        <main>
+            <h1>Customer Management</h1>
+            <div class="date">
+                <input type="date">
+            </div>
+
+            <div class="insights">
+                <div class="sales">
+                    <span class="material-icons-sharp">people</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3>Total Customers</h3>
+                            <h1>1,247</h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx=38 cy=36 r=36></circle>
+                            </svg>
+                            <div class="number">
+                                <p>+12%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">This Month</small>
+                </div>
+
+                <div class="expenses">
+                    <span class="material-icons-sharp">person_add</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3>New Customers</h3>
+                            <h1>89</h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx=38 cy=36 r=36></circle>
+                            </svg>
+                            <div class="number">
+                                <p>+8</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">This Week</small>
+                </div>
+
+                <div class="income">
+                    <span class="material-icons-sharp">trending_up</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3>Active Traders</h3>
+                            <h1>934</h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx=38 cy=36 r=36></circle>
+                            </svg>
+                            <div class="number">
+                                <p>75%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Engagement Rate</small>
+                </div>
+            </div>
+
+            <div class="recent-orders">
+                <h2>Customer Overview</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Account Type</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Last Active</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>John Peterson</td>
+                            <td>Premium</td>
+                            <td>$125,450</td>
+                            <td class="success">Active</td>
+                            <td>2 min ago</td>
+                        </tr>
+                        <tr>
+                            <td>Sarah Chen</td>
+                            <td>Standard</td>
+                            <td>$43,200</td>
+                            <td class="success">Active</td>
+                            <td>15 min ago</td>
+                        </tr>
+                        <tr>
+                            <td>Michael Brown</td>
+                            <td>Premium</td>
+                            <td>$89,750</td>
+                            <td class="warning">Inactive</td>
+                            <td>2 days ago</td>
+                        </tr>
+                        <tr>
+                            <td>Emma Wilson</td>
+                            <td>Basic</td>
+                            <td>$12,500</td>
+                            <td class="success">Active</td>
+                            <td>1 hour ago</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <a href="#">View All Customers</a>
+            </div>
+        </main>
+
+        <div class="right">
+            <div class="top">
+                <button id="menu-btn">
+                    <span class="material-icons-sharp">menu</span>
+                </button>
+                <div class="theme-toggler">
+                    <span class="material-icons-sharp active">light_mode</span>
+                    <span class="material-icons-sharp">dark_mode</span>
+                </div>
+                <div class="profile">
+                    <div class="info">
+                        <p>Key: <b>Gavin</b></p>
+                        <small class="text-muted">Admin</small>
+                    </div>
+                    <div class="profile-pic">
+                        <img src="../assets/profile-pic-1.png" height="50px" width="50px">
+                    </div>
+                </div>
+            </div>
+
+            <div class="recent-updates">
+                <h2>Customer Activity</h2>
+                <div class="updates">
+                    <div class="update">
+                        <div class="profile-photo">
+                            <img src="../assets/profile-pic-2.png">
+                        </div>
+                        <div class="message">
+                            <p><b>John Peterson</b> opened a new position in Gold.</p>
+                            <small class="text-muted">5 minutes ago</small>
+                        </div>
+                    </div>
+                    <div class="update">
+                        <div class="profile-photo">
+                            <img src="../assets/profile-pic-3.png">
+                        </div>
+                        <div class="message">
+                            <p><b>Sarah Chen</b> upgraded to Premium account.</p>
+                            <small class="text-muted">1 hour ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sales-analytics">
+                <h2>Customer Insights</h2>
+                <div class="item customers">
+                    <div class="icon">
+                        <span class="material-icons-sharp">star</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3>TOP TRADER</h3>
+                            <small class="text-muted">John Peterson</small>
+                        </div>
+                        <h5 class="success">+24%</h5>
+                        <h3>ROI</h3>
+                    </div>
+                </div>
+
+                <div class="item offline">
+                    <div class="icon">
+                        <span class="material-icons-sharp">schedule</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3>RESPONSE TIME</h3>
+                            <small class="text-muted">Avg Support</small>
+                        </div>
+                        <h5 class="success">1.2h</h5>
+                        <h3>Fast</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <script src="../scripts/main.js"></script>
 </body>
 </html>

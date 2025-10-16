@@ -13,51 +13,51 @@
     <div class="container">
         <aside class="top">
             <div class="logo">
-                <img src="assets/logo-temp.png">
-                <h2>YOUR<span class="danger">LOGO</span></h2>
+                <img src="../assets/logo-temp.png">
+                <h2>SQU^RE<span class="danger">DOFF</span></h2>
             </div>
             <div class="close" id="close-btn">
                 <span class="material-icons-sharp">close</span>
             </div>
 
             <div class="sidebar">
-                <a href="#">
+                <a href="../index.html">
                     <span class="material-icons-sharp">grid_view</span>
                     <h3>Dashboard</h3>
                 </a>
 
-                <a href="#">
+                <a href="customers.html">
                     <span class="material-icons-sharp">person_outline</span>
                     <h3>Customers</h3>
                 </a>
 
-                <a href="#">
+                <a href="orders.html">
                     <span class="material-icons-sharp">receipt_long</span>
                     <h3>Orders</h3>
                 </a>
 
-                <a href="#">
+                <a href="analytics.html">
                     <span class="material-icons-sharp">insights</span>
                     <h3>Analytics</h3>
                 </a>
 
-                <a href="#">
+                <a href="messages.html">
                     <span class="material-icons-sharp">mail_outline</span>
                     <h3>Messages</h3>
                     <span class="message-count">21</span>
                 </a>
 
-                <a href="#">
+                <a href="products.html">
                     <span class="material-icons-sharp">inventory</span>
                     <h3>Products</h3>
                 </a>
 
-                <a href="#">
+                <a href="reports.html">
                     <span class="material-icons-sharp">error</span>
                     <h3>Reports</h3>
                 </a>
 
-                <a href="#">
+                <a href="settings.html">
                     <span class="material-icons-sharp">settings</span>
                     <h3>Settings</h3>
                 </a>
@@ -76,47 +76,68 @@
         </aside>
     </div>
     
-<!--candleChart ONE-------------------------------------------------------------------------------------------->
+<!--Trading Volume Chart-------------------------------------------------------------------------------------------->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-<div id="chart">
-    <script>
-    var options = {
-        chart: {
-          type: 'bar'
-        },
-        series: [{
-          name: 'sales',
-          data: [30,40,45,34,49,60,70,91,30]
-        }],
-        xaxis: {
-          categories: [1991,1992,1993,1994,1995,1996,1997, 1998,1999]
-        }
-      }
-      
-      var chart = new ApexCharts(document.querySelector("#chart"), options);
-      
-      chart.render();</script>
+<div style="margin: 20px 0;">
+    <h2>Trading Volume Analysis</h2>
+    <div id="volumeChart"></div>
 </div>
-<!--candleChart ONE-------------------------------------------------------------------------------------------->
 
-<div id="chart">
-    <script>var options = {
-        chart: {
-          type: 'bar'
-        },
-        series: [{
-          name: 'sales',
-          data: [30,40,45,50,49,60,70,91,125]
-        }],
-        xaxis: {
-          categories: [1991,1992,1993,1994,1995,1996,1997, 1998,1999]
-        }
-      }
-      
-      var chart = new ApexCharts(document.querySelector("#chart"), options);
-      
-      chart.render();</script>
+<!--Price Movement Chart-------------------------------------------------------------------------------------------->
+<div style="margin: 20px 0;">
+    <h2>Price Movement Trends</h2>
+    <div id="priceChart"></div>
 </div>
+
+<script>
+// Volume Chart
+var volumeOptions = {
+    chart: {
+        type: 'bar',
+        height: 350
+    },
+    series: [{
+        name: 'Trading Volume',
+        data: [30000, 40000, 45000, 34000, 49000, 60000, 70000, 91000, 30000]
+    }],
+    xaxis: {
+        categories: ['S&P', 'QQQ', 'FTSE', 'Oil', 'Gold', 'Natural Gas', 'Silver', 'Bitcoin', 'Ethereum']
+    },
+    colors: ['#7380cc'],
+    title: {
+        text: 'Daily Trading Volume by Asset'
+    }
+}
+
+var volumeChart = new ApexCharts(document.querySelector("#volumeChart"), volumeOptions);
+volumeChart.render();
+
+// Price Chart
+var priceOptions = {
+    chart: {
+        type: 'line',
+        height: 350
+    },
+    series: [{
+        name: 'Price Change %',
+        data: [2.1, 4.2, -1.5, -2.8, 1.9, 3.2, 0.7, 8.1, -3.2]
+    }],
+    xaxis: {
+        categories: ['S&P', 'QQQ', 'FTSE', 'Oil', 'Gold', 'Natural Gas', 'Silver', 'Bitcoin', 'Ethereum']
+    },
+    colors: ['#41f1b6'],
+    title: {
+        text: 'Price Change Percentage'
+    },
+    stroke: {
+        curve: 'smooth',
+        width: 3
+    }
+}
+
+var priceChart = new ApexCharts(document.querySelector("#priceChart"), priceOptions);
+priceChart.render();
+</script>
 
 
 

@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products</title>
+    <title>Settings</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp"
       rel="stylesheet">
       <link rel="stylesheet" href="../styles/style.css">
 </head>
 <body>
-
     <div class="container">
         <aside class="top">
             <div class="logo">
@@ -76,121 +75,118 @@
         </aside>
 
         <main>
-            <h1>Trading Products</h1>
-            <div class="date">
-                <input type="date">
-            </div>
+            <h1>Trading Settings</h1>
 
             <div class="insights">
                 <div class="sales">
-                    <span class="material-icons-sharp">inventory_2</span>
+                    <span class="material-icons-sharp">account_circle</span>
                     <div class="middle">
                         <div class="left">
-                            <h3>Available Products</h3>
-                            <h1>47</h1>
+                            <h3>Profile Settings</h3>
+                            <h1>Active</h1>
                         </div>
                         <div class="progress">
                             <svg>
                                 <circle cx=38 cy=36 r=36></circle>
                             </svg>
                             <div class="number">
-                                <p>Live</p>
+                                <p>✓</p>
                             </div>
                         </div>
                     </div>
-                    <small class="text-muted">Tradeable Assets</small>
+                    <small class="text-muted">Account Status</small>
                 </div>
 
                 <div class="expenses">
-                    <span class="material-icons-sharp">trending_up</span>
+                    <span class="material-icons-sharp">security</span>
                     <div class="middle">
                         <div class="left">
-                            <h3>Top Performer</h3>
-                            <h1>Gold</h1>
+                            <h3>Security</h3>
+                            <h1>High</h1>
                         </div>
                         <div class="progress">
                             <svg>
                                 <circle cx=38 cy=36 r=36></circle>
                             </svg>
                             <div class="number">
-                                <p>+15%</p>
+                                <p>2FA</p>
                             </div>
                         </div>
                     </div>
-                    <small class="text-muted">This Month</small>
+                    <small class="text-muted">Two-Factor Auth</small>
                 </div>
 
                 <div class="income">
-                    <span class="material-icons-sharp">local_fire_department</span>
+                    <span class="material-icons-sharp">notifications</span>
                     <div class="middle">
                         <div class="left">
-                            <h3>Most Traded</h3>
-                            <h1>S&P 500</h1>
+                            <h3>Alerts</h3>
+                            <h1>12</h1>
                         </div>
                         <div class="progress">
                             <svg>
                                 <circle cx=38 cy=36 r=36></circle>
                             </svg>
                             <div class="number">
-                                <p>Hot</p>
+                                <p>ON</p>
                             </div>
                         </div>
                     </div>
-                    <small class="text-muted">Volume Leader</small>
+                    <small class="text-muted">Active Alerts</small>
                 </div>
             </div>
 
             <div class="recent-orders">
-                <h2>Product Catalog</h2>
+                <h2>Configuration Settings</h2>
                 <table>
                     <thead>
                         <tr>
-                            <th>Product</th>
+                            <th>Setting</th>
                             <th>Category</th>
-                            <th>Price</th>
-                            <th>Change 24h</th>
+                            <th>Value</th>
                             <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>S&P 500 Index</td>
-                            <td>Index</td>
-                            <td>$4,247.50</td>
-                            <td class="success">+1.2%</td>
+                            <td>Risk Tolerance</td>
+                            <td>Trading</td>
+                            <td>Medium</td>
                             <td class="success">Active</td>
+                            <td class="primary">Edit</td>
                         </tr>
                         <tr>
-                            <td>Gold Futures</td>
-                            <td>Commodity</td>
-                            <td>$1,980.25</td>
-                            <td class="success">+2.1%</td>
+                            <td>Position Limit</td>
+                            <td>Risk Management</td>
+                            <td>$50,000</td>
                             <td class="success">Active</td>
+                            <td class="primary">Edit</td>
                         </tr>
                         <tr>
-                            <td>Crude Oil</td>
-                            <td>Energy</td>
-                            <td>$89.45</td>
-                            <td class="danger">-1.8%</td>
-                            <td class="success">Active</td>
+                            <td>Auto-Stop Loss</td>
+                            <td>Trading</td>
+                            <td>5%</td>
+                            <td class="success">Enabled</td>
+                            <td class="primary">Edit</td>
                         </tr>
                         <tr>
-                            <td>Bitcoin</td>
-                            <td>Crypto</td>
-                            <td>$67,450</td>
-                            <td class="success">+5.2%</td>
-                            <td class="warning">Volatile</td>
+                            <td>Email Notifications</td>
+                            <td>Alerts</td>
+                            <td>All Trades</td>
+                            <td class="success">Enabled</td>
+                            <td class="primary">Edit</td>
                         </tr>
                         <tr>
-                            <td>NASDAQ 100</td>
-                            <td>Index</td>
-                            <td>$15,247</td>
-                            <td class="success">+0.8%</td>
+                            <td>Theme Preference</td>
+                            <td>Display</td>
+                            <td>Auto</td>
                             <td class="success">Active</td>
+                            <td class="primary">Edit</td>
                         </tr>
                     </tbody>
                 </table>
-                <a href="#">View All Products</a>
+                <a href="#">Save All Changes</a>
             </div>
         </main>
 
@@ -215,63 +211,63 @@
             </div>
 
             <div class="recent-updates">
-                <h2>Market Updates</h2>
+                <h2>Recent Changes</h2>
                 <div class="updates">
                     <div class="update">
                         <div class="profile-photo">
-                            <img src="../assets/chart.jpg">
+                            <img src="../assets/profile-pic-1.png">
                         </div>
                         <div class="message">
-                            <p><b>Gold</b> breaks resistance at $1,975. New high expected.</p>
-                            <small class="text-muted">10 minutes ago</small>
+                            <p><b>Settings Updated:</b> Risk tolerance changed to Medium</p>
+                            <small class="text-muted">1 hour ago</small>
                         </div>
                     </div>
                     <div class="update">
                         <div class="profile-photo">
-                            <img src="../assets/chart2.png">
+                            <img src="../assets/profile-pic-1.png">
                         </div>
                         <div class="message">
-                            <p><b>S&P 500</b> showing strong bullish momentum.</p>
-                            <small class="text-muted">30 minutes ago</small>
+                            <p><b>Security:</b> Two-factor authentication enabled</p>
+                            <small class="text-muted">2 days ago</small>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="sales-analytics">
-                <h2>Product Performance</h2>
+                <h2>Quick Actions</h2>
                 <div class="item customers">
                     <div class="icon">
-                        <span class="material-icons-sharp">trending_up</span>
+                        <span class="material-icons-sharp">backup</span>
                     </div>
                     <div class="right">
                         <div class="info">
-                            <h3>GAINERS</h3>
-                            <small class="text-muted">Top 3 Today</small>
+                            <h3>BACKUP</h3>
+                            <small class="text-muted">Export Settings</small>
                         </div>
-                        <h5 class="success">+5.2%</h5>
-                        <h3>BTC</h3>
+                        <h5 class="success">Ready</h5>
+                        <h3>Export</h3>
                     </div>
                 </div>
 
                 <div class="item offline">
                     <div class="icon">
-                        <span class="material-icons-sharp">trending_down</span>
+                        <span class="material-icons-sharp">restore</span>
                     </div>
                     <div class="right">
                         <div class="info">
-                            <h3>LOSERS</h3>
-                            <small class="text-muted">Needs Attention</small>
+                            <h3>RESTORE</h3>
+                            <small class="text-muted">Import Settings</small>
                         </div>
-                        <h5 class="danger">-1.8%</h5>
-                        <h3>Oil</h3>
+                        <h5 class="primary">Available</h5>
+                        <h3>Import</h3>
                     </div>
                 </div>
 
                 <div class="item add-product">
                     <div>
-                        <span class="material-icons-sharp">add</span>
-                        <h3>Add New Product</h3>
+                        <span class="material-icons-sharp">refresh</span>
+                        <h3>Reset to Defaults</h3>
                     </div>
                 </div>
             </div>

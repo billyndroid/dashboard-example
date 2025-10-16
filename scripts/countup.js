@@ -1,12 +1,19 @@
 
-// How long you want the animation to take, in ms
-const animationDuration = 2000;
-// Calculate how long each ‘frame’ should last if we want to update the animation 60 times per second
-const frameDuration = 1000 / 60;
-// Use that to calculate how many frames we need to complete the animation
-const totalFrames = Math.round( animationDuration / frameDuration );
-// An ease-out function that slows the count as it progresses
-const easeOutQuad = t => t * ( 2 - t );
+// Enhanced CountUp Animation with Error Handling
+
+// Configuration
+const ANIMATION_CONFIG = {
+    duration: 2000, // Animation duration in ms
+    fps: 60, // Frames per second
+    get frameDuration() { return 1000 / this.fps; },
+    get totalFrames() { return Math.round(this.duration / this.frameDuration); }
+};
+// Easing functions
+const easingFunctions = {
+    easeOutQuad: t => t * (2 - t),
+    easeInOut: t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+    linear: t => t
+};
 
 // The animation function, which takes an Element
 const animateCountUp = el => {
