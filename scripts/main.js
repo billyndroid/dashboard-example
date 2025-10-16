@@ -1,12 +1,21 @@
-// Enhanced main.js with error handling and improved functionality
+/**
+ * Main Dashboard Script
+ * Handles sidebar navigation, theme toggling, and core dashboard functionality
+ * @author Dashboard Team
+ * @version 2.0.0
+ */
 
-// Safely get DOM elements
+// DOM element references
 const sideMenu = document.querySelector("aside");
 const menuBtn = document.querySelector("#menu-btn");
 const closeBtn = document.querySelector("#close-btn");
 const themeToggler = document.querySelector(".theme-toggler");
 
-// Load theme preference
+/**
+ * Load and apply saved theme preference from localStorage
+ * Automatically applies dark theme class and updates theme toggle icons
+ * @returns {void}
+ */
 function loadThemePreference() {
     const savedTheme = localStorage.getItem('dashboard-theme');
     if (savedTheme === 'dark') {
@@ -108,7 +117,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Handle window resize
+// Handle window resize - close sidebar when switching to desktop
 window.addEventListener('resize', () => {
     if (window.innerWidth > 768 && sideMenu) {
         sideMenu.classList.remove('show');
@@ -123,7 +132,12 @@ window.addEventListener('resize', () => {
 // Initialize theme on page load
 document.addEventListener('DOMContentLoaded', loadThemePreference);
 
-// Enhanced Progress Circle Calculations
+/**
+ * Update SVG progress circles based on percentage values
+ * Calculates stroke-dashoffset to create circular progress effect
+ * Applies color coding based on positive/negative values
+ * @returns {void}
+ */
 function updateProgressCircles() {
     try {
         const progressCircles = document.querySelectorAll('.progress circle');
@@ -135,7 +149,7 @@ function updateProgressCircles() {
             const percentageText = numberElement.textContent;
             let percentage = 0;
             
-            // Extract percentage from different formats
+            // Extract percentage from different formats (75%, +8.2%, -1.5%)
             if (percentageText.includes('%')) {
                 percentage = parseFloat(percentageText.replace('%', ''));
             } else if (percentageText.includes('+') || percentageText.includes('-')) {
@@ -146,20 +160,21 @@ function updateProgressCircles() {
                 percentage = 75;
             }
             
-            // Ensure percentage is within valid range
+            // Ensure percentage is within valid range (0-100)
             percentage = Math.max(0, Math.min(100, percentage));
             
             // Calculate circle properties
+            // Formula: circumference = 2πr, offset = circumference - (percentage/100) * circumference
             const radius = 36;
             const circumference = 2 * Math.PI * radius;
             const offset = circumference - (percentage / 100) * circumference;
             
-            // Apply styles
+            // Apply styles with smooth transition
             circle.style.strokeDasharray = circumference;
             circle.style.strokeDashoffset = offset;
             circle.style.transition = 'stroke-dashoffset 1s ease-in-out';
             
-            // Add color based on value
+            // Add color based on value (green for positive, red for negative, blue for neutral)
             if (percentageText.includes('+')) {
                 circle.style.stroke = 'var(--color-success)';
             } else if (percentageText.includes('-')) {
@@ -181,7 +196,11 @@ if (document.readyState === 'loading') {
     updateProgressCircles();
 }
 
-// Enhanced orders table population with error handling
+/**
+ * Populate the recent orders table with data
+ * Displays order number, product name, and status with color coding
+ * @returns {void}
+ */
 function populateOrdersTable() {
     try {
         if (typeof Orders === 'undefined') {

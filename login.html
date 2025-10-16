@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SQU^RE DOFF Trading Dashboard</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link rel="stylesheet" href="styles/style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--color-background);
+        }
+
+        .login-container {
+            background: var(--color-white);
+            padding: 3rem;
+            border-radius: var(--card-border-radius);
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: var(--color-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: var(--color-info-dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--color-dark);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--color-light);
+            border-radius: var(--border-radius-1);
+            font-size: 1rem;
+            transition: all 300ms ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .form-group .error {
+            color: var(--color-danger);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-group.has-error input {
+            border-color: var(--color-danger);
+        }
+
+        .form-group.has-error .error {
+            display: block;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-1);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 300ms ease;
+        }
+
+        .btn-login:hover {
+            background: var(--color-primary-variant);
+        }
+
+        .btn-login:disabled {
+            background: var(--color-light);
+            cursor: not-allowed;
+        }
+
+        .demo-credentials {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: var(--color-light);
+            border-radius: var(--border-radius-1);
+            font-size: 0.875rem;
+        }
+
+        .demo-credentials h3 {
+            margin-bottom: 0.5rem;
+            color: var(--color-dark);
+        }
+
+        .demo-credentials p {
+            margin: 0.25rem 0;
+            color: var(--color-info-dark);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius-1);
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .alert.active {
+            display: block;
+        }
+
+        .alert-error {
+            background: #fee;
+            color: var(--color-danger);
+            border: 1px solid var(--color-danger);
+        }
+
+        .alert-success {
+            background: #efe;
+            color: var(--color-success);
+            border: 1px solid var(--color-success);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Welcome Back</h1>
+            <p>Sign in to access your trading dashboard</p>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                <span class="error">Please enter a valid email address</span>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <span class="error">Password must be at least 6 characters</span>
+            </div>
+
+            <div class="form-options">
+                <div class="remember-me">
+                    <input type="checkbox" id="rememberMe" name="rememberMe">
+                    <label for="rememberMe">Remember me</label>
+                </div>
+                <a href="#" class="forgot-password">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn-login">Sign In</button>
+
+            <div class="loading">
+                <p>Signing in...</p>
+            </div>
+        </form>
+
+        <div class="demo-credentials">
+            <h3>Demo Credentials</h3>
+            <p><strong>Trader:</strong> demo@dashboard.com / demo123</p>
+            <p><strong>Admin:</strong> admin@dashboard.com / admin123</p>
+        </div>
+    </div>
+
+    <script src="scripts/config.js"></script>
+    <script src="scripts/error-handler.js"></script>
+    <script src="scripts/security-utils.js"></script>
+    <script src="scripts/auth-service.js"></script>
+    <script>
+        // Prevent authenticated users from accessing login page
+        if (AuthService.isUserAuthenticated()) {
+            window.location.href = 'index.html';
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const rememberMeCheckbox = document.getElementById('rememberMe');
+        const loading = document.querySelector('.loading');
+        const alert = document.getElementById('alert');
+
+        // Form validation
+        function validateEmail() {
+            const emailGroup = emailInput.closest('.form-group');
+            if (!SecurityUtils.validateEmail(emailInput.value)) {
+                emailGroup.classList.add('has-error');
+                return false;
+            }
+            emailGroup.classList.remove('has-error');
+            return true;
+        }
+
+        function validatePassword() {
+            const passwordGroup = passwordInput.closest('.form-group');
+            if (passwordInput.value.length < 6) {
+                passwordGroup.classList.add('has-error');
+                return false;
+            }
+            passwordGroup.classList.remove('has-error');
+            return true;
+        }
+
+        // Real-time validation
+        emailInput.addEventListener('blur', validateEmail);
+        passwordInput.addEventListener('blur', validatePassword);
+
+        // Show alert message
+        function showAlert(message, type = 'error') {
+            alert.textContent = message;
+            alert.className = `alert alert-${type} active`;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    alert.classList.remove('active');
+                }, 3000);
+            }
+        }
+
+        // Handle form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validate inputs
+            const emailValid = validateEmail();
+            const passwordValid = validatePassword();
+
+            if (!emailValid || !passwordValid) {
+                showAlert('Please fix the errors above');
+                return;
+            }
+
+            // Show loading state
+            loading.classList.add('active');
+            alert.classList.remove('active');
+            const submitButton = loginForm.querySelector('.btn-login');
+            submitButton.disabled = true;
+
+            try {
+                // Attempt login
+                const result = await AuthService.login(
+                    emailInput.value,
+                    passwordInput.value,
+                    rememberMeCheckbox.checked
+                );
+
+                if (result.success) {
+                    showAlert('Login successful! Redirecting...', 'success');
+                    
+                    // Redirect after short delay
+                    setTimeout(() => {
+                        AuthService.handlePostLoginRedirect();
+                    }, 1000);
+                } else {
+                    showAlert(result.error || 'Login failed. Please try again.');
+                    loading.classList.remove('active');
+                    submitButton.disabled = false;
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.');
+                loading.classList.remove('active');
+                submitButton.disabled = false;
+            }
+        });
+
+        // Apply theme on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('dashboard-theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme-variables');
+            }
+        });
+    </script>
+</body>
+</html>

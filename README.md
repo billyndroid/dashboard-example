@@ -84,7 +84,27 @@ dashboard-example/
 └── README.md               # This file
 ```
 
-## 🛠️ Setup & Installation
+## � Screenshots
+
+### Dashboard Overview
+![Dashboard](docs/screenshots/dashboard.png)
+*Main dashboard with portfolio metrics, recent orders, and top performers*
+
+### Analytics & Charts
+![Analytics](docs/screenshots/analytics.png)
+*Interactive charts with historical data and date range filtering*
+
+### Notification Center
+![Notifications](docs/screenshots/notifications.png)
+*Comprehensive notification system with filtering and statistics*
+
+### Mobile View
+![Mobile](docs/screenshots/mobile.png)
+*Responsive design with slide-in sidebar and touch-optimized controls*
+
+> **Note**: Screenshots to be added. Dashboard is fully functional.
+
+## �🛠️ Setup & Installation
 
 ### Quick Start
 1. Clone the repository:
@@ -98,19 +118,59 @@ dashboard-example/
    - Option 2: Use a local server (recommended)
 
 ### Local Development Server
-Using Python:
+
+#### Option 1: Python (Simple)
 ```bash
 python -m http.server 8000
+# Visit http://localhost:8000
 ```
 
-Using Node.js (http-server):
+#### Option 2: Node.js with npm (Recommended for Development)
 ```bash
-npx http-server -p 8000
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+# Visit http://localhost:8000
+
+# Or use Node.js http-server directly
+npm run start:node
 ```
 
-Using VS Code Live Server:
-- Install Live Server extension
-- Right-click `index.html` → "Open with Live Server"
+#### Option 3: VS Code Live Server
+1. Install Live Server extension
+2. Right-click `index.html` → "Open with Live Server"
+3. Dashboard opens in browser automatically
+
+### Production Build
+
+For optimized production deployment:
+
+```bash
+# Install dependencies
+npm install
+
+# Run production build (minification + linting)
+npm run build
+
+# Output in dist/ folder:
+# - styles/*.min.css (40-60% smaller)
+# - scripts/*.min.js (40-60% smaller)
+# - scripts/bundle.min.js (all scripts combined)
+```
+
+#### Build Scripts
+
+```bash
+npm run minify         # Minify CSS and JavaScript
+npm run minify:css     # Minify CSS only
+npm run minify:js      # Minify JavaScript only
+npm run lint           # Run ESLint + Stylelint
+npm run build          # Lint + minify (full build)
+```
+
+See [PERFORMANCE.md](PERFORMANCE.md) for optimization details.
 
 ### Configuration
 Edit `scripts/config.js` to customize:

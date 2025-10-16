@@ -1,0 +1,52 @@
+{
+  "name": "dashboard-example",
+  "version": "2.0.0",
+  "description": "SQU^RE DOFF - Financial Trading Dashboard with real-time data visualization",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "start:node": "npx http-server -p 8000",
+    "minify": "npm run minify:css && npm run minify:js",
+    "minify:css": "npx clean-css-cli styles/*.css -o styles/style.min.css",
+    "minify:js": "npx terser scripts/*.js -o scripts/bundle.min.js --compress --mangle",
+    "optimize:images": "echo 'Image optimization: Use online tools like squoosh.app or imagemin'",
+    "lint": "npm run lint:js && npm run lint:css",
+    "lint:js": "npx eslint scripts/*.js",
+    "lint:css": "npx stylelint styles/*.css",
+    "test": "echo 'Tests to be implemented'",
+    "build": "npm run lint && npm run minify",
+    "dev": "npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/billyndroid/dashboard-example.git"
+  },
+  "keywords": [
+    "dashboard",
+    "trading",
+    "finance",
+    "analytics",
+    "charts",
+    "real-time"
+  ],
+  "author": "SQU^RE DOFF Team",
+  "license": "MIT",
+  "devDependencies": {
+    "clean-css-cli": "^5.6.2",
+    "eslint": "^8.50.0",
+    "http-server": "^14.1.1",
+    "stylelint": "^15.10.3",
+    "terser": "^5.20.0"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "not dead",
+    "not IE 11"
+  ]
+}

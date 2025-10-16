@@ -99,6 +99,47 @@ const AppConfig = {
             maxAttempts: 5,
             windowMs: 60000  // 1 minute
         }
+    },
+    
+    // Performance settings
+    performance: {
+        enableMonitoring: true,  // Enable performance monitoring
+        lazyLoadImages: true,    // Lazy load images
+        lazyLoadCharts: true,    // Lazy load chart library
+        debounceDelay: 300,      // Debounce delay in ms
+        throttleDelay: 100,      // Throttle delay in ms
+        reportEndpoint: '/api/analytics/performance'  // Performance metrics endpoint
+    },
+
+    // Authentication configuration (Section 14)
+    auth: {
+        enabled: true,
+        sessionDuration: 3600000, // 1 hour in milliseconds
+        rememberMeDuration: 2592000000, // 30 days in milliseconds
+        requireAuthForPages: ['index.html', 'analytics.html', 'orders.html', 'messages.html'],
+        loginPage: 'login.html'
+    },
+
+    // WebSocket configuration for real-time updates (Section 14)
+    websocket: {
+        enabled: false, // Set to true when WebSocket server is available
+        url: 'ws://localhost:8080/ws',
+        reconnectAttempts: 5,
+        heartbeatInterval: 15000,
+        channels: {
+            marketData: 'market-data',
+            orders: 'orders',
+            notifications: 'notifications',
+            priceAlerts: 'price-alerts'
+        }
+    },
+
+    // Export and analytics features (Section 14)
+    analytics: {
+        enableExport: true,
+        exportFormats: ['csv', 'json', 'pdf'],
+        maxExportRows: 10000,
+        chartExportEnabled: true
     }
 };
 
