@@ -528,15 +528,61 @@ async function refreshDashboardData() {
     }
 }
 
-// Update recent updates with real-time crypto prices
+// Update recent updates with real-time prices from multiple sources
 async function updateRecentUpdatesWithRealPrices() {
+    console.log('[Dashboard] === Starting updateRecentUpdatesWithRealPrices ===');
+    
     try {
         const useMockData = window.AppConfig?.useMockData ?? true;
+        console.log('[Dashboard] useMockData:', useMockData);
+        console.log('[Dashboard] AppConfig exists:', typeof window.AppConfig !== 'undefined');
+        console.log('[Dashboard] DataService exists:', typeof window.DataService !== 'undefined');
+        
         const apiStatus = document.getElementById('apiStatus');
         
         if (!useMockData && window.DataService) {
-            // Fetch real crypto prices
-            const cryptoPrices = await DataService.fetchCryptoPrices(['bitcoin', 'ethereum']);
+            console.log('[Dashboard] Fetching live crypto prices...');
+            // Fetch crypto prices
+            const cryptoPrices = await DataService.fetchCryptoPrices(['bitcoin', 'ethereum', 'solana']);
+            console.log('[Dashboard] Crypto prices received:', cryptoPrices);
+            
+            // Fetch stock/commodity prices
+            let goldPrice = null;
+            let spyPrice = null;
+            
+            try {
+                // Fetch Gold (XAU/USD) from Twelve Data if key is available
+                const tdKey = window.AppConfig?.thirdPartyApis?.twelveData?.key;
+                console.log('[Dashboard] Twelve Data key exists:', !!tdKey);
+                
+                if (tdKey && tdKey !== 'YOUR_TWELVE_DATA_KEY_HERE' && tdKey !== '') {
+                    console.log('[Dashboard] Fetching Gold price...');
+                    const goldData = await DataService.fetchAssetQuote('XAU/USD');
+                    console.log('[Dashboard] Gold data received:', goldData);
+                    
+                    if (goldData && goldData.close) {
+                        goldPrice = {
+                            price: parseFloat(goldData.close),
+                            change: parseFloat(goldData.percent_change || 0)
+                        };
+                        console.log('[Dashboard] Gold price parsed:', goldPrice);
+                    }
+                    
+                    console.log('[Dashboard] Fetching S&P 500 price...');
+                    const spyData = await DataService.fetchAssetQuote('SPY');
+                    console.log('[Dashboard] SPY data received:', spyData);
+                    
+                    if (spyData && spyData.close) {
+                        spyPrice = {
+                            price: parseFloat(spyData.close),
+                            change: parseFloat(spyData.percent_change || 0)
+                        };
+                        console.log('[Dashboard] SPY price parsed:', spyPrice);
+                    }
+                }
+            } catch (error) {
+                console.warn('[Dashboard] Could not fetch stock/commodity data:', error);
+            }
             
             if (cryptoPrices && cryptoPrices.bitcoin) {
                 // Show API status indicator
@@ -546,46 +592,149 @@ async function updateRecentUpdatesWithRealPrices() {
                     apiStatus.style.gap = '0.5rem';
                 }
                 
-                // Update Bitcoin message in recent updates
+                // Update all entries in recent updates
                 const updates = document.querySelectorAll('.recent-updates .update');
-                updates.forEach(update => {
+                console.log('[Dashboard] Found', updates.length, 'update entries to process');
+                console.log('[Dashboard] cryptoPrices object:', cryptoPrices);
+                updates.forEach((update, index) => {
                     const message = update.querySelector('.message p');
-                    if (message && message.textContent.includes('Bitcoin')) {
+                    const timestamp = update.querySelector('.message small');
+                    
+                    if (!message) {
+                        console.warn('[Dashboard] Update', index, 'has no message element');
+                        return;
+                    }
+                    
+                    const messageText = message.textContent;
+                    console.log('[Dashboard] Processing update', index, ':', messageText);
+                    
+                    if (messageText.includes('Bitcoin') && cryptoPrices.bitcoin) {
                         const price = cryptoPrices.bitcoin.usd;
                         const change = cryptoPrices.bitcoin.usd_24h_change || 0;
                         const changeSymbol = change >= 0 ? '+' : '';
                         message.innerHTML = `<b>Bitcoin</b> trading at $${price.toLocaleString('en-US', {maximumFractionDigits: 2})} (${changeSymbol}${change.toFixed(2)}% 24h)`;
-                        
-                        // Update timestamp
-                        const timestamp = update.querySelector('.message small');
-                        if (timestamp) {
-                            timestamp.textContent = 'Just now (live data)';
-                        }
-                        
-                        console.log('[Dashboard] Updated Bitcoin price:', price);
+                        if (timestamp) timestamp.textContent = 'Just now (live data)';
+                        console.log('[Dashboard] ✅ Updated Bitcoin price:', price);
                     }
                     
-                    if (message && message.textContent.includes('Ethereum')) {
-                        const ethPrice = cryptoPrices.ethereum?.usd;
-                        if (ethPrice) {
-                            const ethChange = cryptoPrices.ethereum.usd_24h_change || 0;
-                            const changeSymbol = ethChange >= 0 ? '+' : '';
-                            message.innerHTML = `<b>Ethereum</b> trading at $${ethPrice.toLocaleString('en-US', {maximumFractionDigits: 2})} (${changeSymbol}${ethChange.toFixed(2)}% 24h)`;
-                            
-                            const timestamp = update.querySelector('.message small');
-                            if (timestamp) {
-                                timestamp.textContent = 'Just now (live data)';
-                            }
-                            
-                            console.log('[Dashboard] Updated Ethereum price:', ethPrice);
-                        }
+                    if (messageText.includes('Ethereum') && cryptoPrices.ethereum) {
+                        const ethPrice = cryptoPrices.ethereum.usd;
+                        const ethChange = cryptoPrices.ethereum.usd_24h_change || 0;
+                        const changeSymbol = ethChange >= 0 ? '+' : '';
+                        message.innerHTML = `<b>Ethereum</b> trading at $${ethPrice.toLocaleString('en-US', {maximumFractionDigits: 2})} (${changeSymbol}${ethChange.toFixed(2)}% 24h)`;
+                        if (timestamp) timestamp.textContent = 'Just now (live data)';
+                        console.log('[Dashboard] ✅ Updated Ethereum price:', ethPrice);
+                    }
+                    
+                    if (messageText.includes('Gold') && goldPrice) {
+                        const changeSymbol = goldPrice.change >= 0 ? '+' : '';
+                        message.innerHTML = `<b>Gold</b> trading at $${goldPrice.price.toLocaleString('en-US', {maximumFractionDigits: 2})} (${changeSymbol}${goldPrice.change.toFixed(2)}% today)`;
+                        if (timestamp) timestamp.textContent = 'Just now (live data)';
+                        console.log('[Dashboard] ✅ Updated Gold price:', goldPrice.price);
+                    }
+                    
+                    if (messageText.includes('S&P 500') && spyPrice) {
+                        const changeSymbol = spyPrice.change >= 0 ? '+' : '';
+                        message.innerHTML = `<b>S&P 500</b> at $${spyPrice.price.toLocaleString('en-US', {maximumFractionDigits: 2})} (${changeSymbol}${spyPrice.change.toFixed(2)}% today)`;
+                        if (timestamp) timestamp.textContent = 'Just now (live data)';
+                        console.log('[Dashboard] ✅ Updated S&P 500 price:', spyPrice.price);
                     }
                 });
+                
+                // Update Market Analytics cards
+                const allPrices = [];
+                
+                if (cryptoPrices.bitcoin) {
+                    allPrices.push({
+                        name: 'Bitcoin',
+                        price: cryptoPrices.bitcoin.usd,
+                        change: cryptoPrices.bitcoin.usd_24h_change || 0
+                    });
+                }
+                
+                if (cryptoPrices.ethereum) {
+                    allPrices.push({
+                        name: 'Ethereum',
+                        price: cryptoPrices.ethereum.usd,
+                        change: cryptoPrices.ethereum.usd_24h_change || 0
+                    });
+                }
+                
+                if (cryptoPrices.solana) {
+                    allPrices.push({
+                        name: 'Solana',
+                        price: cryptoPrices.solana.usd,
+                        change: cryptoPrices.solana.usd_24h_change || 0
+                    });
+                }
+                
+                if (goldPrice) {
+                    allPrices.push({
+                        name: 'Gold',
+                        price: goldPrice.price,
+                        change: goldPrice.change
+                    });
+                }
+                
+                if (spyPrice) {
+                    allPrices.push({
+                        name: 'S&P 500',
+                        price: spyPrice.price,
+                        change: spyPrice.change
+                    });
+                }
+                
+                // Find best and worst performers
+                if (allPrices.length > 0) {
+                    allPrices.sort((a, b) => b.change - a.change);
+                    
+                    const bestPerformer = allPrices[0];
+                    const worstPerformer = allPrices[allPrices.length - 1];
+                    
+                    // Update best performer
+                    const bestCard = document.querySelector('#bestPerformer');
+                    if (bestCard) {
+                        const nameEl = bestCard.querySelector('.info small');
+                        const changeEl = bestCard.querySelector('h5');
+                        const priceEl = bestCard.querySelector('.right h3');
+                        
+                        if (nameEl) nameEl.textContent = bestPerformer.name;
+                        if (changeEl) {
+                            changeEl.textContent = `${bestPerformer.change >= 0 ? '+' : ''}${bestPerformer.change.toFixed(2)}%`;
+                            changeEl.className = bestPerformer.change >= 0 ? 'success' : 'danger';
+                        }
+                        if (priceEl) priceEl.textContent = `$${bestPerformer.price.toLocaleString('en-US', {maximumFractionDigits: 2})}`;
+                    }
+                    
+                    // Update worst performer
+                    const worstCard = document.querySelector('#worstPerformer');
+                    if (worstCard) {
+                        const nameEl = worstCard.querySelector('.info small');
+                        const changeEl = worstCard.querySelector('h5');
+                        const priceEl = worstCard.querySelector('.right h3');
+                        
+                        if (nameEl) nameEl.textContent = worstPerformer.name;
+                        if (changeEl) {
+                            changeEl.textContent = `${worstPerformer.change >= 0 ? '+' : ''}${worstPerformer.change.toFixed(2)}%`;
+                            changeEl.className = worstPerformer.change >= 0 ? 'success' : 'danger';
+                        }
+                        if (priceEl) priceEl.textContent = `$${worstPerformer.price.toLocaleString('en-US', {maximumFractionDigits: 2})}`;
+                    }
+                    
+                    console.log('[Dashboard] Updated Market Analytics - Best:', bestPerformer.name, 'Worst:', worstPerformer.name);
+                }
+            } else {
+                console.warn('[Dashboard] No crypto prices received from API');
             }
+        } else {
+            console.log('[Dashboard] Skipping live data update - useMockData:', useMockData, 'DataService exists:', !!window.DataService);
         }
     } catch (error) {
         console.error('[Dashboard] Error updating real-time prices:', error);
+        console.error('[Dashboard] Error stack:', error.stack);
     }
+    
+    console.log('[Dashboard] === Finished updateRecentUpdatesWithRealPrices ===');
 }
 
 // Update notification badge count
@@ -609,8 +758,8 @@ if (document.readyState === 'loading') {
         updateNotificationBadge();
         // Update real-time crypto prices
         updateRecentUpdatesWithRealPrices();
-        // Refresh crypto prices every 30 seconds
-        setInterval(updateRecentUpdatesWithRealPrices, 30000);
+        // Refresh crypto prices every 90 seconds (to avoid rate limits)
+        setInterval(updateRecentUpdatesWithRealPrices, 90000);
     });
 } else {
     updateDashboardMetrics();
@@ -619,8 +768,8 @@ if (document.readyState === 'loading') {
     updateNotificationBadge();
     // Update real-time crypto prices
     updateRecentUpdatesWithRealPrices();
-    // Refresh crypto prices every 30 seconds
-    setInterval(updateRecentUpdatesWithRealPrices, 30000);
+    // Refresh crypto prices every 90 seconds (to avoid rate limits)
+    setInterval(updateRecentUpdatesWithRealPrices, 90000);
 }
 
 // Make functions globally available

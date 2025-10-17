@@ -5,6 +5,35 @@
  */
 
 const DataService = {
+    // Cache for API responses
+    _cache: {},
+    _cacheTimeout: 60000, // Cache for 60 seconds
+    
+    /**
+     * Get cached data if available and not expired
+     * @param {string} key - Cache key
+     * @returns {Object|null} Cached data or null
+     */
+    _getCached(key) {
+        const cached = this._cache[key];
+        if (cached && Date.now() - cached.timestamp < this._cacheTimeout) {
+            console.log('[DataService] Using cached data for:', key);
+            return cached.data;
+        }
+        return null;
+    },
+    
+    /**
+     * Store data in cache
+     * @param {string} key - Cache key
+     * @param {Object} data - Data to cache
+     */
+    _setCache(key, data) {
+        this._cache[key] = {
+            data: data,
+            timestamp: Date.now()
+        };
+    },
     /**
      * Fetch real-time crypto prices from CoinGecko API
      * @param {Array} symbols - Array of crypto symbols
@@ -16,12 +45,52 @@ const DataService = {
             if (!config?.enabled) return null;
             
             const ids = symbols.join(',');
-            const url = `${config.baseUrl}/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
+            const cacheKey = 'crypto_' + ids;
             
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`CoinGecko API error: ${response.status}`);
+            // Check cache first
+            const cached = this._getCached(cacheKey);
+            if (cached) return cached;
             
-            return await response.json();
+            const apiUrl = `${config.baseUrl}/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
+            
+            // Try direct API call first
+            try {
+                const response = await fetch(apiUrl);
+                if (response.ok) {
+                    const data = await response.json();
+                    this._setCache(cacheKey, data);
+                    return data;
+                }
+            } catch (corsError) {
+                console.warn('[DataService] CORS error with direct call, trying proxies...');
+            }
+            
+            // Try multiple CORS proxies in order
+            const proxies = [
+                'https://api.allorigins.win/raw?url=',
+                'https://api.codetabs.com/v1/proxy?quest=',
+                'https://corsproxy.io/?'
+            ];
+            
+            for (let i = 0; i < proxies.length; i++) {
+                try {
+                    const proxy = proxies[i];
+                    const proxyUrl = proxy + encodeURIComponent(apiUrl);
+                    console.log(`[DataService] Trying proxy ${i + 1}/${proxies.length}...`);
+                    
+                    const response = await fetch(proxyUrl);
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('[DataService] ✅ Proxy succeeded!');
+                        this._setCache(cacheKey, data);
+                        return data;
+                    }
+                } catch (proxyError) {
+                    console.warn(`[DataService] Proxy ${i + 1} failed:`, proxyError.message);
+                }
+            }
+            
+            throw new Error('All proxy attempts failed');
         } catch (error) {
             console.error('[DataService] Crypto price fetch error:', error);
             return null;
@@ -36,14 +105,75 @@ const DataService = {
     async fetchAssetQuote(symbol) {
         try {
             const config = window.AppConfig?.thirdPartyApis?.twelveData;
-            if (!config?.enabled || !config?.key) return null;
+            if (!config?.enabled || !config?.key) {
+                console.warn('[DataService] Twelve Data not configured');
+                return null;
+            }
             
-            const url = `${config.baseUrl}/quote?symbol=${symbol}&apikey=${config.key}`;
+            const cacheKey = 'quote_' + symbol;
             
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Twelve Data API error: ${response.status}`);
+            // Check cache first
+            const cached = this._getCached(cacheKey);
+            if (cached) return cached;
             
-            return await response.json();
+            const apiUrl = `${config.baseUrl}/quote?symbol=${symbol}&apikey=${config.key}`;
+            
+            // Try direct API call first
+            try {
+                const response = await fetch(apiUrl);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status !== 'error') {
+                        this._setCache(cacheKey, data);
+                        return data;
+                    } else {
+                        console.warn('[DataService] Twelve Data API error:', data.message);
+                        const oldCached = this._cache[cacheKey];
+                        if (oldCached) {
+                            console.log('[DataService] Using expired cache due to API error');
+                            return oldCached.data;
+                        }
+                        throw new Error(data.message);
+                    }
+                }
+            } catch (corsError) {
+                console.warn('[DataService] CORS error with Twelve Data, trying proxies...');
+            }
+            
+            // Try multiple CORS proxies
+            const proxies = [
+                'https://api.allorigins.win/raw?url=',
+                'https://api.codetabs.com/v1/proxy?quest='
+            ];
+            
+            for (let i = 0; i < proxies.length; i++) {
+                try {
+                    const proxy = proxies[i];
+                    const proxyUrl = proxy + encodeURIComponent(apiUrl);
+                    console.log(`[DataService] Trying proxy ${i + 1}/${proxies.length} for Twelve Data...`);
+                    
+                    const response = await fetch(proxyUrl);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.status !== 'error') {
+                            console.log('[DataService] ✅ Proxy succeeded!');
+                            this._setCache(cacheKey, data);
+                            return data;
+                        }
+                    }
+                } catch (proxyError) {
+                    console.warn(`[DataService] Proxy ${i + 1} failed:`, proxyError.message);
+                }
+            }
+            
+            // If all proxies fail, try to use expired cache
+            const oldCached = this._cache[cacheKey];
+            if (oldCached) {
+                console.log('[DataService] Using expired cache as last resort');
+                return oldCached.data;
+            }
+            
+            throw new Error('All proxy attempts failed');
         } catch (error) {
             console.error('[DataService] Asset quote fetch error:', error);
             return null;
