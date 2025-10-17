@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Diagnostics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .section h2 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+        .check-item {
+            padding: 10px;
+            margin: 8px 0;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            border-left: 4px solid #ccc;
+        }
+        .check-item.pass {
+            border-left-color: #00ff00;
+            background: rgba(0,255,0,0.1);
+        }
+        .check-item.fail {
+            border-left-color: #ff0000;
+            background: rgba(255,0,0,0.1);
+        }
+        .check-item.warn {
+            border-left-color: #ffaa00;
+            background: rgba(255,170,0,0.1);
+        }
+        .icon {
+            display: inline-block;
+            width: 20px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        #apiResults {
+            background: rgba(0,0,0,0.4);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .code {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .buttons {
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Dashboard Diagnostics</h1>
+        
+        <div class="section">
+            <h2>📦 Script Loading Status</h2>
+            <div id="scriptCheck"></div>
+        </div>
+        
+        <div class="section">
+            <h2>⚙️ Configuration Status</h2>
+            <div id="configCheck"></div>
+        </div>
+        
+        <div class="section">
+            <h2>🔑 API Keys</h2>
+            <div id="apiKeyCheck"></div>
+        </div>
+        
+        <div class="section">
+            <h2>🌐 API Connectivity Tests</h2>
+            <div class="buttons">
+                <button onclick="testAllAPIs()">🚀 Test All APIs</button>
+                <button onclick="testCoinGecko()">₿ Test CoinGecko</button>
+                <button onclick="testTwelveData()">📈 Test Twelve Data</button>
+                <button onclick="testNewsAPI()">📰 Test NewsAPI</button>
+            </div>
+            <div id="apiResults"></div>
+        </div>
+    </div>
+    
+    <script src="scripts/config.js"></script>
+    <script src="scripts/config.local.js"></script>
+    <script src="scripts/data-service.js"></script>
+    <script>
+        // Verify critical scripts loaded
+        console.log('=== Script Loading Status ===');
+        console.log('AppConfig:', typeof AppConfig !== 'undefined' ? '✅ Loaded' : '❌ FAILED');
+        console.log('DataService:', typeof DataService !== 'undefined' ? '✅ Loaded' : '❌ FAILED');
+        
+        if (typeof AppConfig === 'undefined') {
+            console.error('CRITICAL ERROR: config.js did not load!');
+            console.error('Check that scripts/config.js exists and is accessible.');
+        }
+        
+        // Run diagnostics on load
+        window.addEventListener('DOMContentLoaded', runDiagnostics);
+        
+        function runDiagnostics() {
+            checkScripts();
+            checkConfiguration();
+            checkAPIKeys();
+        }
+        
+        function checkScripts() {
+            const container = document.getElementById('scriptCheck');
+            const checks = [
+                { name: 'AppConfig', obj: window.AppConfig },
+                { name: 'DataService', obj: window.DataService },
+                { name: 'config.js loaded', obj: typeof AppConfig !== 'undefined' },
+                { name: 'config.local.js loaded', obj: typeof AppConfig !== 'undefined' && AppConfig.thirdPartyApis },
+                { name: 'data-service.js loaded', obj: typeof DataService !== 'undefined' && DataService.fetchCryptoPrices }
+            ];
+            
+            let html = '';
+            checks.forEach(check => {
+                const pass = !!check.obj;
+                html += `<div class="check-item ${pass ? 'pass' : 'fail'}">
+                    <span class="icon">${pass ? '✅' : '❌'}</span>
+                    <strong>${check.name}</strong>: ${pass ? 'Loaded' : 'NOT FOUND'}
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function checkConfiguration() {
+            const container = document.getElementById('configCheck');
+            let html = '';
+            
+            if (typeof AppConfig === 'undefined') {
+                html = '<div class="check-item fail"><span class="icon">❌</span><strong>FATAL:</strong> AppConfig not loaded!</div>';
+                container.innerHTML = html;
+                return;
+            }
+            
+            const checks = [
+                { 
+                    name: 'Mock Data Mode', 
+                    value: AppConfig.useMockData,
+                    pass: AppConfig.useMockData === false,
+                    detail: AppConfig.useMockData ? 'Using mock data' : 'Using real APIs'
+                },
+                {
+                    name: 'CoinGecko Enabled',
+                    value: AppConfig.thirdPartyApis?.coingecko?.enabled,
+                    pass: AppConfig.thirdPartyApis?.coingecko?.enabled === true,
+                    detail: AppConfig.thirdPartyApis?.coingecko?.baseUrl || 'N/A'
+                },
+                {
+                    name: 'Twelve Data Enabled',
+                    value: AppConfig.thirdPartyApis?.twelveData?.enabled,
+                    pass: AppConfig.thirdPartyApis?.twelveData?.enabled === true,
+                    detail: AppConfig.thirdPartyApis?.twelveData?.baseUrl || 'N/A'
+                },
+                {
+                    name: 'NewsAPI Enabled',
+                    value: AppConfig.thirdPartyApis?.newsapi?.enabled,
+                    pass: AppConfig.thirdPartyApis?.newsapi?.enabled === true,
+                    detail: AppConfig.thirdPartyApis?.newsapi?.baseUrl || 'N/A'
+                }
+            ];
+            
+            checks.forEach(check => {
+                const status = check.pass ? 'pass' : 'warn';
+                html += `<div class="check-item ${status}">
+                    <span class="icon">${check.pass ? '✅' : '⚠️'}</span>
+                    <strong>${check.name}</strong>: ${check.value}<br>
+                    <small>${check.detail}</small>
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function checkAPIKeys() {
+            const container = document.getElementById('apiKeyCheck');
+            let html = '';
+            
+            if (typeof AppConfig === 'undefined') {
+                html = '<div class="check-item fail"><span class="icon">❌</span><strong>FATAL:</strong> AppConfig not loaded!</div>';
+                container.innerHTML = html;
+                return;
+            }
+            
+            const keys = [
+                {
+                    name: 'CoinGecko API Key',
+                    required: false,
+                    value: 'Not required (free API)',
+                    pass: true
+                },
+                {
+                    name: 'Twelve Data API Key',
+                    required: true,
+                    value: AppConfig.thirdPartyApis?.twelveData?.key,
+                    pass: AppConfig.thirdPartyApis?.twelveData?.key && 
+                          AppConfig.thirdPartyApis.twelveData.key !== 'YOUR_TWELVE_DATA_KEY_HERE' &&
+                          AppConfig.thirdPartyApis.twelveData.key !== ''
+                },
+                {
+                    name: 'NewsAPI Key',
+                    required: true,
+                    value: AppConfig.thirdPartyApis?.newsapi?.key,
+                    pass: AppConfig.thirdPartyApis?.newsapi?.key && 
+                          AppConfig.thirdPartyApis.newsapi.key !== 'YOUR_NEWSAPI_KEY_HERE' &&
+                          AppConfig.thirdPartyApis.newsapi.key !== ''
+                },
+                {
+                    name: 'Alpha Vantage API Key',
+                    required: false,
+                    value: AppConfig.thirdPartyApis?.alphaVantage?.key,
+                    pass: !AppConfig.thirdPartyApis?.alphaVantage?.enabled || 
+                          (AppConfig.thirdPartyApis?.alphaVantage?.key && 
+                           AppConfig.thirdPartyApis.alphaVantage.key !== 'YOUR_ALPHA_VANTAGE_KEY_HERE')
+                }
+            ];
+            
+            keys.forEach(key => {
+                const status = key.pass ? 'pass' : (key.required ? 'fail' : 'warn');
+                const icon = key.pass ? '✅' : (key.required ? '❌' : '⚠️');
+                const valueDisplay = key.value && key.value.length > 10 && key.pass ? 
+                    key.value.substring(0, 10) + '...' : 
+                    (key.value || 'Not configured');
+                
+                html += `<div class="check-item ${status}">
+                    <span class="icon">${icon}</span>
+                    <strong>${key.name}</strong>: <span class="code">${valueDisplay}</span><br>
+                    <small>${key.required ? 'Required' : 'Optional'}</small>
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // API Testing Functions
+        let apiLog = '';
+        
+        function logAPI(message, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            const icon = icons[type] || icons.info;
+            apiLog += `[${time}] ${icon} ${message}\n`;
+            document.getElementById('apiResults').textContent = apiLog;
+        }
+        
+        async function testCoinGecko() {
+            logAPI('━━━ Testing CoinGecko API ━━━');
+            try {
+                const url = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true';
+                logAPI('Fetching Bitcoin & Ethereum prices...');
+                
+                const response = await fetch(url);
+                logAPI(`HTTP Status: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                logAPI('CoinGecko API: SUCCESS', 'success');
+                logAPI(`Bitcoin: $${data.bitcoin.usd.toLocaleString()} (${data.bitcoin.usd_24h_change.toFixed(2)}% 24h)`, 'success');
+                logAPI(`Ethereum: $${data.ethereum.usd.toLocaleString()} (${data.ethereum.usd_24h_change.toFixed(2)}% 24h)`, 'success');
+                
+            } catch (error) {
+                logAPI(`CoinGecko API: FAILED - ${error.message}`, 'error');
+            }
+        }
+        
+        async function testTwelveData() {
+            logAPI('━━━ Testing Twelve Data API ━━━');
+            try {
+                if (typeof AppConfig === 'undefined') {
+                    throw new Error('AppConfig not loaded');
+                }
+                
+                const key = AppConfig.thirdPartyApis?.twelveData?.key;
+                if (!key || key === 'YOUR_TWELVE_DATA_KEY_HERE' || key === '') {
+                    logAPI('Twelve Data: No API key configured', 'error');
+                    return;
+                }
+                
+                logAPI('Fetching AAPL quote...');
+                const url = `https://api.twelvedata.com/quote?symbol=AAPL&apikey=${key}`;
+                const response = await fetch(url);
+                logAPI(`HTTP Status: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                
+                if (data.status === 'error' || data.code) {
+                    throw new Error(data.message || 'API error');
+                }
+                
+                logAPI('Twelve Data API: SUCCESS', 'success');
+                logAPI(`AAPL: $${data.close} (${data.change > 0 ? '+' : ''}${data.change})`, 'success');
+                
+            } catch (error) {
+                logAPI(`Twelve Data API: FAILED - ${error.message}`, 'error');
+            }
+        }
+        
+        async function testNewsAPI() {
+            logAPI('━━━ Testing NewsAPI ━━━');
+            try {
+                if (typeof AppConfig === 'undefined') {
+                    throw new Error('AppConfig not loaded');
+                }
+                
+                const key = AppConfig.thirdPartyApis?.newsapi?.key;
+                if (!key || key === 'YOUR_NEWSAPI_KEY_HERE' || key === '') {
+                    logAPI('NewsAPI: No API key configured', 'error');
+                    return;
+                }
+                
+                logAPI('Fetching Bitcoin news...');
+                const url = `https://newsapi.org/v2/everything?q=bitcoin&pageSize=3&apiKey=${key}`;
+                const response = await fetch(url);
+                logAPI(`HTTP Status: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                
+                if (data.status === 'error') {
+                    throw new Error(data.message || 'API error');
+                }
+                
+                logAPI('NewsAPI: SUCCESS', 'success');
+                logAPI(`Found ${data.totalResults} articles`, 'success');
+                if (data.articles && data.articles.length > 0) {
+                    data.articles.slice(0, 2).forEach((article, i) => {
+                        logAPI(`${i+1}. ${article.title.substring(0, 80)}...`, 'success');
+                    });
+                }
+                
+            } catch (error) {
+                logAPI(`NewsAPI: FAILED - ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAllAPIs() {
+            apiLog = '';
+            logAPI('═══════════════════════════════════');
+            logAPI('🚀 STARTING COMPREHENSIVE API TESTS');
+            logAPI('═══════════════════════════════════');
+            logAPI('');
+            
+            await testCoinGecko();
+            logAPI('');
+            await testTwelveData();
+            logAPI('');
+            await testNewsAPI();
+            logAPI('');
+            logAPI('═══════════════════════════════════');
+            logAPI('✅ ALL TESTS COMPLETE');
+            logAPI('═══════════════════════════════════');
+        }
+    </script>
+</body>
+</html>

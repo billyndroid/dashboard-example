@@ -7,7 +7,7 @@ const AppConfig = {
     // API Configuration
     api: {
         // Base URL - update this when deploying to production
-        baseUrl: process.env.API_BASE_URL || 'https://api.example.com',
+        baseUrl: (typeof process !== 'undefined' && process.env && process.env.API_BASE_URL) ? process.env.API_BASE_URL : 'https://api.example.com',
         
         // Endpoints
         endpoints: {

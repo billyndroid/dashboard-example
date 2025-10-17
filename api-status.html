@@ -313,6 +313,15 @@
     <script src="scripts/config.local.js"></script>
     <script src="scripts/data-service.js"></script>
     <script>
+        // Verify scripts loaded and wait if needed
+        console.log('AppConfig loaded:', typeof AppConfig !== 'undefined');
+        console.log('DataService loaded:', typeof DataService !== 'undefined');
+        
+        if (typeof AppConfig === 'undefined') {
+            console.error('CRITICAL: AppConfig failed to load!');
+            alert('Configuration files failed to load. Please check the browser console.');
+        }
+        
         let testLog = '';
         
         function log(message, type = 'info') {
@@ -326,8 +335,18 @@
         async function testCoinGecko() {
             log('Testing CoinGecko API...');
             try {
-                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
+                const url = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true';
+                log(`Fetching: ${url}`);
+                
+                const response = await fetch(url);
+                log(`Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                
                 const data = await response.json();
+                log(`Response data received`);
                 
                 if (data.bitcoin && data.bitcoin.usd) {
                     log(`CoinGecko API: SUCCESS`, 'success');
@@ -354,7 +373,14 @@
         
         async function testTwelveData() {
             log('Testing Twelve Data API...');
+            
+            if (typeof AppConfig === 'undefined') {
+                log('ERROR: AppConfig not loaded!', 'error');
+                return;
+            }
+            
             const key = AppConfig.thirdPartyApis?.twelveData?.key;
+            log(`API Key exists: ${!!key}`);
             
             if (!key || key === 'YOUR_TWELVE_DATA_KEY_HERE' || key === '') {
                 log('Twelve Data API: No API key configured', 'error');
@@ -367,8 +393,18 @@
             }
             
             try {
-                const response = await fetch(`https://api.twelvedata.com/quote?symbol=AAPL&apikey=${key}`);
+                const url = `https://api.twelvedata.com/quote?symbol=AAPL&apikey=${key}`;
+                log(`Fetching Twelve Data...`);
+                
+                const response = await fetch(url);
+                log(`Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                
                 const data = await response.json();
+                log(`Response data received`);
                 
                 if (data.status === 'error' || data.code === 401) {
                     throw new Error(data.message || 'Invalid API key');
@@ -398,7 +434,14 @@
         
         async function testNewsAPI() {
             log('Testing NewsAPI...');
+            
+            if (typeof AppConfig === 'undefined') {
+                log('ERROR: AppConfig not loaded!', 'error');
+                return;
+            }
+            
             const key = AppConfig.thirdPartyApis?.newsapi?.key;
+            log(`API Key exists: ${!!key}`);
             
             if (!key || key === 'YOUR_NEWSAPI_KEY_HERE' || key === '') {
                 log('NewsAPI: No API key configured', 'error');
@@ -411,8 +454,18 @@
             }
             
             try {
-                const response = await fetch(`https://newsapi.org/v2/everything?q=bitcoin&pageSize=1&apiKey=${key}`);
+                const url = `https://newsapi.org/v2/everything?q=bitcoin&pageSize=1&apiKey=${key}`;
+                log(`Fetching NewsAPI...`);
+                
+                const response = await fetch(url);
+                log(`Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                
                 const data = await response.json();
+                log(`Response data received`);
                 
                 if (data.status === 'error') {
                     throw new Error(data.message || 'API error');
@@ -446,15 +499,22 @@
         async function testAllAPIs() {
             testLog = '';
             log('=== Starting API Tests ===');
+            log(`AppConfig loaded: ${typeof AppConfig !== 'undefined'}`);
+            log(`DataService loaded: ${typeof DataService !== 'undefined'}`);
             log('');
             
-            await testCoinGecko();
-            log('');
-            await testTwelveData();
-            log('');
-            await testNewsAPI();
-            log('');
-            log('=== Tests Complete ===');
+            try {
+                await testCoinGecko();
+                log('');
+                await testTwelveData();
+                log('');
+                await testNewsAPI();
+                log('');
+                log('=== Tests Complete ===');
+            } catch (error) {
+                log(`FATAL ERROR: ${error.message}`, 'error');
+                log(error.stack, 'error');
+            }
         }
         
         // Check API key status on load

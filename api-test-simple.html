@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple API Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        .status { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px;
+            background: #2a2a2a;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .info { color: #00aaff; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #00aa00; }
+        #results {
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 API Direct Test</h1>
+    <p>Testing APIs without any dependencies...</p>
+    
+    <button onclick="testCoinGecko()">Test CoinGecko</button>
+    <button onclick="testTwelveData()">Test Twelve Data</button>
+    <button onclick="testNewsAPI()">Test NewsAPI</button>
+    <button onclick="testAll()">Test All</button>
+    <button onclick="clearResults()">Clear</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function log(message, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const colors = { success: '#00ff00', error: '#ff0000', info: '#00aaff' };
+            const color = colors[type] || colors.info;
+            results.innerHTML += `<div style="color: ${color}">[${time}] ${message}</div>`;
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        function clearResults() {
+            results.innerHTML = '';
+        }
+        
+        async function testCoinGecko() {
+            log('━━━ Testing CoinGecko API ━━━', 'info');
+            try {
+                const url = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true';
+                log(`Fetching: ${url}`);
+                
+                const response = await fetch(url);
+                log(`Response status: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                log('✅ CoinGecko SUCCESS!', 'success');
+                log(`Bitcoin: $${data.bitcoin.usd} (${data.bitcoin.usd_24h_change.toFixed(2)}% 24h)`, 'success');
+                log(`Ethereum: $${data.ethereum.usd} (${data.ethereum.usd_24h_change.toFixed(2)}% 24h)`, 'success');
+                log(JSON.stringify(data, null, 2));
+                
+            } catch (error) {
+                log(`❌ CoinGecko FAILED: ${error.message}`, 'error');
+                log(`Error details: ${error.stack}`, 'error');
+            }
+        }
+        
+        async function testTwelveData() {
+            log('━━━ Testing Twelve Data API ━━━', 'info');
+            try {
+                const apiKey = 'ec255d3049df465baa6aae0868e6a397';
+                const url = `https://api.twelvedata.com/quote?symbol=AAPL&apikey=${apiKey}`;
+                log(`Fetching: ${url.replace(apiKey, 'XXXXX')}`);
+                
+                const response = await fetch(url);
+                log(`Response status: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'error' || data.code) {
+                    throw new Error(data.message || 'API returned error');
+                }
+                
+                log('✅ Twelve Data SUCCESS!', 'success');
+                log(`AAPL: $${data.close} (${data.change > 0 ? '+' : ''}${data.change})`, 'success');
+                log(JSON.stringify(data, null, 2));
+                
+            } catch (error) {
+                log(`❌ Twelve Data FAILED: ${error.message}`, 'error');
+                log(`Error details: ${error.stack}`, 'error');
+            }
+        }
+        
+        async function testNewsAPI() {
+            log('━━━ Testing NewsAPI ━━━', 'info');
+            try {
+                const apiKey = '67c37920fd1f488d899dfeea0affc18a';
+                const url = `https://newsapi.org/v2/everything?q=bitcoin&pageSize=3&apiKey=${apiKey}`;
+                log(`Fetching: ${url.replace(apiKey, 'XXXXX')}`);
+                
+                const response = await fetch(url);
+                log(`Response status: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'error') {
+                    throw new Error(data.message || 'API returned error');
+                }
+                
+                log('✅ NewsAPI SUCCESS!', 'success');
+                log(`Found ${data.totalResults} articles`, 'success');
+                if (data.articles && data.articles.length > 0) {
+                    data.articles.slice(0, 3).forEach((article, i) => {
+                        log(`${i+1}. ${article.title}`, 'success');
+                    });
+                }
+                
+            } catch (error) {
+                log(`❌ NewsAPI FAILED: ${error.message}`, 'error');
+                log(`Error details: ${error.stack}`, 'error');
+            }
+        }
+        
+        async function testAll() {
+            clearResults();
+            log('========================================');
+            log('🔧 STARTING COMPREHENSIVE API TESTS');
+            log('========================================');
+            log('');
+            
+            await testCoinGecko();
+            log('');
+            await testTwelveData();
+            log('');
+            await testNewsAPI();
+            log('');
+            log('========================================');
+            log('✅ ALL TESTS COMPLETE');
+            log('========================================');
+        }
+        
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            log('🚀 Page loaded. Click buttons to test APIs.');
+            log('Or wait 2 seconds for auto-test...');
+            setTimeout(testAll, 2000);
+        });
+    </script>
+</body>
+</html>

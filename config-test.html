@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Config Loading Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            line-height: 1.8;
+        }
+        pre { background: #111; padding: 15px; border-radius: 5px; overflow-x: auto; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Configuration Loading Test</h1>
+    <pre id="output">Initializing...</pre>
+    
+    <script>
+        // Write to page immediately
+        document.getElementById('output').textContent = 'DOM Ready!\nLoading config.js...\n';
+    </script>
+    
+    <script src="scripts/config.js"></script>
+    <script>
+        var output = document.getElementById('output');
+        var log = 'DOM Ready!\nconfig.js loaded\n\n';
+        
+        function print(msg) {
+            var time = new Date().toLocaleTimeString();
+            log += '[' + time + '] ' + msg + '\n';
+            output.textContent = log;
+        }
+        
+        print('=== STEP 1: Check config.js loaded ===');
+        print('typeof AppConfig: ' + (typeof AppConfig));
+        print('typeof window.AppConfig: ' + (typeof window.AppConfig));
+        
+        console.log('AppConfig type:', typeof AppConfig);
+        console.log('AppConfig object:', window.AppConfig);
+        
+        if (typeof AppConfig !== 'undefined') {
+            print('SUCCESS: AppConfig EXISTS!');
+            print('useMockData: ' + AppConfig.useMockData);
+            print('thirdPartyApis exists: ' + (!!AppConfig.thirdPartyApis));
+            
+            if (AppConfig.thirdPartyApis) {
+                var cg = AppConfig.thirdPartyApis.coingecko;
+                var td = AppConfig.thirdPartyApis.twelveData;
+                var na = AppConfig.thirdPartyApis.newsapi;
+                
+                print('CoinGecko enabled: ' + (cg && cg.enabled));
+                print('TwelveData enabled: ' + (td && td.enabled));
+                print('NewsAPI enabled: ' + (na && na.enabled));
+            }
+        } else {
+            print('ERROR: AppConfig DOES NOT EXIST!');
+            print('config.js failed to load');
+            print('Press F12 to see console errors');
+            console.error('CRITICAL: AppConfig not found!');
+        }
+        
+        print('');
+        print('=== STEP 2: Loading config.local.js ===');
+    </script>
+    
+    <script src="scripts/config.local.js"></script>
+    
+    <script>
+        setTimeout(function() {
+            print('');
+            print('=== STEP 3: Check config.local.js loaded ===');
+            
+            console.log('Step 3: Checking AppConfig');
+            
+            if (typeof AppConfig !== 'undefined') {
+                print('SUCCESS: AppConfig still exists');
+                print('useMockData: ' + AppConfig.useMockData);
+                
+                if (AppConfig.thirdPartyApis) {
+                    var td = AppConfig.thirdPartyApis.twelveData;
+                    var na = AppConfig.thirdPartyApis.newsapi;
+                    
+                    print('');
+                    if (td.key && td.key !== '' && td.key !== 'YOUR_TWELVE_DATA_KEY_HERE') {
+                        print('TwelveData: CONFIGURED (' + td.key.substring(0, 10) + '...)');
+                    } else {
+                        print('TwelveData: NOT CONFIGURED');
+                    }
+                    
+                    if (na.key && na.key !== '' && na.key !== 'YOUR_NEWSAPI_KEY_HERE') {
+                        print('NewsAPI: CONFIGURED (' + na.key.substring(0, 10) + '...)');
+                    } else {
+                        print('NewsAPI: NOT CONFIGURED');
+                    }
+                }
+                
+                print('');
+                print('=== STEP 4: Testing APIs ===');
+                print('Testing CoinGecko...');
+                
+                fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
+                    .then(function(r) {
+                        print('CoinGecko HTTP ' + r.status);
+                        return r.json();
+                    })
+                    .then(function(data) {
+                        console.log('CoinGecko data:', data);
+                        print('SUCCESS: Bitcoin = $' + data.bitcoin.usd);
+                        
+                        // Test Twelve Data
+                        print('');
+                        var tdKey = AppConfig.thirdPartyApis.twelveData.key;
+                        if (tdKey && tdKey !== 'YOUR_TWELVE_DATA_KEY_HERE' && tdKey !== '') {
+                            print('Testing Twelve Data...');
+                            
+                            fetch('https://api.twelvedata.com/quote?symbol=AAPL&apikey=' + tdKey)
+                                .then(function(r) {
+                                    print('Twelve Data HTTP ' + r.status);
+                                    return r.json();
+                                })
+                                .then(function(data) {
+                                    console.log('Twelve Data:', data);
+                                    if (data.status === 'error' || data.code) {
+                                        print('ERROR: ' + (data.message || 'Unknown error'));
+                                    } else {
+                                        print('SUCCESS: AAPL = $' + data.close);
+                                    }
+                                })
+                                .catch(function(err) {
+                                    console.error('Twelve Data error:', err);
+                                    print('ERROR: ' + err.message);
+                                });
+                        } else {
+                            print('Twelve Data: No API key');
+                        }
+                        
+                        // Test NewsAPI
+                        print('');
+                        var naKey = AppConfig.thirdPartyApis.newsapi.key;
+                        if (naKey && naKey !== 'YOUR_NEWSAPI_KEY_HERE' && naKey !== '') {
+                            print('Testing NewsAPI...');
+                            
+                            fetch('https://newsapi.org/v2/everything?q=bitcoin&pageSize=1&apiKey=' + naKey)
+                                .then(function(r) {
+                                    print('NewsAPI HTTP ' + r.status);
+                                    return r.json();
+                                })
+                                .then(function(data) {
+                                    console.log('NewsAPI:', data);
+                                    if (data.status === 'error') {
+                                        print('ERROR: ' + (data.message || 'Unknown error'));
+                                    } else {
+                                        print('SUCCESS: ' + data.totalResults + ' articles');
+                                    }
+                                })
+                                .catch(function(err) {
+                                    console.error('NewsAPI error:', err);
+                                    print('ERROR: ' + err.message);
+                                });
+                        } else {
+                            print('NewsAPI: No API key');
+                        }
+                    })
+                    .catch(function(err) {
+                        console.error('CoinGecko error:', err);
+                        print('ERROR: ' + err.message);
+                    });
+                    
+            } else {
+                print('ERROR: AppConfig does not exist!');
+                print('config.js did not load');
+                console.error('CRITICAL: AppConfig undefined');
+            }
+        }, 1000);
+    </script>
+    
+    <hr style="margin: 20px 0; border-color: #0f0;">
+    <p style="color: #0af;">
+        📌 This page loads scripts step-by-step and shows exactly what's happening.<br>
+        💡 If you see errors, press <strong>F12</strong> to open the browser console for more details.<br>
+        🔄 Hard refresh (Ctrl+Shift+R or Ctrl+F5) if scripts appear cached.
+    </p>
+</body>
+</html>
