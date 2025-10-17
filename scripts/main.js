@@ -201,7 +201,7 @@ if (document.readyState === 'loading') {
  * Displays order number, product name, and status with color coding
  * @returns {void}
  */
-function populateOrdersTable() {
+async function populateOrdersTable() {
     try {
         if (typeof Orders === 'undefined') {
             console.warn('Orders data not found. Please ensure orders.js is loaded.');
@@ -218,6 +218,37 @@ function populateOrdersTable() {
         // Clear existing content
         tableBody.innerHTML = '';
 
+        // Fetch live prices if available
+        let livePrices = {};
+        if (!window.AppConfig?.useMockData && window.DataService) {
+            try {
+                // Fetch crypto prices
+                const cryptoPrices = await DataService.fetchCryptoPrices(['bitcoin', 'ethereum']);
+                if (cryptoPrices) {
+                    if (cryptoPrices.bitcoin) livePrices['Bitcoin'] = cryptoPrices.bitcoin.usd;
+                    if (cryptoPrices.ethereum) livePrices['Ethereum'] = cryptoPrices.ethereum.usd;
+                }
+                
+                // Fetch Gold and SPY prices
+                const tdKey = window.AppConfig?.thirdPartyApis?.twelveData?.key;
+                if (tdKey && tdKey !== 'YOUR_TWELVE_DATA_KEY_HERE' && tdKey !== '') {
+                    const goldData = await DataService.fetchAssetQuote('XAU/USD');
+                    if (goldData && goldData.close) {
+                        livePrices['Gold'] = parseFloat(goldData.close);
+                    }
+                    
+                    const spyData = await DataService.fetchAssetQuote('SPY');
+                    if (spyData && spyData.close) {
+                        livePrices['S&P 500'] = parseFloat(spyData.close);
+                    }
+                }
+                
+                console.log('[Dashboard] Live prices for table:', livePrices);
+            } catch (error) {
+                console.warn('[Dashboard] Could not fetch live prices for table:', error);
+            }
+        }
+
         Orders.forEach((order, index) => {
             try {
                 const tr = document.createElement('tr');
@@ -225,20 +256,31 @@ function populateOrdersTable() {
                     order.shipping === 'Declined' ? 'danger' : 
                     order.shipping === 'Pending' ? 'warning' : 'success';
                 
+                // Use live price if available, otherwise use current price from order
+                const currentPrice = livePrices[order.productName] || order.currentPrice || getCurrentPrice(order.productName);
+                
                 // Calculate P&L for display
-                const pnl = order.currentPrice && order.entryPrice ? 
-                    (order.currentPrice - order.entryPrice) * order.quantity : 0;
+                const pnl = currentPrice && order.entryPrice ? 
+                    (currentPrice - order.entryPrice) * order.quantity : 0;
                 const pnlPercentage = order.entryPrice ? 
-                    ((order.currentPrice - order.entryPrice) / order.entryPrice * 100) : 0;
+                    ((currentPrice - order.entryPrice) / order.entryPrice * 100) : 0;
                 const actualPnL = order.orderType === 'Long' ? pnl : -pnl;
                 const actualPercentage = order.orderType === 'Long' ? pnlPercentage : -pnlPercentage;
                 
                 const pnlClass = actualPnL >= 0 ? 'success' : 'danger';
                 const pnlSign = actualPnL >= 0 ? '+' : '';
                 
+                // Format current price with appropriate currency symbol
+                let priceDisplay = '';
+                if (order.productName === 'FTSE 100') {
+                    priceDisplay = `£${currentPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                } else {
+                    priceDisplay = `$${currentPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                }
+                
                 tr.innerHTML = `
                     <td><strong>${order.productName || 'N/A'}</strong><br><small>${order.sector || ''}</small></td>
-                    <td>${order.productNumber || 'N/A'}<br><small>Qty: ${order.quantity || 0}</small></td>
+                    <td>${priceDisplay}<br><small>Qty: ${order.quantity || 0}</small></td>
                     <td class="${pnlClass}">${pnlSign}$${Math.abs(actualPnL).toFixed(2)}<br><small>(${pnlSign}${actualPercentage.toFixed(2)}%)</small></td>
                     <td class="${statusClass}">${order.shipping || 'Unknown'}<br><small>${order.orderType || 'N/A'}</small></td>
                     <td><button class="primary details-btn" data-order-index="${index}">Details</button></td>
@@ -760,6 +802,8 @@ if (document.readyState === 'loading') {
         updateRecentUpdatesWithRealPrices();
         // Refresh crypto prices every 90 seconds (to avoid rate limits)
         setInterval(updateRecentUpdatesWithRealPrices, 90000);
+        // Refresh orders table every 90 seconds for live prices
+        setInterval(populateOrdersTable, 90000);
     });
 } else {
     updateDashboardMetrics();

@@ -244,10 +244,11 @@ window.getPriceChange = getPriceChange;
 /**
  * Generate detailed position data for modal display
  * @param {Object} order - Order object from Orders array
+ * @param {Object} livePrices - Optional live prices from API
  * @returns {Object} Formatted position data for modal
  */
-function generatePositionData(order) {
-    const currentPrice = getCurrentPrice(order.productName);
+function generatePositionData(order, livePrices = {}) {
+    const currentPrice = livePrices[order.productName] || getCurrentPrice(order.productName);
     const pnlValue = (currentPrice - order.entryPrice) * order.quantity;
     const actualPnL = order.orderType === 'Long' ? pnlValue : -pnlValue;
     const pnlPercent = ((currentPrice - order.entryPrice) / order.entryPrice) * 100;
