@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptocurrency Live Tracker - Dashboard</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/style.css">
+    <style>
+        .crypto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .crypto-header h1 {
+            margin: 0;
+        }
+        
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--color-success);
+            color: white;
+            border-radius: 2rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .crypto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .crypto-card {
+            background: var(--color-white);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .crypto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .crypto-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-success));
+        }
+        
+        .crypto-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-info-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 1rem;
+            color: white;
+        }
+        
+        .crypto-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--color-dark);
+            margin-bottom: 0.25rem;
+        }
+        
+        .crypto-symbol {
+            font-size: 0.85rem;
+            color: var(--color-info-dark);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+        
+        .crypto-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .crypto-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .crypto-change.positive {
+            background: var(--color-success);
+            color: white;
+        }
+        
+        .crypto-change.negative {
+            background: var(--color-danger);
+            color: white;
+        }
+        
+        .crypto-stats {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--color-light);
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .stat-label {
+            color: var(--color-info-dark);
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            color: var(--color-dark);
+        }
+        
+        .market-overview {
+            background: var(--color-white);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+        
+        .overview-item {
+            text-align: center;
+        }
+        
+        .overview-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .overview-label {
+            color: var(--color-info-dark);
+            font-size: 0.9rem;
+        }
+        
+        .detailed-table {
+            background: var(--color-white);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+            overflow-x: auto;
+        }
+        
+        .detailed-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .detailed-table th {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 2px solid var(--color-light);
+            color: var(--color-info-dark);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        
+        .detailed-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--color-light);
+        }
+        
+        .detailed-table tbody tr:hover {
+            background: var(--color-light);
+        }
+        
+        .rank-badge {
+            background: var(--color-primary);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-info-dark);
+        }
+        
+        .loading-spinner {
+            border: 3px solid var(--color-light);
+            border-top: 3px solid var(--color-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: var(--color-danger);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .refresh-btn {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            background: var(--color-primary-variant);
+        }
+        
+        .refresh-btn:disabled {
+            background: var(--color-info-light);
+            cursor: not-allowed;
+        }
+        
+        .sparkline {
+            margin-top: 1rem;
+            height: 50px;
+            position: relative;
+        }
+        
+        .sparkline-line {
+            stroke: var(--color-primary);
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            transition: gap 0.3s ease;
+        }
+        
+        .back-button:hover {
+            gap: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="top">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="48" height="48">
+                    <title>SQU^RE DOFF Trading Dashboard</title>
+                    <g opacity="0.08" fill="none" class="logo-grid" stroke-width="0.8">
+                        <path d="M10 48 L54 48" />
+                        <path d="M10 36 L54 36" />
+                        <path d="M10 24 L54 24" />
+                        <path d="M22 10 L22 54" />
+                        <path d="M34 10 L34 54" />
+                        <path d="M46 10 L46 54" />
+                    </g>
+                    <rect x="12" y="36" width="6" height="10" rx="1" class="logo-bar" opacity="0.18" />
+                    <rect x="22" y="30" width="6" height="16" rx="1" class="logo-bar" opacity="0.22" />
+                    <rect x="32" y="22" width="6" height="24" rx="1" class="logo-bar-active" />
+                    <rect x="42" y="16" width="6" height="30" rx="1" class="logo-bar" opacity="0.18" />
+                    <polyline points="12,42 20,34 28,26 36,20 44,16" fill="none" class="logo-line" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="44" cy="16" r="3.2" class="logo-accent" />
+                </svg>
+                <h2>SQU^RE<span class="danger">DOFF</span></h2>
+            </div>
+            <div class="close" id="close-btn">
+                <span class="material-icons-sharp">close</span>
+            </div>
+
+            <nav class="sidebar">
+                <a href="../index.html">
+                    <span class="material-icons-sharp">grid_view</span>
+                    <h3>Dashboard</h3>
+                </a>
+                <a href="indecescommodities.html">
+                    <span class="material-icons-sharp">person_outline</span>
+                    <h3>Indeces</h3>
+                </a>
+                <a href="indecescommodities.html">
+                    <span class="material-icons-sharp">receipt_long</span>
+                    <h3>Commodities</h3>
+                </a>
+                <a href="analytics.html">
+                    <span class="material-icons-sharp">insights</span>
+                    <h3>Analytics</h3>
+                </a>
+                <a href="messages.html">
+                    <span class="material-icons-sharp">mail_outline</span>
+                    <h3>Messages</h3>
+                    <span class="message-count">21</span>
+                </a>
+                <a href="orders.html">
+                    <span class="material-icons-sharp">inventory</span>
+                    <h3>Orders</h3>
+                </a>
+                <a href="#" class="active">
+                    <span class="material-icons-sharp">currency_bitcoin</span>
+                    <h3>Crypto</h3>
+                </a>
+                <a href="news.html">
+                    <span class="material-icons-sharp">newspaper</span>
+                    <h3>Financial News</h3>
+                </a>
+                <a href="settings.html">
+                    <span class="material-icons-sharp">settings</span>
+                    <h3>Settings</h3>
+                </a>
+            </nav>
+        </aside>
+
+        <main>
+            <div class="crypto-header">
+                <div>
+                    <a href="../index.html" class="back-button">
+                        <span class="material-icons-sharp">arrow_back</span>
+                        Back to Dashboard
+                    </a>
+                    <h1>Cryptocurrency Live Tracker</h1>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <button class="refresh-btn" id="refreshBtn">
+                        <span class="material-icons-sharp">refresh</span>
+                        Refresh
+                    </button>
+                    <div class="live-indicator">
+                        <span class="material-icons-sharp">wifi</span>
+                        <span>LIVE</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="market-overview">
+                <h2>Market Overview</h2>
+                <div class="overview-grid">
+                    <div class="overview-item">
+                        <div class="overview-value" id="totalMarketCap">-</div>
+                        <div class="overview-label">Total Market Cap</div>
+                    </div>
+                    <div class="overview-item">
+                        <div class="overview-value" id="total24hVolume">-</div>
+                        <div class="overview-label">24h Volume</div>
+                    </div>
+                    <div class="overview-item">
+                        <div class="overview-value" id="btcDominance">-</div>
+                        <div class="overview-label">BTC Dominance</div>
+                    </div>
+                    <div class="overview-item">
+                        <div class="overview-value" id="activeCryptos">-</div>
+                        <div class="overview-label">Active Cryptos</div>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Top Cryptocurrencies</h2>
+            <div class="crypto-grid" id="cryptoGrid">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading live cryptocurrency data...</p>
+                </div>
+            </div>
+
+            <div class="detailed-table">
+                <h2>Detailed Market Data</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>24h Change</th>
+                            <th>Market Cap</th>
+                            <th>Volume (24h)</th>
+                            <th>Circulating Supply</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cryptoTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 2rem;">
+                                <div class="loading-spinner" style="margin: 0 auto 1rem;"></div>
+                                Loading...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <div class="right">
+            <div class="top">
+                <button id="menu-btn">
+                    <span class="material-icons-sharp">menu</span>
+                </button>
+                <div class="theme-toggler">
+                    <span class="material-icons-sharp active">light_mode</span>
+                    <span class="material-icons-sharp">dark_mode</span>
+                </div>
+                <div class="profile">
+                    <div class="info">
+                        <p>Key: <b>Gavin</b></p>
+                        <small class="text-muted">Admin</small>
+                    </div>
+                    <div class="profile-pic">
+                        <img src="../assets/profile-pic-1.png" alt="Profile" height="50px" width="50px">
+                    </div>
+                </div>
+            </div>
+
+            <div class="recent-updates">
+                <h2>Market Updates</h2>
+                <div class="updates" id="marketUpdates">
+                    <div class="loading" style="padding: 1rem;">
+                        <div class="loading-spinner" style="width: 30px; height: 30px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/config.js"></script>
+    <script src="../scripts/config.local.js"></script>
+    <script src="../scripts/data-service.js"></script>
+    <script>
+        // Sidebar and theme functionality
+        var sideMenu = document.querySelector("aside");
+        var menuBtn = document.querySelector("#menu-btn");
+        var closeBtn = document.querySelector("#close-btn");
+        var themeToggler = document.querySelector(".theme-toggler");
+
+        if (menuBtn) {
+            menuBtn.onclick = function() { sideMenu.classList.add('show'); }
+        }
+        if (closeBtn) {
+            closeBtn.onclick = function() { sideMenu.classList.remove('show'); }
+        }
+        if (themeToggler) {
+            themeToggler.onclick = function() {
+                document.body.classList.toggle('dark-theme-variables');
+                themeToggler.querySelector('span:nth-child(1)').classList.toggle('active');
+                themeToggler.querySelector('span:nth-child(2)').classList.toggle('active');
+            }
+        }
+
+        // Load saved theme
+        var savedTheme = localStorage.getItem('dashboard-theme');
+        if (savedTheme === 'dark' && themeToggler) {
+            document.body.classList.add('dark-theme-variables');
+            themeToggler.querySelector('span:nth-child(1)').classList.remove('active');
+            themeToggler.querySelector('span:nth-child(2)').classList.add('active');
+        }
+
+        // Crypto icons mapping
+        var cryptoIcons = {
+            bitcoin: '₿',
+            ethereum: 'Ξ',
+            tether: '₮',
+            binancecoin: 'B',
+            cardano: '₳',
+            ripple: 'X',
+            solana: '◎',
+            polkadot: '●',
+            dogecoin: 'Ð',
+            avalanche: 'A',
+            polygon: 'M',
+            litecoin: 'Ł',
+            chainlink: '⬢',
+            uniswap: '🦄',
+            default: '◆'
+        };
+
+        // Format currency
+        function formatCurrency(value) {
+            if (value >= 1e12) return '$' + (value / 1e12).toFixed(2) + 'T';
+            if (value >= 1e9) return '$' + (value / 1e9).toFixed(2) + 'B';
+            if (value >= 1e6) return '$' + (value / 1e6).toFixed(2) + 'M';
+            if (value >= 1000) return '$' + (value / 1000).toFixed(2) + 'K';
+            return '$' + value.toFixed(2);
+        }
+
+        // Format number
+        function formatNumber(value) {
+            if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B';
+            if (value >= 1e6) return (value / 1e6).toFixed(2) + 'M';
+            if (value >= 1000) return (value / 1000).toFixed(2) + 'K';
+            return value.toFixed(0);
+        }
+
+        // Show error message
+        function showError(message) {
+            var errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            setTimeout(function() {
+                errorEl.style.display = 'none';
+            }, 5000);
+        }
+
+        // Fetch cryptocurrency data
+        async function fetchCryptoData() {
+            try {
+                console.log('Fetching crypto data from CoinGecko...');
+                
+                // Fetch top 15 cryptocurrencies
+                var response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=15&page=1&sparkline=false&price_change_percentage=24h');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data: ' + response.status);
+                }
+                
+                var data = await response.json();
+                console.log('Received crypto data:', data);
+                
+                return data;
+            } catch (error) {
+                console.error('Error fetching crypto data:', error);
+                showError('Failed to load cryptocurrency data: ' + error.message);
+                return null;
+            }
+        }
+
+        // Fetch global market data
+        async function fetchGlobalData() {
+            try {
+                var response = await fetch('https://api.coingecko.com/api/v3/global');
+                if (!response.ok) throw new Error('Failed to fetch global data');
+                var result = await response.json();
+                return result.data;
+            } catch (error) {
+                console.error('Error fetching global data:', error);
+                return null;
+            }
+        }
+
+        // Render crypto cards
+        function renderCryptoCards(cryptos) {
+            var grid = document.getElementById('cryptoGrid');
+            if (!cryptos || cryptos.length === 0) {
+                grid.innerHTML = '<div class="loading"><p>No data available</p></div>';
+                return;
+            }
+
+            grid.innerHTML = '';
+            
+            cryptos.slice(0, 6).forEach(function(crypto) {
+                var change = crypto.price_change_percentage_24h || 0;
+                var isPositive = change >= 0;
+                var icon = cryptoIcons[crypto.id] || cryptoIcons.default;
+                
+                var card = document.createElement('div');
+                card.className = 'crypto-card';
+                card.innerHTML = 
+                    '<div class="crypto-icon">' + icon + '</div>' +
+                    '<div class="crypto-name">' + crypto.name + '</div>' +
+                    '<div class="crypto-symbol">' + crypto.symbol + '</div>' +
+                    '<div class="crypto-price">$' + crypto.current_price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</div>' +
+                    '<div class="crypto-change ' + (isPositive ? 'positive' : 'negative') + '">' +
+                        '<span class="material-icons-sharp">' + (isPositive ? 'trending_up' : 'trending_down') + '</span>' +
+                        (isPositive ? '+' : '') + change.toFixed(2) + '%' +
+                    '</div>' +
+                    '<div class="crypto-stats">' +
+                        '<div class="stat-row">' +
+                            '<span class="stat-label">Market Cap</span>' +
+                            '<span class="stat-value">' + formatCurrency(crypto.market_cap) + '</span>' +
+                        '</div>' +
+                        '<div class="stat-row">' +
+                            '<span class="stat-label">Volume (24h)</span>' +
+                            '<span class="stat-value">' + formatCurrency(crypto.total_volume) + '</span>' +
+                        '</div>' +
+                        '<div class="stat-row">' +
+                            '<span class="stat-label">24h High</span>' +
+                            '<span class="stat-value">$' + (crypto.high_24h || 0).toLocaleString() + '</span>' +
+                        '</div>' +
+                        '<div class="stat-row">' +
+                            '<span class="stat-label">24h Low</span>' +
+                            '<span class="stat-value">$' + (crypto.low_24h || 0).toLocaleString() + '</span>' +
+                        '</div>' +
+                    '</div>';
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Render detailed table
+        function renderTable(cryptos) {
+            var tbody = document.getElementById('cryptoTableBody');
+            if (!cryptos || cryptos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No data available</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            
+            cryptos.forEach(function(crypto) {
+                var change = crypto.price_change_percentage_24h || 0;
+                var isPositive = change >= 0;
+                
+                var row = document.createElement('tr');
+                row.innerHTML = 
+                    '<td><span class="rank-badge">#' + crypto.market_cap_rank + '</span></td>' +
+                    '<td><strong>' + crypto.name + '</strong> <span style="color: var(--color-info-dark); text-transform: uppercase;">' + crypto.symbol + '</span></td>' +
+                    '<td><strong>$' + crypto.current_price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</strong></td>' +
+                    '<td><span class="crypto-change ' + (isPositive ? 'positive' : 'negative') + '">' + (isPositive ? '+' : '') + change.toFixed(2) + '%</span></td>' +
+                    '<td>' + formatCurrency(crypto.market_cap) + '</td>' +
+                    '<td>' + formatCurrency(crypto.total_volume) + '</td>' +
+                    '<td>' + formatNumber(crypto.circulating_supply) + ' ' + crypto.symbol.toUpperCase() + '</td>';
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Render market overview
+        function renderMarketOverview(globalData) {
+            if (!globalData) return;
+            
+            document.getElementById('totalMarketCap').textContent = formatCurrency(globalData.total_market_cap.usd);
+            document.getElementById('total24hVolume').textContent = formatCurrency(globalData.total_volume.usd);
+            document.getElementById('btcDominance').textContent = globalData.market_cap_percentage.btc.toFixed(1) + '%';
+            document.getElementById('activeCryptos').textContent = formatNumber(globalData.active_cryptocurrencies);
+        }
+
+        // Render market updates
+        function renderMarketUpdates(cryptos) {
+            var updatesEl = document.getElementById('marketUpdates');
+            if (!cryptos || cryptos.length === 0) return;
+
+            updatesEl.innerHTML = '';
+            
+            var topGainer = cryptos.reduce(function(a, b) {
+                return (a.price_change_percentage_24h || 0) > (b.price_change_percentage_24h || 0) ? a : b;
+            });
+            
+            var topLoser = cryptos.reduce(function(a, b) {
+                return (a.price_change_percentage_24h || 0) < (b.price_change_percentage_24h || 0) ? a : b;
+            });
+            
+            var highestVolume = cryptos.reduce(function(a, b) {
+                return a.total_volume > b.total_volume ? a : b;
+            });
+
+            var updates = [
+                {
+                    icon: 'trending_up',
+                    iconClass: 'success',
+                    title: 'Top Gainer',
+                    crypto: topGainer.name,
+                    change: '+' + topGainer.price_change_percentage_24h.toFixed(2) + '%',
+                    time: 'Last 24 hours'
+                },
+                {
+                    icon: 'trending_down',
+                    iconClass: 'danger',
+                    title: 'Top Loser',
+                    crypto: topLoser.name,
+                    change: topLoser.price_change_percentage_24h.toFixed(2) + '%',
+                    time: 'Last 24 hours'
+                },
+                {
+                    icon: 'bar_chart',
+                    iconClass: 'primary',
+                    title: 'Highest Volume',
+                    crypto: highestVolume.name,
+                    change: formatCurrency(highestVolume.total_volume),
+                    time: 'Last 24 hours'
+                }
+            ];
+
+            updates.forEach(function(update) {
+                var updateDiv = document.createElement('div');
+                updateDiv.className = 'update';
+                updateDiv.innerHTML = 
+                    '<div class="profile-photo update-icon ' + update.iconClass + '">' +
+                        '<span class="material-icons-sharp">' + update.icon + '</span>' +
+                    '</div>' +
+                    '<div class="message">' +
+                        '<p><b>' + update.crypto + '</b> ' + update.change + ' - ' + update.title + '</p>' +
+                        '<small class="text-muted">' + update.time + '</small>' +
+                    '</div>';
+                updatesEl.appendChild(updateDiv);
+            });
+        }
+
+        // Load all data
+        async function loadAllData() {
+            var refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+                refreshBtn.querySelector('span').style.animation = 'spin 1s linear infinite';
+            }
+
+            var cryptos = await fetchCryptoData();
+            var globalData = await fetchGlobalData();
+            
+            if (cryptos) {
+                renderCryptoCards(cryptos);
+                renderTable(cryptos);
+                renderMarketUpdates(cryptos);
+            }
+            
+            if (globalData) {
+                renderMarketOverview(globalData);
+            }
+
+            if (refreshBtn) {
+                refreshBtn.disabled = false;
+                refreshBtn.querySelector('span').style.animation = '';
+            }
+        }
+
+        // Auto-refresh every 60 seconds
+        var refreshInterval;
+        function startAutoRefresh() {
+            refreshInterval = setInterval(loadAllData, 60000);
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+        }
+
+        // Refresh button
+        document.getElementById('refreshBtn').addEventListener('click', function() {
+            loadAllData();
+            stopAutoRefresh();
+            startAutoRefresh();
+        });
+
+        // Initial load
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, fetching crypto data...');
+            loadAllData();
+            startAutoRefresh();
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', stopAutoRefresh);
+    </script>
+</body>
+</html>
