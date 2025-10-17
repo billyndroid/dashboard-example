@@ -76,7 +76,7 @@ dashboard-example/
 │   ├── style.css           # Main stylesheet
 │   └── glass-card.css      # Glass-morphism effects
 ├── assets/
-│   ├── logo-temp.png       # Logo
+│   ├── logo.svg            # Logo (SVG)
 │   └── profile-pic-*.png   # Profile images
 ├── TODO.md                 # Project roadmap
 ├── NOTIFICATIONS.md        # Notification system docs

@@ -241,13 +241,22 @@ function populateOrdersTable() {
                     <td>${order.productNumber || 'N/A'}<br><small>Qty: ${order.quantity || 0}</small></td>
                     <td class="${pnlClass}">${pnlSign}$${Math.abs(actualPnL).toFixed(2)}<br><small>(${pnlSign}${actualPercentage.toFixed(2)}%)</small></td>
                     <td class="${statusClass}">${order.shipping || 'Unknown'}<br><small>${order.orderType || 'N/A'}</small></td>
-                    <td><button class="primary" onclick="showOrderDetails(${index})">Details</button></td>
+                    <td><button class="primary details-btn" data-order-index="${index}">Details</button></td>
                 `;
                 
                 tableBody.appendChild(tr);
             } catch (error) {
                 console.error('Error creating table row for order:', order, error);
             }
+        });
+        
+        // Add event listeners to all Details buttons
+        const detailsButtons = tableBody.querySelectorAll('.details-btn');
+        detailsButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const orderIndex = parseInt(this.getAttribute('data-order-index'));
+                showOrderDetailsModal(orderIndex);
+            });
         });
         
         console.info(`Successfully populated ${Orders.length} orders in table.`);
@@ -257,7 +266,64 @@ function populateOrdersTable() {
     }
 }
 
-// Show order details function with enhanced information
+// Show order details in modal
+function showOrderDetailsModal(orderIndex) {
+    try {
+        if (typeof Orders === 'undefined' || !Orders[orderIndex]) {
+            console.error('Order not found at index:', orderIndex);
+            return;
+        }
+        
+        const order = Orders[orderIndex];
+        
+        // Generate detailed position data
+        const positionData = typeof generatePositionData !== 'undefined' 
+            ? generatePositionData(order)
+            : createFallbackPositionData(order);
+        
+        // Show modal if available
+        if (typeof showPositionDetails !== 'undefined') {
+            showPositionDetails(positionData);
+        } else {
+            console.warn('Position modal not loaded. Showing alert instead.');
+            showOrderDetails(orderIndex);
+        }
+        
+    } catch (error) {
+        console.error('Error showing order details modal:', error);
+    }
+}
+
+// Fallback function to create position data if generatePositionData is not available
+function createFallbackPositionData(order) {
+    const currentPrice = order.currentPrice || order.entryPrice;
+    const pnlValue = (currentPrice - order.entryPrice) * order.quantity;
+    const actualPnL = order.orderType === 'Long' ? pnlValue : -pnlValue;
+    const pnlPercent = ((currentPrice - order.entryPrice) / order.entryPrice) * 100;
+    const actualPnLPercent = order.orderType === 'Long' ? pnlPercent : -pnlPercent;
+    
+    return {
+        asset: order.productName,
+        assetType: order.sector || 'Commodity',
+        status: order.shipping,
+        currentPrice: currentPrice,
+        priceChangePercent: 0,
+        entryPrice: order.entryPrice,
+        entryDate: 'N/A',
+        quantity: order.quantity,
+        positionType: order.orderType,
+        pnl: actualPnL >= 0 ? `+$${actualPnL.toFixed(2)}` : `-$${Math.abs(actualPnL).toFixed(2)}`,
+        pnlValue: actualPnL,
+        pnlPercent: actualPnLPercent.toFixed(2),
+        stopLoss: 'Not Set',
+        takeProfit: 'Not Set',
+        riskReward: '1:2',
+        daysHeld: '0 days',
+        tradeId: `TRD-${order.id || Date.now()}`
+    };
+}
+
+// Show order details function with enhanced information (legacy fallback)
 function showOrderDetails(orderIndex) {
     try {
         if (typeof Orders === 'undefined' || !Orders[orderIndex]) {

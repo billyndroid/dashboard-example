@@ -249,7 +249,7 @@ dashboard-example/
 ├── .gitignore                      # Version control exclusions
 │
 ├── assets/                         # Images and static files
-│   ├── logo-temp.png
+│   ├── logo.svg
 │   └── profile-pic-*.png
 │
 ├── html/                           # Additional pages

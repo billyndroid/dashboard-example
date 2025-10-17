@@ -203,10 +203,10 @@ try {
 
 ```html
 <!-- Current -->
-<img src="assets/logo-temp.png">
+<img src="assets/logo.svg" alt="SQU^RE DOFF Trading Dashboard Logo">
 
 <!-- Improved -->
-<img src="assets/logo-temp.png" alt="SQU^RE DOFF Trading Dashboard Logo">
+<img src="assets/logo.svg" alt="SQU^RE DOFF Trading Dashboard Logo">
 
 <!-- Profile images -->
 <img src="assets/profile-pic-1.png" alt="User profile picture">

@@ -240,3 +240,57 @@ window.MarketData = MarketData;
 window.DashboardData = DashboardData;
 window.getCurrentPrice = getCurrentPrice;
 window.getPriceChange = getPriceChange;
+
+/**
+ * Generate detailed position data for modal display
+ * @param {Object} order - Order object from Orders array
+ * @returns {Object} Formatted position data for modal
+ */
+function generatePositionData(order) {
+    const currentPrice = getCurrentPrice(order.productName);
+    const pnlValue = (currentPrice - order.entryPrice) * order.quantity;
+    const actualPnL = order.orderType === 'Long' ? pnlValue : -pnlValue;
+    const pnlPercent = ((currentPrice - order.entryPrice) / order.entryPrice) * 100;
+    const actualPnLPercent = order.orderType === 'Long' ? pnlPercent : -pnlPercent;
+    
+    // Calculate days held
+    const entryDate = new Date(order.timestamp);
+    const today = new Date();
+    const daysHeld = Math.floor((today - entryDate) / (1000 * 60 * 60 * 24));
+    
+    // Calculate risk/reward (simplified)
+    const riskPercent = 2; // 2% stop loss
+    const rewardPercent = Math.abs(actualPnLPercent);
+    const riskReward = `1:${(rewardPercent / riskPercent).toFixed(1)}`;
+    
+    // Calculate stop loss and take profit
+    const stopLossPrice = order.orderType === 'Long' 
+        ? order.entryPrice * 0.98 
+        : order.entryPrice * 1.02;
+    const takeProfitPrice = order.orderType === 'Long'
+        ? order.entryPrice * 1.05
+        : order.entryPrice * 0.95;
+    
+    return {
+        asset: order.productName,
+        assetType: MarketData[order.productName]?.sector || 'Commodity',
+        status: order.shipping,
+        currentPrice: currentPrice,
+        priceChangePercent: getPriceChange(order.productName),
+        entryPrice: order.entryPrice,
+        entryDate: entryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        quantity: order.quantity,
+        positionType: order.orderType,
+        pnl: actualPnL >= 0 ? `+$${actualPnL.toFixed(2)}` : `-$${Math.abs(actualPnL).toFixed(2)}`,
+        pnlValue: actualPnL,
+        pnlPercent: actualPnLPercent.toFixed(2),
+        stopLoss: `$${stopLossPrice.toFixed(2)}`,
+        takeProfit: `$${takeProfitPrice.toFixed(2)}`,
+        riskReward: riskReward,
+        daysHeld: `${daysHeld} ${daysHeld === 1 ? 'day' : 'days'}`,
+        tradeId: `TRD-${order.id}-${Date.now().toString().slice(-6)}`
+    };
+}
+
+// Export for global use
+window.generatePositionData = generatePositionData;
