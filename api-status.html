@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Status - Dashboard</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f7fb;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .status-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .status-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .status-icon.success { background: #d1fae5; color: #10b981; }
+        .status-icon.warning { background: #fef3c7; color: #f59e0b; }
+        .status-icon.error { background: #fee2e2; color: #ef4444; }
+        .status-icon.pending { background: #e5e7eb; color: #6b7280; }
+        
+        .status-title {
+            flex: 1;
+        }
+        
+        .status-title h3 {
+            color: #111827;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .status-title p {
+            color: #6b7280;
+            font-size: 0.85rem;
+        }
+        
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.active { background: #d1fae5; color: #10b981; }
+        .status-badge.inactive { background: #fee2e2; color: #ef4444; }
+        .status-badge.testing { background: #dbeafe; color: #3b82f6; }
+        
+        .status-details {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .status-row .label {
+            color: #6b7280;
+        }
+        
+        .status-row .value {
+            color: #111827;
+            font-weight: 600;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-button {
+            background: #2d6cdf;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .test-button:hover {
+            background: #1e5bd6;
+        }
+        
+        .test-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        #testResults {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            border-left: 4px solid #2d6cdf;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            display: none;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #2d6cdf;
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">
+            <span class="material-icons-sharp">arrow_back</span>
+            Back to Dashboard
+        </a>
+        
+        <h1>API Status Dashboard</h1>
+        <p class="subtitle">Monitor and test real-time API connections</p>
+        
+        <div class="status-grid">
+            <!-- CoinGecko Status -->
+            <div class="status-card">
+                <div class="status-header">
+                    <div class="status-icon pending" id="coinGeckoIcon">
+                        <span class="material-icons-sharp">currency_bitcoin</span>
+                    </div>
+                    <div class="status-title">
+                        <h3>CoinGecko API</h3>
+                        <p>Cryptocurrency Prices</p>
+                    </div>
+                    <span class="status-badge testing" id="coinGeckoBadge">Testing...</span>
+                </div>
+                <div class="status-details">
+                    <div class="status-row">
+                        <span class="label">API Key Required:</span>
+                        <span class="value">No ✅</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="label">Rate Limit:</span>
+                        <span class="value">50 calls/min</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="label">Last Test:</span>
+                        <span class="value" id="coinGeckoTime">-</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="label">Status:</span>
+                        <span class="value" id="coinGeckoStatus">Not tested</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Twelve Data Status -->
+            <div class="status-card">
+                <div class="status-header">
+                    <div class="status-icon pending" id="twelveDataIcon">
+                        <span class="material-icons-sharp">show_chart</span>
+                    </div>
+                    <div class="status-title">
+                        <h3>Twelve Data API</h3>
+                        <p>Stocks, Forex, Commodities</p>
+                    </div>
+                    <span class="status-badge testing" id="twelveDataBadge">Testing...</span>
+                </div>
+                <div class="status-details">
+                    <div class="status-row">
+                        <span class="label">API Key Required:</span>
+                        <span class="value" id="twelveDataKeyStatus">Checking...</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="label">Rate Limit:</span>
+                        <span class="value">800 credits/day</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="label">Last Test:</span>
+                        <span class="value" id="twelveDataTime">-</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="label">Status:</span>
+                        <span class="value" id="twelveDataStatus">Not tested</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- NewsAPI Status -->
+            <div class="status-card">
+                <div class="status-header">
+                    <div class="status-icon pending" id="newsApiIcon">
+                        <span class="material-icons-sharp">newspaper</span>
+                    </div>
+                    <div class="status-title">
+                        <h3>NewsAPI</h3>
+                        <p>Financial News</p>
+                    </div>
+                    <span class="status-badge testing" id="newsApiBadge">Testing...</span>
+                </div>
+                <div class="status-details">
+                    <div class="status-row">
+                        <span class="label">API Key Required:</span>
+                        <span class="value" id="newsApiKeyStatus">Checking...</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="label">Rate Limit:</span>
+                        <span class="value">100 req/day</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="label">Last Test:</span>
+                        <span class="value" id="newsApiTime">-</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="label">Status:</span>
+                        <span class="value" id="newsApiStatus">Not tested</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>API Testing</h2>
+            <p style="margin-bottom: 1.5rem; color: #6b7280;">Run comprehensive tests on all configured APIs</p>
+            
+            <button class="test-button" onclick="testAllAPIs()">
+                <span class="material-icons-sharp">play_arrow</span>
+                Test All APIs
+            </button>
+            
+            <button class="test-button" onclick="testCoinGecko()">
+                Test CoinGecko
+            </button>
+            
+            <button class="test-button" onclick="testTwelveData()">
+                Test Twelve Data
+            </button>
+            
+            <button class="test-button" onclick="testNewsAPI()">
+                Test NewsAPI
+            </button>
+            
+            <div id="testResults"></div>
+        </div>
+    </div>
+    
+    <script src="scripts/config.js"></script>
+    <script src="scripts/config.local.js"></script>
+    <script src="scripts/data-service.js"></script>
+    <script>
+        let testLog = '';
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            testLog += `[${timestamp}] ${prefix} ${message}\n`;
+            document.getElementById('testResults').textContent = testLog;
+            document.getElementById('testResults').style.display = 'block';
+        }
+        
+        async function testCoinGecko() {
+            log('Testing CoinGecko API...');
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
+                const data = await response.json();
+                
+                if (data.bitcoin && data.bitcoin.usd) {
+                    log(`CoinGecko API: SUCCESS`, 'success');
+                    log(`Bitcoin: $${data.bitcoin.usd} (${data.bitcoin.usd_24h_change.toFixed(2)}% 24h)`);
+                    log(`Ethereum: $${data.ethereum.usd} (${data.ethereum.usd_24h_change.toFixed(2)}% 24h)`);
+                    
+                    document.getElementById('coinGeckoIcon').className = 'status-icon success';
+                    document.getElementById('coinGeckoBadge').className = 'status-badge active';
+                    document.getElementById('coinGeckoBadge').textContent = 'Active';
+                    document.getElementById('coinGeckoStatus').textContent = '✅ Working';
+                    document.getElementById('coinGeckoTime').textContent = new Date().toLocaleTimeString();
+                } else {
+                    throw new Error('Invalid response');
+                }
+            } catch (error) {
+                log(`CoinGecko API: FAILED - ${error.message}`, 'error');
+                document.getElementById('coinGeckoIcon').className = 'status-icon error';
+                document.getElementById('coinGeckoBadge').className = 'status-badge inactive';
+                document.getElementById('coinGeckoBadge').textContent = 'Error';
+                document.getElementById('coinGeckoStatus').textContent = '❌ Failed';
+                document.getElementById('coinGeckoTime').textContent = new Date().toLocaleTimeString();
+            }
+        }
+        
+        async function testTwelveData() {
+            log('Testing Twelve Data API...');
+            const key = AppConfig.thirdPartyApis?.twelveData?.key;
+            
+            if (!key || key === 'YOUR_TWELVE_DATA_KEY_HERE' || key === '') {
+                log('Twelve Data API: No API key configured', 'error');
+                document.getElementById('twelveDataIcon').className = 'status-icon warning';
+                document.getElementById('twelveDataBadge').className = 'status-badge inactive';
+                document.getElementById('twelveDataBadge').textContent = 'No Key';
+                document.getElementById('twelveDataStatus').textContent = '⚠️ No API key';
+                document.getElementById('twelveDataTime').textContent = new Date().toLocaleTimeString();
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://api.twelvedata.com/quote?symbol=AAPL&apikey=${key}`);
+                const data = await response.json();
+                
+                if (data.status === 'error' || data.code === 401) {
+                    throw new Error(data.message || 'Invalid API key');
+                }
+                
+                if (data.close) {
+                    log(`Twelve Data API: SUCCESS`, 'success');
+                    log(`AAPL Price: $${data.close} (${data.change > 0 ? '+' : ''}${data.change})`);
+                    
+                    document.getElementById('twelveDataIcon').className = 'status-icon success';
+                    document.getElementById('twelveDataBadge').className = 'status-badge active';
+                    document.getElementById('twelveDataBadge').textContent = 'Active';
+                    document.getElementById('twelveDataStatus').textContent = '✅ Working';
+                    document.getElementById('twelveDataTime').textContent = new Date().toLocaleTimeString();
+                } else {
+                    throw new Error('Invalid response');
+                }
+            } catch (error) {
+                log(`Twelve Data API: FAILED - ${error.message}`, 'error');
+                document.getElementById('twelveDataIcon').className = 'status-icon error';
+                document.getElementById('twelveDataBadge').className = 'status-badge inactive';
+                document.getElementById('twelveDataBadge').textContent = 'Error';
+                document.getElementById('twelveDataStatus').textContent = '❌ Failed';
+                document.getElementById('twelveDataTime').textContent = new Date().toLocaleTimeString();
+            }
+        }
+        
+        async function testNewsAPI() {
+            log('Testing NewsAPI...');
+            const key = AppConfig.thirdPartyApis?.newsapi?.key;
+            
+            if (!key || key === 'YOUR_NEWSAPI_KEY_HERE' || key === '') {
+                log('NewsAPI: No API key configured', 'error');
+                document.getElementById('newsApiIcon').className = 'status-icon warning';
+                document.getElementById('newsApiBadge').className = 'status-badge inactive';
+                document.getElementById('newsApiBadge').textContent = 'No Key';
+                document.getElementById('newsApiStatus').textContent = '⚠️ No API key';
+                document.getElementById('newsApiTime').textContent = new Date().toLocaleTimeString();
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://newsapi.org/v2/everything?q=bitcoin&pageSize=1&apiKey=${key}`);
+                const data = await response.json();
+                
+                if (data.status === 'error') {
+                    throw new Error(data.message || 'API error');
+                }
+                
+                if (data.articles) {
+                    log(`NewsAPI: SUCCESS`, 'success');
+                    log(`Found ${data.totalResults} articles`);
+                    if (data.articles[0]) {
+                        log(`Latest: ${data.articles[0].title.substring(0, 60)}...`);
+                    }
+                    
+                    document.getElementById('newsApiIcon').className = 'status-icon success';
+                    document.getElementById('newsApiBadge').className = 'status-badge active';
+                    document.getElementById('newsApiBadge').textContent = 'Active';
+                    document.getElementById('newsApiStatus').textContent = '✅ Working';
+                    document.getElementById('newsApiTime').textContent = new Date().toLocaleTimeString();
+                } else {
+                    throw new Error('Invalid response');
+                }
+            } catch (error) {
+                log(`NewsAPI: FAILED - ${error.message}`, 'error');
+                document.getElementById('newsApiIcon').className = 'status-icon error';
+                document.getElementById('newsApiBadge').className = 'status-badge inactive';
+                document.getElementById('newsApiBadge').textContent = 'Error';
+                document.getElementById('newsApiStatus').textContent = '❌ Failed';
+                document.getElementById('newsApiTime').textContent = new Date().toLocaleTimeString();
+            }
+        }
+        
+        async function testAllAPIs() {
+            testLog = '';
+            log('=== Starting API Tests ===');
+            log('');
+            
+            await testCoinGecko();
+            log('');
+            await testTwelveData();
+            log('');
+            await testNewsAPI();
+            log('');
+            log('=== Tests Complete ===');
+        }
+        
+        // Check API key status on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const twelveKey = AppConfig.thirdPartyApis?.twelveData?.key;
+            const newsKey = AppConfig.thirdPartyApis?.newsapi?.key;
+            
+            document.getElementById('twelveDataKeyStatus').textContent = 
+                (twelveKey && twelveKey !== 'YOUR_TWELVE_DATA_KEY_HERE' && twelveKey !== '') ? 'Yes ✅' : 'No ❌';
+                
+            document.getElementById('newsApiKeyStatus').textContent = 
+                (newsKey && newsKey !== 'YOUR_NEWSAPI_KEY_HERE' && newsKey !== '') ? 'Yes ✅' : 'No ❌';
+            
+            // Auto-test on load
+            setTimeout(testAllAPIs, 500);
+        });
+    </script>
+</body>
+</html>

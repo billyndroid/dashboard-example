@@ -478,11 +478,29 @@ function startRealTimeUpdates() {
 }
 
 // Enhanced data refresh with DataService
-function refreshDashboardData() {
+async function refreshDashboardData() {
     try {
         if (window.DataService) {
-            // Get latest market data
+            // Get latest market data with real-time prices if available
             const assets = ['S&P 500', 'NASDAQ', 'Gold', 'Oil', 'Bitcoin'];
+            
+            // Try to get real-time prices
+            const useMockData = window.AppConfig?.useMockData ?? true;
+            
+            if (!useMockData) {
+                console.log('[Dashboard] Fetching real-time data...');
+                
+                // Fetch real crypto prices
+                try {
+                    const cryptoPrices = await DataService.fetchCryptoPrices(['bitcoin', 'ethereum']);
+                    if (cryptoPrices) {
+                        console.log('[Dashboard] Real crypto prices:', cryptoPrices);
+                    }
+                } catch (error) {
+                    console.warn('[Dashboard] Crypto API error:', error);
+                }
+            }
+            
             const marketData = DataService.getMarketData(assets, 1);
             
             // Calculate top performers
@@ -503,10 +521,70 @@ function refreshDashboardData() {
                 worstPerformer.querySelector('small').textContent = `${bottom.asset} ${bottom.change.toFixed(2)}%`;
             }
             
-            console.info('Dashboard data refreshed with DataService');
+            console.info('[Dashboard] Data refreshed');
         }
     } catch (error) {
         console.error('Error refreshing dashboard data:', error);
+    }
+}
+
+// Update recent updates with real-time crypto prices
+async function updateRecentUpdatesWithRealPrices() {
+    try {
+        const useMockData = window.AppConfig?.useMockData ?? true;
+        const apiStatus = document.getElementById('apiStatus');
+        
+        if (!useMockData && window.DataService) {
+            // Fetch real crypto prices
+            const cryptoPrices = await DataService.fetchCryptoPrices(['bitcoin', 'ethereum']);
+            
+            if (cryptoPrices && cryptoPrices.bitcoin) {
+                // Show API status indicator
+                if (apiStatus) {
+                    apiStatus.style.display = 'flex';
+                    apiStatus.style.alignItems = 'center';
+                    apiStatus.style.gap = '0.5rem';
+                }
+                
+                // Update Bitcoin message in recent updates
+                const updates = document.querySelectorAll('.recent-updates .update');
+                updates.forEach(update => {
+                    const message = update.querySelector('.message p');
+                    if (message && message.textContent.includes('Bitcoin')) {
+                        const price = cryptoPrices.bitcoin.usd;
+                        const change = cryptoPrices.bitcoin.usd_24h_change || 0;
+                        const changeSymbol = change >= 0 ? '+' : '';
+                        message.innerHTML = `<b>Bitcoin</b> trading at $${price.toLocaleString('en-US', {maximumFractionDigits: 2})} (${changeSymbol}${change.toFixed(2)}% 24h)`;
+                        
+                        // Update timestamp
+                        const timestamp = update.querySelector('.message small');
+                        if (timestamp) {
+                            timestamp.textContent = 'Just now (live data)';
+                        }
+                        
+                        console.log('[Dashboard] Updated Bitcoin price:', price);
+                    }
+                    
+                    if (message && message.textContent.includes('Ethereum')) {
+                        const ethPrice = cryptoPrices.ethereum?.usd;
+                        if (ethPrice) {
+                            const ethChange = cryptoPrices.ethereum.usd_24h_change || 0;
+                            const changeSymbol = ethChange >= 0 ? '+' : '';
+                            message.innerHTML = `<b>Ethereum</b> trading at $${ethPrice.toLocaleString('en-US', {maximumFractionDigits: 2})} (${changeSymbol}${ethChange.toFixed(2)}% 24h)`;
+                            
+                            const timestamp = update.querySelector('.message small');
+                            if (timestamp) {
+                                timestamp.textContent = 'Just now (live data)';
+                            }
+                            
+                            console.log('[Dashboard] Updated Ethereum price:', ethPrice);
+                        }
+                    }
+                });
+            }
+        }
+    } catch (error) {
+        console.error('[Dashboard] Error updating real-time prices:', error);
     }
 }
 
@@ -529,12 +607,20 @@ if (document.readyState === 'loading') {
         startRealTimeUpdates();
         refreshDashboardData();
         updateNotificationBadge();
+        // Update real-time crypto prices
+        updateRecentUpdatesWithRealPrices();
+        // Refresh crypto prices every 30 seconds
+        setInterval(updateRecentUpdatesWithRealPrices, 30000);
     });
 } else {
     updateDashboardMetrics();
     startRealTimeUpdates();
     refreshDashboardData();
     updateNotificationBadge();
+    // Update real-time crypto prices
+    updateRecentUpdatesWithRealPrices();
+    // Refresh crypto prices every 30 seconds
+    setInterval(updateRecentUpdatesWithRealPrices, 30000);
 }
 
 // Make functions globally available
@@ -542,4 +628,5 @@ window.showOrderDetails = showOrderDetails;
 window.updateDashboardMetrics = updateDashboardMetrics;
 window.startRealTimeUpdates = startRealTimeUpdates;
 window.refreshDashboardData = refreshDashboardData;
+window.updateRecentUpdatesWithRealPrices = updateRecentUpdatesWithRealPrices;
 window.updateNotificationBadge = updateNotificationBadge;
