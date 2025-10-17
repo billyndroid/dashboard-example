@@ -82,7 +82,56 @@ const AppConfig = {
     },
     
     // Mock data flag for development
-    useMockData: true, // Set to false when real API is available
+    useMockData: false, // Set to false when real API is available
+    
+    // Third-party API configuration
+    thirdPartyApis: {
+        // Free crypto API (no key needed)
+        coingecko: {
+            enabled: true,
+            baseUrl: 'https://api.coingecko.com/api/v3',
+            endpoints: {
+                prices: '/simple/price',
+                markets: '/coins/markets',
+                historical: '/coins/{id}/market_chart'
+            }
+        },
+        // Stock, forex, commodities API (requires free key from https://twelvedata.com)
+        twelveData: {
+            enabled: true,
+            key: '', // Add your free API key here
+            baseUrl: 'https://api.twelvedata.com',
+            endpoints: {
+                quote: '/quote',
+                timeseries: '/time_series',
+                forex: '/forex_pairs',
+                commodities: '/commodities'
+            }
+        },
+        // Financial news API (requires free key from https://newsapi.org)
+        newsapi: {
+            enabled: true,
+            key: '', // Add your free API key here
+            baseUrl: 'https://newsapi.org/v2',
+            endpoints: {
+                everything: '/everything',
+                topHeadlines: '/top-headlines'
+            }
+        },
+        // Alternative: Alpha Vantage (free key from https://www.alphavantage.co)
+        alphaVantage: {
+            enabled: true,
+            key: '', // Add your free API key here
+            baseUrl: 'https://www.alphavantage.co/query',
+            functions: {
+                quote: 'GLOBAL_QUOTE',
+                intraday: 'TIME_SERIES_INTRADAY',
+                forex: 'CURRENCY_EXCHANGE_RATE',
+                crypto: 'DIGITAL_CURRENCY_DAILY',
+                news: 'NEWS_SENTIMENT'
+            }
+        }
+    },
     
     // Error monitoring (optional)
     monitoring: {

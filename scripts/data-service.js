@@ -1,9 +1,165 @@
 /**
  * Enhanced Data Service
  * Provides historical data generation, time-series utilities, and data sources for charts
+ * Supports real API integration with fallback to generated data
  */
 
 const DataService = {
+    /**
+     * Fetch real-time crypto prices from CoinGecko API
+     * @param {Array} symbols - Array of crypto symbols
+     * @returns {Promise<Object>} Price data
+     */
+    async fetchCryptoPrices(symbols = ['bitcoin', 'ethereum']) {
+        try {
+            const config = window.AppConfig?.thirdPartyApis?.coingecko;
+            if (!config?.enabled) return null;
+            
+            const ids = symbols.join(',');
+            const url = `${config.baseUrl}/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
+            
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`CoinGecko API error: ${response.status}`);
+            
+            return await response.json();
+        } catch (error) {
+            console.error('[DataService] Crypto price fetch error:', error);
+            return null;
+        }
+    },
+    
+    /**
+     * Fetch stock/forex/commodity data from Twelve Data API
+     * @param {string} symbol - Asset symbol
+     * @returns {Promise<Object>} Quote data
+     */
+    async fetchAssetQuote(symbol) {
+        try {
+            const config = window.AppConfig?.thirdPartyApis?.twelveData;
+            if (!config?.enabled || !config?.key) return null;
+            
+            const url = `${config.baseUrl}/quote?symbol=${symbol}&apikey=${config.key}`;
+            
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Twelve Data API error: ${response.status}`);
+            
+            return await response.json();
+        } catch (error) {
+            console.error('[DataService] Asset quote fetch error:', error);
+            return null;
+        }
+    },
+    
+    /**
+     * Fetch forex rate from Alpha Vantage
+     * @param {string} from - From currency
+     * @param {string} to - To currency
+     * @returns {Promise<Object>} Exchange rate data
+     */
+    async fetchForexRate(from, to) {
+        try {
+            const config = window.AppConfig?.thirdPartyApis?.alphaVantage;
+            if (!config?.enabled || !config?.key) return null;
+            
+            const url = `${config.baseUrl}?function=${config.functions.forex}&from_currency=${from}&to_currency=${to}&apikey=${config.key}`;
+            
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Alpha Vantage API error: ${response.status}`);
+            
+            return await response.json();
+        } catch (error) {
+            console.error('[DataService] Forex fetch error:', error);
+            return null;
+        }
+    },
+    
+    /**
+     * Get real-time price for an asset with API integration
+     * @param {string} asset - Asset name
+     * @returns {Promise<number>} Current price
+     */
+    async getRealTimePrice(asset) {
+        const useMockData = window.AppConfig?.useMockData ?? true;
+        
+        if (useMockData) {
+            // Use generated data
+            return this.generateCurrentPrice(asset);
+        }
+        
+        try {
+            // Map asset names to API symbols
+            const cryptoMap = {
+                'Bitcoin': 'bitcoin',
+                'Ethereum': 'ethereum'
+            };
+            
+            const stockMap = {
+                'S&P 500': 'SPY',
+                'NASDAQ': 'QQQ',
+                'FTSE': 'ISF.LON'
+            };
+            
+            const commodityMap = {
+                'Gold': 'XAUUSD',
+                'Silver': 'XAGUSD',
+                'Oil': 'USOIL',
+                'Crude Oil': 'USOIL',
+                'Natural Gas': 'NATGAS'
+            };
+            
+            // Try crypto API
+            if (cryptoMap[asset]) {
+                const data = await this.fetchCryptoPrices([cryptoMap[asset]]);
+                if (data && data[cryptoMap[asset]]) {
+                    return data[cryptoMap[asset]].usd;
+                }
+            }
+            
+            // Try stock/commodity API
+            if (stockMap[asset] || commodityMap[asset]) {
+                const symbol = stockMap[asset] || commodityMap[asset];
+                const data = await this.fetchAssetQuote(symbol);
+                if (data && data.close) {
+                    return parseFloat(data.close);
+                }
+            }
+            
+            // Fallback to generated data
+            return this.generateCurrentPrice(asset);
+            
+        } catch (error) {
+            console.error('[DataService] Real-time price error:', error);
+            return this.generateCurrentPrice(asset);
+        }
+    },
+    
+    /**
+     * Generate current price (fallback method)
+     * @param {string} asset - Asset name
+     * @returns {number} Generated price
+     */
+    generateCurrentPrice(asset) {
+        const basePrices = {
+            'S&P 500': 4200,
+            'NASDAQ': 13000,
+            'FTSE': 7500,
+            'Gold': 1950,
+            'Silver': 23,
+            'Oil': 85,
+            'Crude Oil': 85,
+            'Natural Gas': 2.8,
+            'Bitcoin': 65000,
+            'Ethereum': 3200,
+            'QQQ': 350
+        };
+        
+        const basePrice = basePrices[asset] || 100;
+        const volatility = 0.02;
+        const change = (Math.random() - 0.5) * volatility;
+        
+        return basePrice * (1 + change);
+    },
+    
     /**
      * Generate historical price data for an asset
      * @param {string} asset - Asset name

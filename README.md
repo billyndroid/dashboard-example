@@ -3,7 +3,30 @@
 Live Demo: https://billyndroid.github.io/dashboard-example/
 
 ## 🚀 Overview
-A modern, responsive financial trading dashboard with real-time data visualization, comprehensive notification system, and professional UI designed for commodity and index trading.
+A modern, responsive financial trading dashboard with **real-time data from live APIs**, comprehensive notification system, and professional UI designed for commodity and index trading.
+
+## 🆕 Real API Integration
+
+**NEW!** The dashboard now supports real-time data from multiple free APIs:
+
+- ✅ **Cryptocurrency Prices** - Working out of the box (no API key needed!)
+- ⚙️ **Stocks, Forex & Commodities** - Free API (800 requests/day)
+- ⚙️ **Financial News** - Real headlines from NewsAPI (100 requests/day)
+- 🔄 **Smart Fallback** - Automatically uses mock data if APIs unavailable
+
+### Quick Start
+
+1. **Crypto works now!** Just set `useMockData: false` in `config.js`
+2. **For more data**: Get free API keys and add to `config.local.js`
+3. **Full guide**: See [QUICK-START-REAL-APIs.md](./QUICK-START-REAL-APIs.md)
+
+**Supported APIs**:
+- [CoinGecko](https://www.coingecko.com/en/api) (Crypto - FREE, no key needed)
+- [Twelve Data](https://twelvedata.com/) (Stocks, Forex, Commodities)
+- [NewsAPI](https://newsapi.org/) (Financial News)
+- [Alpha Vantage](https://www.alphavantage.co/) (Alternative)
+
+📖 **Complete Setup**: [API-INTEGRATION-GUIDE.md](./API-INTEGRATION-GUIDE.md)
 
 ## ✨ Features
 
@@ -199,24 +222,65 @@ const AppConfig = {
 
 ## 📊 Data Sources
 
-### Mock Data (Default)
-- **DataService** generates historical price data using random walk algorithm
-- **NotificationService** creates 50+ sample notifications
-- No backend required - fully client-side
+### 🆕 Real API Integration (NEW!)
 
-### Real API Integration
-1. Set `useMockData: false` in `config.js`
-2. Configure API endpoints
-3. Implement authentication if needed
-4. Update service files to use fetch instead of mock data
+The dashboard now supports **real-time data** from multiple free APIs:
 
-Example:
+#### ✅ Cryptocurrency Prices (CoinGecko)
+- **Status**: Working out of the box (no API key needed!)
+- **Supports**: Bitcoin, Ethereum, and 10,000+ cryptocurrencies
+- **Features**: Real-time prices, 24h changes, market cap
+
+#### ⚙️ Stocks, Forex & Commodities (Twelve Data)
+- **Status**: Requires free API key
+- **Free tier**: 800 requests/day
+- **Supports**: 5,000+ stocks, 50+ forex pairs, 20+ commodities
+- **Sign up**: https://twelvedata.com
+
+#### ⚙️ Financial News (NewsAPI)
+- **Status**: Requires free API key
+- **Free tier**: 100 requests/day
+- **Features**: Real-time financial news, search, filtering
+- **Sign up**: https://newsapi.org/register
+
+#### ⚙️ Alternative APIs (Alpha Vantage)
+- **Status**: Requires free API key
+- **Free tier**: 25 requests/day
+- **Features**: Stocks, forex, crypto, news with sentiment
+- **Sign up**: https://www.alphavantage.co/support/#api-key
+
+**📖 Complete Setup Guide**: See [API-INTEGRATION-GUIDE.md](./API-INTEGRATION-GUIDE.md) for detailed instructions.
+
+### Quick API Setup
+
+1. **Get free API keys** (optional - crypto works without keys!)
+2. **Add keys to `config.js`**:
 ```javascript
-async function getMarketData() {
-    const response = await fetch(`${AppConfig.api.baseUrl}/market`);
-    return await response.json();
+thirdPartyApis: {
+    coingecko: { enabled: true },  // ✅ Already working!
+    twelveData: { enabled: true, key: 'YOUR_KEY' },
+    newsapi: { enabled: true, key: 'YOUR_KEY' },
+    alphaVantage: { enabled: true, key: 'YOUR_KEY' }
 }
 ```
+3. **Enable real APIs**: Set `useMockData: false` in `config.js`
+
+### Mock Data (Default)
+When `useMockData: true` (default):
+- **DataService** generates realistic price data using random walk algorithm
+- **NotificationService** creates 50+ sample notifications
+- **NewsService** provides 12 mock financial articles
+- No backend required - fully client-side
+- Perfect for development and testing
+
+### Smart Fallback System
+The dashboard automatically falls back to mock data if:
+- API keys are missing
+- Rate limits are exceeded
+- APIs are temporarily unavailable
+- No internet connection
+
+This ensures the dashboard **always works** regardless of API status.
 
 ## 🎯 Key Features in Detail
 

@@ -6,20 +6,29 @@
 
 class NewsService {
     constructor() {
-        // API Configuration - Users should add their own API keys
+        // API Configuration - Check global config first, then use defaults
+        const globalConfig = window.AppConfig?.thirdPartyApis || {};
+        
         this.config = {
             newsapi: {
-                enabled: false, // Set to true when API key is added
-                key: '', // Get free key from https://newsapi.org
-                baseUrl: 'https://newsapi.org/v2'
+                enabled: globalConfig.newsapi?.enabled && globalConfig.newsapi?.key ? true : false,
+                key: globalConfig.newsapi?.key || '',
+                baseUrl: globalConfig.newsapi?.baseUrl || 'https://newsapi.org/v2'
             },
             alphaVantage: {
-                enabled: false, // Set to true when API key is added
-                key: '', // Get free key from https://www.alphavantage.co
-                baseUrl: 'https://www.alphavantage.co/query'
+                enabled: globalConfig.alphaVantage?.enabled && globalConfig.alphaVantage?.key ? true : false,
+                key: globalConfig.alphaVantage?.key || '',
+                baseUrl: globalConfig.alphaVantage?.baseUrl || 'https://www.alphavantage.co/query'
             },
-            useMockData: true // Fallback to mock data when APIs are not configured
+            useMockData: window.AppConfig?.useMockData ?? true // Use global config, fallback to true
         };
+        
+        // Log configuration status
+        console.log('[NewsService] Configuration:', {
+            newsapi: this.config.newsapi.enabled ? 'Enabled' : 'Disabled',
+            alphaVantage: this.config.alphaVantage.enabled ? 'Enabled' : 'Disabled',
+            useMockData: this.config.useMockData
+        });
 
         this.cache = {
             articles: [],

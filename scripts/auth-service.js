@@ -72,9 +72,17 @@ const AuthService = {
                 return { success: false, error: 'Password must be at least 6 characters' };
             }
 
-            // In production, this would call your authentication API
-            // For now, we'll simulate with mock authentication
-            const result = await this.mockLogin(email, password);
+            // Check if we should use real API or mock authentication
+            const useMockAuth = window.AppConfig?.useMockData ?? true;
+            let result;
+            
+            if (!useMockAuth && window.AppConfig?.api?.endpoints?.auth?.login) {
+                // Real API authentication
+                result = await this.apiLogin(email, password);
+            } else {
+                // Mock authentication
+                result = await this.mockLogin(email, password);
+            }
 
             if (result.success) {
                 const sessionDuration = rememberMe ? 2592000000 : this.sessionDuration; // 30 days vs 1 hour
@@ -97,8 +105,56 @@ const AuthService = {
     },
 
     /**
+     * Real API login function
+     * @param {string} email - User email
+     * @param {string} password - User password
+     * @returns {Promise<object>} Login result
+     */
+    async apiLogin(email, password) {
+        try {
+            const apiUrl = window.AppConfig.getApiUrl(window.AppConfig.api.endpoints.auth.login);
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password }),
+                signal: AbortSignal.timeout(window.AppConfig.api.timeout)
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    return { success: false, error: 'Invalid email or password' };
+                }
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            // Expected response format:
+            // { success: true, user: {...}, token: '...' }
+            if (data.success && data.user) {
+                // Store auth token if provided
+                if (data.token) {
+                    localStorage.setItem('authToken', data.token);
+                }
+                return { success: true, user: data.user };
+            } else {
+                return { success: false, error: data.error || 'Login failed' };
+            }
+            
+        } catch (error) {
+            console.error('[AuthService] API login error:', error);
+            // Fallback to mock login on API error
+            console.log('[AuthService] Falling back to mock authentication');
+            return await this.mockLogin(email, password);
+        }
+    },
+
+    /**
      * Mock login function for demonstration
-     * Replace with actual API call in production
+     * Used when useMockData is true or API is unavailable
      * @param {string} email - User email
      * @param {string} password - User password
      * @returns {Promise<object>} Mock login result
