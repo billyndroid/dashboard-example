@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial News - Dashboard</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp"
+      rel="stylesheet">
+      <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <div class="container">
+        <aside class="top">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="48" height="48" role="img" aria-labelledby="logoTitle logoDesc">
+                  <title id="logoTitle">SQU^RE DOFF Trading Dashboard</title>
+                  <desc id="logoDesc">Square logo with an upward trending chart line indicating market performance.</desc>
+                  <g opacity="0.08" fill="none" class="logo-grid" stroke-width="0.8">
+                    <path d="M10 48 L54 48" />
+                    <path d="M10 36 L54 36" />
+                    <path d="M10 24 L54 24" />
+                    <path d="M22 10 L22 54" />
+                    <path d="M34 10 L34 54" />
+                    <path d="M46 10 L46 54" />
+                  </g>
+                  <rect x="12" y="36" width="6" height="10" rx="1" class="logo-bar" opacity="0.18" />
+                  <rect x="22" y="30" width="6" height="16" rx="1" class="logo-bar" opacity="0.22" />
+                  <rect x="32" y="22" width="6" height="24" rx="1" class="logo-bar-active" />
+                  <rect x="42" y="16" width="6" height="30" rx="1" class="logo-bar" opacity="0.18" />
+                  <polyline points="12,42 20,34 28,26 36,20 44,16" fill="none" class="logo-line" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <circle cx="44" cy="16" r="3.2" class="logo-accent" />
+                </svg>
+                <h2>SQU^RE<span class="danger">DOFF</span></h2>
+            </div>
+            <div class="close" id="close-btn" role="button" aria-label="Close sidebar" tabindex="0">
+                <span class="material-icons-sharp" aria-hidden="true">close</span>
+            </div>
+
+            <nav class="sidebar" role="navigation" aria-label="Main navigation">
+                <a href="../index.html">
+                    <span class="material-icons-sharp" aria-hidden="true">grid_view</span>
+                    <h3>Dashboard</h3>
+                </a>
+
+                <a href="indecescommodities.html">
+                    <span class="material-icons-sharp" aria-hidden="true">person_outline</span>
+                    <h3>Indeces</h3>
+                </a>
+
+                <a href="indecescommodities.html">
+                    <span class="material-icons-sharp" aria-hidden="true">receipt_long</span>
+                    <h3>Commodities</h3>
+                </a>
+
+                <a href="analytics.html">
+                    <span class="material-icons-sharp" aria-hidden="true">insights</span>
+                    <h3>Analytics</h3>
+                </a>
+
+                <a href="messages.html">
+                    <span class="material-icons-sharp" aria-hidden="true">mail_outline</span>
+                    <h3>Messages</h3>
+                    <span class="message-count" aria-label="21 unread messages">21</span>
+                </a>
+
+                <a href="orders.html">
+                    <span class="material-icons-sharp" aria-hidden="true">inventory</span>
+                    <h3>Orders</h3>
+                </a>
+
+                <a href="news.html" aria-current="page">
+                    <span class="material-icons-sharp" aria-hidden="true">newspaper</span>
+                    <h3>Financial News</h3>
+                </a>
+
+                <a href="reports.html">
+                    <span class="material-icons-sharp" aria-hidden="true">error</span>
+                    <h3>Reports</h3>
+                </a>
+
+                <a href="settings.html">
+                    <span class="material-icons-sharp" aria-hidden="true">settings</span>
+                    <h3>Settings</h3>
+                </a>
+
+                <a href="#">
+                    <span class="material-icons-sharp" aria-hidden="true">add</span>
+                    <h3>Add Commodity</h3>
+                </a>
+
+                <a href="#">
+                    <span class="material-icons-sharp" aria-hidden="true">logout</span>
+                    <h3>Logout</h3>
+                </a>
+            </nav>
+
+        </aside>
+
+        <main id="main-content" role="main" aria-label="Financial News content">
+            <h1>Financial News</h1>
+            
+            <!-- News Filters -->
+            <div class="news-filters">
+                <div class="filter-group">
+                    <button class="filter-btn active" data-category="all">
+                        <span class="material-icons-sharp">feed</span>
+                        All News
+                    </button>
+                    <button class="filter-btn" data-category="markets">
+                        <span class="material-icons-sharp">trending_up</span>
+                        Markets
+                    </button>
+                    <button class="filter-btn" data-category="crypto">
+                        <span class="material-icons-sharp">currency_bitcoin</span>
+                        Crypto
+                    </button>
+                    <button class="filter-btn" data-category="commodities">
+                        <span class="material-icons-sharp">savings</span>
+                        Commodities
+                    </button>
+                    <button class="filter-btn" data-category="forex">
+                        <span class="material-icons-sharp">currency_exchange</span>
+                        Forex
+                    </button>
+                </div>
+                
+                <div class="search-box">
+                    <span class="material-icons-sharp">search</span>
+                    <input type="text" id="newsSearch" placeholder="Search news..." aria-label="Search financial news">
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="newsLoading" class="news-loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Loading latest financial news...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="newsError" class="news-error" style="display: none;">
+                <span class="material-icons-sharp">error_outline</span>
+                <p>Unable to load news. Please try again later.</p>
+                <button class="btn btn-primary" id="retryBtn">Retry</button>
+            </div>
+
+            <!-- News Grid -->
+            <div id="newsGrid" class="news-grid">
+                <!-- News articles will be dynamically inserted here -->
+            </div>
+
+            <!-- Pagination -->
+            <div class="news-pagination" id="newsPagination" style="display: none;">
+                <button id="prevPage" class="btn btn-outline" disabled>
+                    <span class="material-icons-sharp">chevron_left</span>
+                    Previous
+                </button>
+                <span id="pageInfo" class="page-info">Page 1 of 1</span>
+                <button id="nextPage" class="btn btn-outline" disabled>
+                    Next
+                    <span class="material-icons-sharp">chevron_right</span>
+                </button>
+            </div>
+        </main>
+
+        <div class="right">
+            <div class="top">
+                <button id="menu-btn" aria-label="Open menu" aria-expanded="false">
+                    <span class="material-icons-sharp" aria-hidden="true">menu</span>
+                </button>    
+                <div class="theme-toggler" role="group" aria-label="Theme selection">
+                    <span class="material-icons-sharp active" role="button" aria-label="Light mode" aria-pressed="true" tabindex="0">light_mode</span>
+                    <span class="material-icons-sharp" role="button" aria-label="Dark mode" aria-pressed="false" tabindex="0">dark_mode</span>
+                </div>
+                <div class="profile">
+                    <div class="info">
+                        <p> Key: <b>Gavin</b></p>
+                        <small class="text-muted">Admin</small>
+                    </div>
+                    <div class="profile-pic">
+                        <img src="../assets/profile-pic-1.png" alt="Gavin's profile picture" height="50px" width="50px">
+                    </div>
+                </div>
+            </div>
+
+            <!-- News Stats -->
+            <div class="news-stats">
+                <h2>Today's Summary</h2>
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <span class="material-icons-sharp">article</span>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalArticles">0</h3>
+                        <small class="text-muted">Articles Loaded</small>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <span class="material-icons-sharp">schedule</span>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="lastUpdate">--:--</h3>
+                        <small class="text-muted">Last Updated</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trending Topics -->
+            <div class="trending-topics">
+                <h2>Trending Topics</h2>
+                <div class="topics-list" id="trendingTopics">
+                    <span class="topic-tag">Stock Market</span>
+                    <span class="topic-tag">Federal Reserve</span>
+                    <span class="topic-tag">Bitcoin</span>
+                    <span class="topic-tag">Oil Prices</span>
+                    <span class="topic-tag">Tech Stocks</span>
+                    <span class="topic-tag">Inflation</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/error-handler.js"></script>
+    <script src="../scripts/security-utils.js"></script>
+    <script src="../scripts/config.js"></script>
+    <script src="../scripts/news-service.js"></script>
+    <script src="../scripts/news.js"></script>
+    <script src="../scripts/main.js"></script>
+    
+</body>
+</html>
