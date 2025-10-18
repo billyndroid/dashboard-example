@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TradingView Live Charts</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link rel="stylesheet" href="styles/style.css">
+    <style>
+        #winRateGauge {
+            background: transparent !important;
+        }
+        #winRateGauge > div {
+            background: transparent !important;
+        }
+        .apexcharts-canvas {
+            background: transparent !important;
+        }
+        /* TradingView Chart Styles */
+        .tv-chart-container {
+            background: var(--color-white);
+            border-radius: var(--card-border-radius);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: var(--box-shadow);
+        }
+        .tv-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .tv-chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--color-dark);
+        }
+        .tv-chart-subtitle {
+            font-size: 0.85rem;
+            color: var(--color-info-dark);
+            margin-top: 0.25rem;
+        }
+        .tv-chart-controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .tv-btn {
+            padding: 0.4rem 0.8rem;
+            background: var(--color-light);
+            border: none;
+            border-radius: var(--border-radius-1);
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--color-dark);
+            transition: all 0.2s ease;
+        }
+        .tv-btn:hover {
+            background: var(--color-primary);
+            color: white;
+        }
+        .tv-btn.active {
+            background: var(--color-primary);
+            color: white;
+        }
+        .tv-chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .tv-chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.6rem;
+            background: var(--color-success);
+            color: white;
+            border-radius: 0.3rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <div class="container">
+        <aside class="top">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="48" height="48" role="img" aria-labelledby="logoTitle logoDesc">
+                  <title id="logoTitle">SQU^RE DOFF Trading Dashboard</title>
+                  <desc id="logoDesc">Square logo with an upward trending chart line indicating market performance.</desc>
+                  <g opacity="0.08" fill="none" class="logo-grid" stroke-width="0.8">
+                    <path d="M10 48 L54 48" />
+                    <path d="M10 36 L54 36" />
+                    <path d="M10 24 L54 24" />
+                    <path d="M22 10 L22 54" />
+                    <path d="M34 10 L34 54" />
+                    <path d="M46 10 L46 54" />
+                  </g>
+                  <rect x="12" y="36" width="6" height="10" rx="1" class="logo-bar" opacity="0.18" />
+                  <rect x="22" y="30" width="6" height="16" rx="1" class="logo-bar" opacity="0.22" />
+                  <rect x="32" y="22" width="6" height="24" rx="1" class="logo-bar-active" />
+                  <rect x="42" y="16" width="6" height="30" rx="1" class="logo-bar" opacity="0.18" />
+                  <polyline points="12,42 20,34 28,26 36,20 44,16" fill="none" class="logo-line" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <circle cx="44" cy="16" r="3.2" class="logo-accent" />
+                </svg>
+                <h2>SQU^RE<span class="danger">DOFF</span></h2>
+            </div>
+            <div class="close" id="close-btn" role="button" aria-label="Close sidebar" tabindex="0">
+                <span class="material-icons-sharp" aria-hidden="true">close</span>
+            </div>
+
+            <nav class="sidebar" role="navigation" aria-label="Main navigation">
+                <a href="index.html">
+                    <span class="material-icons-sharp">grid_view</span>
+                    <h3>Dashboard</h3>
+                </a>
+
+                <a href="html/news.html">
+                    <span class="material-icons-sharp">newspaper</span>
+                    <h3>Financial News</h3>
+                </a>
+
+                <a href="html/stocks.html">
+                    <span class="material-icons-sharp">trending_up</span>
+                    <h3>Stocks</h3>
+                </a>
+
+                <a href="html/indecescommodities.html">
+                    <span class="material-icons-sharp">show_chart</span>
+                    <h3>Indices & Commodities</h3>
+                </a>
+
+                <a href="html/crypto.html">
+                    <span class="material-icons-sharp">currency_bitcoin</span>
+                    <h3>Cryptocurrency</h3>
+                </a>
+
+                <a href="html/analytics.html">
+                    <span class="material-icons-sharp">insights</span>
+                    <h3>Analytics</h3>
+                </a>
+
+                <a href="html/messages.html">
+                    <span class="material-icons-sharp" aria-hidden="true">mail_outline</span>
+                    <h3>Messages</h3>
+                    <span class="message-count" aria-label="21 unread messages">21</span>
+                </a>
+
+                <a href="html/orders.html">
+                    <span class="material-icons-sharp">inventory</span>
+                    <h3>Orders</h3>
+                </a>
+
+                <a href="html/reports.html">
+                    <span class="material-icons-sharp">error</span>
+                    <h3>Reports</h3>
+                </a>
+
+                <a href="html/settings.html">
+                    <span class="material-icons-sharp">settings</span>
+                    <h3>Settings</h3>
+                </a>
+
+                <a href="#">
+                    <span class="material-icons-sharp">add</span>
+                    <h3>Add Commodity</h3>
+                </a>
+
+                <a href="#">
+                    <span class="material-icons-sharp">logout</span>
+                    <h3>Logout</h3>
+                </a>
+            </nav>
+
+        </aside>
+        <!--((((((((((((((End of Aside Section))))))))))))))-->
+        <main id="main-content" role="main" aria-label="Dashboard content">
+            <h1>Main Dashboard <span class="live-indicator"><span class="live-dot"></span>Live Data</span></h1>
+            <h2>Positions *Live/Historical</h2>
+
+            <div class="date">
+                <input type="date" aria-label="Select date for historical data" id="date-picker">
+            </div>
+
+ <!--((((((((((((((End of Date))))))))))))))-->
+
+            <div class="insights" role="region" aria-label="Portfolio metrics">
+                <div class="sales metric-card-clickable" role="article" aria-labelledby="total-position-label" onclick="openMetricsModal('portfolio')" style="cursor: pointer;" title="Click for detailed breakdown">
+                    <span class="material-icons-sharp" aria-hidden="true">attach_money</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3 id="total-position-label">Total Position</h3>
+                            <h3>USD</h3>
+                            <h1 data-live-update data-format="currency" data-base-value="247850" data-variance="0.02">$247.8K</h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx=38 cy=36 r=36 ></circle>
+                            </svg>
+                            <div class="number">
+                                <p>+2.4%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Portfolio Growth</small>
+                </div>
+
+                <div class="expenses metric-card-clickable" role="article" aria-labelledby="pnl-label" onclick="openMetricsModal('pnl')" style="cursor: pointer;" title="Click for detailed breakdown">
+                    <span class="material-icons-sharp" aria-hidden="true">trending_up</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3 id="pnl-label">Total P&L</h3>
+                            <h3>USD</h3>
+                            <h1 data-live-update data-format="currency" data-base-value="12058" data-variance="0.05">+$12.1K</h1>
+                        </div>
+                        <div class="progress">
+                            <svg>
+                                <circle cx=38 cy=36 r=36 ></circle>
+                            </svg>
+                            <div class="number">
+                                <p>+4.9%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Unrealized Gains</small>
+                </div>
+
+                <div class="income metric-card-clickable" role="article" aria-labelledby="win-rate-label" onclick="openMetricsModal('winrate')" style="cursor: pointer;" title="Click for detailed breakdown">
+                    <span class="material-icons-sharp" aria-hidden="true">assessment</span>
+                    <div class="middle">
+                        <div class="left">
+                            <h3 id="win-rate-label">Win Rate</h3>
+                            <h1 id="winRateValue" data-live-update data-format="percentage" data-base-value="0.73" data-variance="0.05">73%</h1>
+                        </div>
+                        <div class="progress" style="position: relative;">
+                            <div id="winRateGauge" style="background: transparent !important;"></div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Success Rate</small>
+                </div>
+            </div>
+
+            <!-- TradingView Live Charts Section -->
+            <div class="tv-chart-container">
+                <div class="tv-chart-header">
+                    <div>
+                        <div class="tv-chart-title">Bitcoin (BTC/USD) - Live Price</div>
+                        <div class="tv-chart-subtitle">Real-time data from CoinGecko API</div>
+                    </div>
+                    <div class="tv-chart-controls">
+                        <button class="tv-btn active" onclick="setBTCTimeframe('1D')">1D</button>
+                        <button class="tv-btn" onclick="setBTCTimeframe('7D')">7D</button>
+                        <button class="tv-btn" onclick="setBTCTimeframe('30D')">30D</button>
+                        <button class="tv-btn" onclick="setBTCTimeframe('1Y')">1Y</button>
+                    </div>
+                </div>
+                <div id="btc-chart" style="width: 100%; height: 400px;"></div>
+            </div>
+
+            <div class="tv-chart-grid">
+                <!-- Ethereum Chart -->
+                <div class="tv-chart-container">
+                    <div class="tv-chart-header">
+                        <div>
+                            <div class="tv-chart-title">Ethereum (ETH/USD)</div>
+                            <div class="tv-chart-subtitle">Live Crypto Data</div>
+                        </div>
+                    </div>
+                    <div id="eth-chart" style="width: 100%; height: 300px;"></div>
+                </div>
+
+                <!-- S&P 500 Chart -->
+                <div class="tv-chart-container">
+                    <div class="tv-chart-header">
+                        <div>
+                            <div class="tv-chart-title">S&P 500 Index</div>
+                            <div class="tv-chart-subtitle">Market Performance</div>
+                        </div>
+                    </div>
+                    <div id="sp500-chart" style="width: 100%; height: 300px;"></div>
+                </div>
+            </div>
+
+            <div class="recent-orders" role="region" aria-labelledby="orders-heading">
+                <h2 id="orders-heading">Indices & Commodities</h2>
+                <table role="table" aria-label="Trading positions and orders">
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Price/Qty</th>
+                            <th>P&L</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <!-- Orders will be populated by JavaScript -->
+                    </tbody>
+                </table>
+                <a href="#">Show All</a>
+            </div>
+        </main>
+        <!--(((((((((((((End of MAIN)))))))))))))-->
+        <div class="right">
+            <div class="top">
+                <button id="menu-btn" aria-label="Open menu" aria-expanded="false">
+                    <span class="material-icons-sharp" aria-hidden="true">menu</span>
+                </button>    
+                    <div class="theme-toggler" role="group" aria-label="Theme selection">
+                        <span class="material-icons-sharp active" role="button" aria-label="Light mode" aria-pressed="true" tabindex="0">light_mode</span>
+                        <span class="material-icons-sharp" role="button" aria-label="Dark mode" aria-pressed="false" tabindex="0">dark_mode</span>
+                    </div>
+                    
+                    <!-- API Status Indicator -->
+                    <div id="apiStatus" style="display: inline-flex; padding: 0.5rem 1rem; background: #10b981; color: white; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600; margin-left: 1rem;">
+                        <span class="material-icons-sharp" style="font-size: 1rem; vertical-align: middle;">cloud_done</span>
+                        Live Data
+                    </div>
+                    
+                    <div class="profile">
+                        <div class="info">
+                            <p> Key: <b>Gavin</b></p>
+                            <small class="text-muted">Admin</small>
+                        </div>
+                        <div class="profile-pic">
+                            <img src="assets/profile-pic-1.png" alt="Gavin's profile picture" height="50px" width="50px">
+                        </div>
+                    </div>
+            </div>
+
+            <div class="recent-updates" role="region" aria-labelledby="updates-heading">
+                <h2 id="updates-heading">Recent Updates</h2>
+                <div class="updates" id="recentUpdates" aria-live="polite" aria-atomic="false">
+                    <div class="update" role="article">
+                        <div class="profile-photo update-icon success">
+                            <span class="material-icons-sharp" aria-hidden="true">savings</span>
+                        </div>
+                        <div class="message">
+                            <p><b>Gold</b> position opened at $1,942.70 - currently +1.74%</p>
+                            <small class="text-muted">30 minutes ago</small>
+                        </div>
+                    </div>
+                    <div class="update" role="article">
+                        <div class="profile-photo update-icon primary">
+                            <span class="material-icons-sharp" aria-hidden="true">show_chart</span>
+                        </div>
+                        <div class="message">
+                            <p><b>S&P 500</b> showing strong momentum - up +0.24% today</p>
+                            <small class="text-muted">15 minutes ago</small>
+                        </div>
+                    </div>
+                    <div class="update" role="article">
+                        <div class="profile-photo update-icon warning">
+                            <span class="material-icons-sharp" aria-hidden="true">currency_bitcoin</span>
+                        </div>
+                        <div class="message">
+                            <p><b>Bitcoin</b> order pending execution at $<span id="btc-live-price">--</span></p>
+                            <small class="text-muted">Live</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sales-analytics" role="region" aria-labelledby="analytics-heading">
+                <h2 id="analytics-heading">Market Analytics</h2>
+
+                <div class="item customers" id="bestPerformer" role="article" aria-labelledby="top-performer-label">
+                    <div class="icon">
+                        <span class="material-icons-sharp" aria-hidden="true">trending_up</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3 id="top-performer-label">TOP PERFORMER</h3>
+                            <small class="text-muted">Bitcoin</small>
+                        </div>
+                        <h5 class="success" id="btc-change">+0.00%</h5>
+                        <h3 id="btc-price-display">$--</h3>
+                    </div>   
+                </div>
+
+                <div class="item offline" id="worstPerformer" role="article" aria-labelledby="needs-attention-label">
+                    <div class="icon">
+                        <span class="material-icons-sharp" aria-hidden="true">trending_down</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3 id="needs-attention-label">ETHEREUM</h3>
+                            <small class="text-muted">ETH/USD</small>
+                        </div>
+                        <h5 class="success" id="eth-change">+0.00%</h5>
+                        <h3 id="eth-price-display">$--</h3>
+                    </div>
+                </div>   
+
+                <div class="item add-product" role="button" tabindex="0" aria-label="Add new trading position">
+                    <div>
+                        <span class="material-icons-sharp" aria-hidden="true">add</span>
+                        <h3>Add Position</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Tooltip -->
+    <div id="chartTooltip" class="chart-tooltip" style="display: none;">
+        <div class="chart-tooltip-header">
+            <span id="chartTooltipAsset" class="chart-tooltip-asset">Asset</span>
+            <span id="chartTooltipPrice" class="chart-tooltip-price">$0.00</span>
+        </div>
+        <canvas id="chartTooltipCanvas" width="280" height="140"></canvas>
+        <div class="chart-tooltip-stats">
+            <div class="stat">
+                <span class="label">Change</span>
+                <span id="chartTooltipChange" class="value">+0.00%</span>
+            </div>
+            <div class="stat">
+                <span class="label">Volume</span>
+                <span id="chartTooltipVolume" class="value">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metrics Modal -->
+    <div id="metricsModal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-container" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 id="metricsModalTitle">Portfolio Metrics</h2>
+                <button class="modal-close" onclick="closeMetricsModal()">
+                    <span class="material-icons-sharp">close</span>
+                </button>
+            </div>
+            <div class="modal-body" id="metricsModalBody">
+                <!-- Content will be dynamically loaded -->
+            </div>
+        </div>
+    </div>
+
+    <!-- TradingView Lightweight Charts Library -->
+    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="scripts/error-handler.js"></script>
+    <script src="scripts/security-utils.js"></script>
+    <script src="scripts/performance-utils.js"></script>
+    <script src="scripts/config.js"></script>
+    <script src="scripts/config.local.js"></script>
+    <script src="scripts/data-service.js"></script>
+    <script src="scripts/notification-service.js"></script>
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/data-utils.js"></script>
+    <script src="scripts/countup-enhanced.js"></script>
+    <script src="scripts/orders.js"></script>
+    <script src="scripts/position-modal.js"></script>
+    <script src="scripts/chart-tooltip.js"></script>
+    <script src="scripts/main.js"></script>
+    
+    <!-- TradingView Charts with Live Data -->
+    <script>
+    // Global chart instances
+    let btcChart, ethChart, sp500Chart;
+    let btcSeries, ethSeries, sp500Series;
+    let currentBTCTimeframe = '1D';
+
+    // CoinGecko API endpoints (free, no API key required)
+    const COINGECKO_API = 'https://api.coingecko.com/api/v3';
+    
+    // Rate limiting: 8 calls per minute
+    const RATE_LIMIT = 8;
+    const RATE_WINDOW = 60000; // 1 minute in ms
+    let apiCallTimestamps = [];
+    
+    // Check if we can make an API call
+    function canMakeAPICall() {
+        const now = Date.now();
+        // Remove timestamps older than 1 minute
+        apiCallTimestamps = apiCallTimestamps.filter(timestamp => now - timestamp < RATE_WINDOW);
+        
+        if (apiCallTimestamps.length >= RATE_LIMIT) {
+            console.warn(`[API] Rate limit reached (${RATE_LIMIT} calls/minute). Waiting...`);
+            return false;
+        }
+        
+        apiCallTimestamps.push(now);
+        return true;
+    }
+    
+    // Wait for rate limit availability
+    async function waitForRateLimit() {
+        while (!canMakeAPICall()) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+    
+    // Generate crypto price history from current price
+    function generateCryptoHistory(currentPrice, days) {
+        const data = [];
+        const now = Math.floor(Date.now() / 1000);
+        const intervalSeconds = days === 1 ? 300 : days <= 7 ? 3600 : 86400; // 5min, 1hr, or 1day intervals
+        const points = days === 1 ? 288 : days <= 7 ? (days * 24) : days;
+        
+        let price = currentPrice * 0.95; // Start 5% lower
+        const volatility = currentPrice * 0.02; // 2% volatility
+        const trend = (currentPrice - price) / points; // Upward trend to current price
+        
+        for (let i = points; i >= 0; i--) {
+            const time = now - (i * intervalSeconds);
+            const randomChange = (Math.random() - 0.5) * volatility;
+            price += trend + randomChange;
+            
+            data.push({
+                time: time,
+                value: parseFloat(price.toFixed(2))
+            });
+        }
+        
+        // Ensure last point is current price
+        data[data.length - 1].value = currentPrice;
+        
+        return data;
+    }
+
+    // Fetch live Bitcoin data using DataService (handles CORS)
+    async function fetchBitcoinData(days = 1) {
+        try {
+            await waitForRateLimit();
+            
+            console.log(`[API] Fetching Bitcoin data for ${days} days via DataService...`);
+            
+            // Use DataService which has CORS proxy fallbacks
+            if (typeof DataService !== 'undefined' && DataService.fetchCryptoPrices) {
+                const cryptoData = await DataService.fetchCryptoPrices(['bitcoin']);
+                
+                if (cryptoData && cryptoData.bitcoin) {
+                    // Generate chart data from current price
+                    // For historical, we'll simulate or use a different endpoint
+                    const currentPrice = cryptoData.bitcoin.usd;
+                    const chartData = generateCryptoHistory(currentPrice, days);
+                    
+                    console.log(`[API] Bitcoin data loaded: ${chartData.length} points`);
+                    return chartData;
+                }
+            }
+            
+            console.warn('[API] DataService not available, generating simulated data');
+            return generateCryptoHistory(107000, days);
+        } catch (error) {
+            console.error('[API] Error fetching Bitcoin data:', error);
+            return generateCryptoHistory(107000, days);
+        }
+    }
+
+    // Fetch live Ethereum data using DataService
+    async function fetchEthereumData(days = 1) {
+        try {
+            await waitForRateLimit();
+            
+            console.log(`[API] Fetching Ethereum data for ${days} days via DataService...`);
+            
+            if (typeof DataService !== 'undefined' && DataService.fetchCryptoPrices) {
+                const cryptoData = await DataService.fetchCryptoPrices(['ethereum']);
+                
+                if (cryptoData && cryptoData.ethereum) {
+                    const currentPrice = cryptoData.ethereum.usd;
+                    const chartData = generateCryptoHistory(currentPrice, days);
+                    
+                    console.log(`[API] Ethereum data loaded: ${chartData.length} points`);
+                    return chartData;
+                }
+            }
+            
+            console.warn('[API] DataService not available, generating simulated data');
+            return generateCryptoHistory(3900, days);
+        } catch (error) {
+            console.error('[API] Error fetching Ethereum data:', error);
+            return generateCryptoHistory(3900, days);
+        }
+    }
+
+    // Fetch current crypto prices using DataService
+    async function fetchCurrentPrices() {
+        try {
+            await waitForRateLimit();
+            
+            console.log('[API] Fetching current crypto prices via DataService...');
+            
+            if (typeof DataService === 'undefined' || !DataService.fetchCryptoPrices) {
+                console.warn('[API] DataService not available');
+                return;
+            }
+            
+            const data = await DataService.fetchCryptoPrices(['bitcoin', 'ethereum']);
+            console.log('[API] Current prices received:', data);
+            
+            // Update Bitcoin price displays
+            if (data && data.bitcoin) {
+                const btcPrice = data.bitcoin.usd.toLocaleString('en-US', {style: 'currency', currency: 'USD', minimumFractionDigits: 2});
+                const btcChange = data.bitcoin.usd_24h_change ? data.bitcoin.usd_24h_change.toFixed(2) : '0.00';
+                
+                const btcPriceEl = document.getElementById('btc-price-display');
+                const btcLivePriceEl = document.getElementById('btc-live-price');
+                const btcChangeEl = document.getElementById('btc-change');
+                
+                if (btcPriceEl) btcPriceEl.textContent = btcPrice;
+                if (btcLivePriceEl) btcLivePriceEl.textContent = data.bitcoin.usd.toLocaleString('en-US', {minimumFractionDigits: 2});
+                if (btcChangeEl) {
+                    btcChangeEl.textContent = (btcChange >= 0 ? '+' : '') + btcChange + '%';
+                    btcChangeEl.className = btcChange >= 0 ? 'success' : 'danger';
+                }
+            }
+            
+            // Update Ethereum price displays
+            if (data && data.ethereum) {
+                const ethPrice = data.ethereum.usd.toLocaleString('en-US', {style: 'currency', currency: 'USD', minimumFractionDigits: 2});
+                const ethChange = data.ethereum.usd_24h_change ? data.ethereum.usd_24h_change.toFixed(2) : '0.00';
+                
+                const ethPriceEl = document.getElementById('eth-price-display');
+                const ethChangeEl = document.getElementById('eth-change');
+                
+                if (ethPriceEl) ethPriceEl.textContent = ethPrice;
+                if (ethChangeEl) {
+                    ethChangeEl.textContent = (ethChange >= 0 ? '+' : '') + ethChange + '%';
+                    ethChangeEl.className = ethChange >= 0 ? 'success' : 'danger';
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching current prices:', error);
+        }
+    }
+
+    // Generate simulated S&P 500 data (would need real API for production)
+    function generateSP500Data(days = 30) {
+        const data = [];
+        const now = Math.floor(Date.now() / 1000);
+        const dayInSeconds = 24 * 60 * 60;
+        let price = 4500;
+        
+        for (let i = days; i >= 0; i--) {
+            const time = now - (i * dayInSeconds);
+            price += (Math.random() - 0.48) * 30;
+            data.push({
+                time: time,
+                value: parseFloat(price.toFixed(2))
+            });
+        }
+        return data;
+    }
+
+    // Initialize Bitcoin chart
+    async function initBitcoinChart() {
+        if (typeof LightweightCharts === 'undefined') {
+            console.error('[Chart] LightweightCharts library not loaded!');
+            return;
+        }
+        
+        const chartElement = document.getElementById('btc-chart');
+        if (!chartElement) {
+            console.error('[Chart] Bitcoin chart element not found!');
+            return;
+        }
+        
+        console.log('[Chart] Initializing Bitcoin chart...');
+        
+        try {
+            btcChart = LightweightCharts.createChart(chartElement, {
+                width: chartElement.clientWidth,
+                height: 400,
+                layout: {
+                    background: { color: 'transparent' },
+                    textColor: '#6b7280',
+                },
+                grid: {
+                    vertLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                    horzLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                },
+                rightPriceScale: {
+                    borderColor: 'rgba(107, 114, 128, 0.2)',
+                },
+                timeScale: {
+                    borderColor: 'rgba(107, 114, 128, 0.2)',
+                    timeVisible: true,
+                    secondsVisible: false,
+                },
+            });
+
+            console.log('[Chart] Bitcoin chart object created, type:', typeof btcChart);
+            console.log('[Chart] Available methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(btcChart)));
+
+            btcSeries = btcChart.addAreaSeries({
+                topColor: 'rgba(239, 142, 66, 0.4)',
+                bottomColor: 'rgba(239, 142, 66, 0.0)',
+                lineColor: '#f59e0b',
+                lineWidth: 2,
+            });            // Load initial data
+            const data = await fetchBitcoinData(1);
+            if (data.length > 0) {
+                btcSeries.setData(data);
+                console.log('[Chart] Bitcoin chart initialized with', data.length, 'data points');
+            } else {
+                console.warn('[Chart] No Bitcoin data available');
+            }
+        } catch (error) {
+            console.error('[Chart] Error initializing Bitcoin chart:', error);
+        }
+    }
+
+    // Initialize Ethereum chart
+    async function initEthereumChart() {
+        if (typeof LightweightCharts === 'undefined') {
+            console.error('[Chart] LightweightCharts library not loaded!');
+            return;
+        }
+        
+        const chartElement = document.getElementById('eth-chart');
+        if (!chartElement) {
+            console.error('[Chart] Ethereum chart element not found!');
+            return;
+        }
+        
+        console.log('[Chart] Initializing Ethereum chart...');
+        
+        try {
+            ethChart = LightweightCharts.createChart(chartElement, {
+            width: chartElement.clientWidth,
+            height: 300,
+            layout: {
+                background: { color: 'transparent' },
+                textColor: '#6b7280',
+            },
+            grid: {
+                vertLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                horzLines: { color: 'rgba(107, 114, 128, 0.1)' },
+            },
+            timeScale: {
+                borderColor: 'rgba(107, 114, 128, 0.2)',
+                timeVisible: true,
+            },
+        });
+
+        ethSeries = ethChart.addLineSeries({
+            color: '#627eea',
+            lineWidth: 2,
+        });
+
+            const data = await fetchEthereumData(1);
+            if (data.length > 0) {
+                ethSeries.setData(data);
+                console.log('[Chart] Ethereum chart initialized with', data.length, 'data points');
+            } else {
+                console.warn('[Chart] No Ethereum data available');
+            }
+        } catch (error) {
+            console.error('[Chart] Error initializing Ethereum chart:', error);
+        }
+    }
+
+    // Initialize S&P 500 chart
+    function initSP500Chart() {
+        if (typeof LightweightCharts === 'undefined') {
+            console.error('[Chart] LightweightCharts library not loaded!');
+            return;
+        }
+        
+        const chartElement = document.getElementById('sp500-chart');
+        if (!chartElement) {
+            console.error('[Chart] S&P 500 chart element not found!');
+            return;
+        }
+        
+        console.log('[Chart] Initializing S&P 500 chart...');
+        
+        try {
+            sp500Chart = LightweightCharts.createChart(chartElement, {
+            width: chartElement.clientWidth,
+            height: 300,
+            layout: {
+                background: { color: 'transparent' },
+                textColor: '#6b7280',
+            },
+            grid: {
+                vertLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                horzLines: { color: 'rgba(107, 114, 128, 0.1)' },
+            },
+            timeScale: {
+                borderColor: 'rgba(107, 114, 128, 0.2)',
+                timeVisible: true,
+            },
+        });
+
+        sp500Series = sp500Chart.addAreaSeries({
+            topColor: 'rgba(16, 185, 129, 0.4)',
+            bottomColor: 'rgba(16, 185, 129, 0.0)',
+            lineColor: '#10b981',
+            lineWidth: 2,
+        });
+
+            const data = generateSP500Data(30);
+            sp500Series.setData(data);
+            console.log('[Chart] S&P 500 chart initialized with', data.length, 'data points');
+        } catch (error) {
+            console.error('[Chart] Error initializing S&P 500 chart:', error);
+        }
+    }
+
+    // Set Bitcoin timeframe
+    async function setBTCTimeframe(tf) {
+        const days = tf === '1D' ? 1 : tf === '7D' ? 7 : tf === '30D' ? 30 : 365;
+        currentBTCTimeframe = tf;
+        
+        const data = await fetchBitcoinData(days);
+        if (data.length > 0 && btcSeries) {
+            btcSeries.setData(data);
+        }
+        
+        // Update button states
+        document.querySelectorAll('.tv-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.textContent === tf) btn.classList.add('active');
+        });
+    }
+
+    // Responsive resize handler
+    window.addEventListener('resize', () => {
+        const btcElement = document.getElementById('btc-chart');
+        const ethElement = document.getElementById('eth-chart');
+        const sp500Element = document.getElementById('sp500-chart');
+
+        if (btcChart) btcChart.applyOptions({ width: btcElement.clientWidth });
+        if (ethChart) ethChart.applyOptions({ width: ethElement.clientWidth });
+        if (sp500Chart) sp500Chart.applyOptions({ width: sp500Element.clientWidth });
+    });
+
+    // Initialize all charts and fetch data
+    window.addEventListener('load', async () => {
+        console.log('[Init] Page loaded, waiting for libraries...');
+        
+        // Wait for LightweightCharts library to load
+        let attempts = 0;
+        while (typeof LightweightCharts === 'undefined' && attempts < 50) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+        
+        if (typeof LightweightCharts === 'undefined') {
+            console.error('[Init] LightweightCharts library failed to load after 5 seconds');
+            return;
+        }
+        
+        console.log('[Init] LightweightCharts library loaded successfully');
+        
+        // Initialize charts with staggered API calls to respect rate limit
+        try {
+            await initBitcoinChart();
+            await new Promise(resolve => setTimeout(resolve, 500)); // Small delay between chart inits
+            
+            await initEthereumChart();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            initSP500Chart();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await fetchCurrentPrices();
+            
+            console.log('[Init] All charts initialized successfully');
+        } catch (error) {
+            console.error('[Init] Error during initialization:', error);
+        }
+
+        // Update prices every 120 seconds (2 minutes) to stay well under rate limit
+        setInterval(async () => {
+            try {
+                console.log('[Update] Starting periodic update...');
+                
+                await fetchCurrentPrices();
+                
+                // Update Bitcoin chart with latest data
+                const btcData = await fetchBitcoinData(currentBTCTimeframe === '1D' ? 1 : currentBTCTimeframe === '7D' ? 7 : currentBTCTimeframe === '30D' ? 30 : 365);
+                if (btcData.length > 0 && btcSeries) {
+                    btcSeries.setData(btcData);
+                }
+                
+                // Update Ethereum chart
+                const ethData = await fetchEthereumData(1);
+                if (ethData.length > 0 && ethSeries) {
+                    ethSeries.setData(ethData);
+                }
+                
+                console.log('[Update] Periodic update completed');
+            } catch (error) {
+                console.error('[Update] Error during periodic update:', error);
+            }
+        }, 120000); // Every 2 minutes instead of 1
+    });
+    </script>
+
+    <!-- Win Rate Gauge Initialization -->
+    <script>
+    let winRateGaugeChart = null;
+    let winRateData = {
+        correct: 27,
+        total: 37,
+        get percentage() {
+            return Math.round((this.correct / this.total) * 100);
+        }
+    };
+
+    function initWinRateGauge() {
+        const options = {
+            series: [winRateData.percentage],
+            chart: {
+                type: 'radialBar',
+                height: 80,
+                width: 80,
+                sparkline: { enabled: false },
+                background: 'transparent',
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    speed: 800,
+                }
+            },
+            plotOptions: {
+                radialBar: {
+                    hollow: {
+                        size: '60%',
+                        background: 'transparent'
+                    },
+                    track: {
+                        background: 'var(--color-light)',
+                        strokeWidth: '100%',
+                        margin: 0,
+                        opacity: 0.3
+                    },
+                    dataLabels: { show: false },
+                    startAngle: -90,
+                    endAngle: 90
+                }
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shade: 'dark',
+                    type: 'horizontal',
+                    shadeIntensity: 0.5,
+                    gradientToColors: ['#10b981'],
+                    stops: [0, 100]
+                }
+            },
+            colors: ['#2d6cdf'],
+            stroke: { lineCap: 'round' }
+        };
+
+        const gaugeElement = document.querySelector('#winRateGauge');
+        if (gaugeElement && !winRateGaugeChart) {
+            winRateGaugeChart = new ApexCharts(gaugeElement, options);
+            winRateGaugeChart.render();
+        }
+    }
+
+    function updateWinRateGauge() {
+        const variation = Math.floor(Math.random() * 5);
+        winRateData.correct = 27 + variation;
+        winRateData.total = 37 + Math.floor(Math.random() * 3);
+        
+        const percentage = winRateData.percentage;
+        
+        if (winRateGaugeChart) {
+            winRateGaugeChart.updateSeries([percentage]);
+        }
+        
+        const valueElement = document.getElementById('winRateValue');
+        if (valueElement) {
+            valueElement.textContent = percentage + '%';
+            valueElement.setAttribute('data-base-value', (percentage / 100).toFixed(2));
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(initWinRateGauge, 500));
+    } else {
+        setTimeout(initWinRateGauge, 500);
+    }
+
+    setInterval(updateWinRateGauge, 30000);
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradingView Charts Example - SQU^RE DOFF</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link rel="stylesheet" href="styles/style.css">
+    <style>
+        .chart-container {
+            background: var(--color-white);
+            border-radius: var(--card-border-radius);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: var(--box-shadow);
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--color-dark);
+        }
+        .chart-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .chart-btn {
+            padding: 0.5rem 1rem;
+            background: var(--color-light);
+            border: none;
+            border-radius: var(--border-radius-1);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--color-dark);
+            transition: all 0.3s ease;
+        }
+        .chart-btn:hover {
+            background: var(--color-primary);
+            color: white;
+        }
+        .chart-btn.active {
+            background: var(--color-primary);
+            color: white;
+        }
+        #tradingview-chart {
+            width: 100%;
+            height: 500px;
+        }
+        #volume-chart {
+            width: 100%;
+            height: 150px;
+            margin-top: 1rem;
+        }
+        .demo-info {
+            background: linear-gradient(135deg, rgba(45, 108, 223, 0.1), rgba(16, 185, 129, 0.1));
+            border-left: 4px solid var(--color-primary);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: var(--border-radius-2);
+        }
+        .demo-info h3 {
+            margin: 0 0 0.5rem 0;
+            color: var(--color-primary);
+        }
+        .demo-info p {
+            margin: 0;
+            color: var(--color-dark);
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <main style="padding: 2rem; max-width: 1400px; margin: 0 auto;">
+            <h1>TradingView Lightweight Charts - Live Demo</h1>
+            
+            <div class="demo-info">
+                <h3>✨ Frontend-Only Implementation</h3>
+                <p>This example uses TradingView's Lightweight Charts library loaded entirely via CDN. No backend server required! The charts update with simulated real-time data and support multiple timeframes, dark mode, and professional trading features.</p>
+            </div>
+
+            <!-- Main Price Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">AAPL - Apple Inc.</div>
+                        <small style="color: var(--color-info-dark);">Real-time Price Chart</small>
+                    </div>
+                    <div class="chart-controls">
+                        <button class="chart-btn" onclick="setTimeframe('1D')">1D</button>
+                        <button class="chart-btn active" onclick="setTimeframe('1W')">1W</button>
+                        <button class="chart-btn" onclick="setTimeframe('1M')">1M</button>
+                        <button class="chart-btn" onclick="setTimeframe('1Y')">1Y</button>
+                        <button class="chart-btn" onclick="toggleChartType('candlestick')">Candles</button>
+                        <button class="chart-btn" onclick="toggleChartType('line')">Line</button>
+                        <button class="chart-btn" onclick="toggleChartType('area')">Area</button>
+                    </div>
+                </div>
+                <div id="tradingview-chart"></div>
+                <div id="volume-chart"></div>
+            </div>
+
+            <!-- Additional Examples -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                <!-- Bitcoin Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">BTC/USD</div>
+                            <small style="color: var(--color-info-dark);">Bitcoin Price</small>
+                        </div>
+                    </div>
+                    <div id="btc-chart" style="width: 100%; height: 300px;"></div>
+                </div>
+
+                <!-- S&P 500 Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">S&P 500</div>
+                            <small style="color: var(--color-info-dark);">Index Performance</small>
+                        </div>
+                    </div>
+                    <div id="sp500-chart" style="width: 100%; height: 300px;"></div>
+                </div>
+            </div>
+
+            <div class="demo-info" style="margin-top: 2rem;">
+                <h3>🔧 Implementation Details</h3>
+                <p><strong>Library:</strong> TradingView Lightweight Charts v4 (Loaded via CDN)<br>
+                <strong>Data Source:</strong> Simulated real-time data (easily replaceable with real API)<br>
+                <strong>Features:</strong> Candlestick/Line/Area charts, Volume histogram, Responsive design, Touch support<br>
+                <strong>Size:</strong> ~50KB gzipped - Extremely lightweight!<br>
+                <strong>Backend:</strong> Not required - Pure frontend JavaScript</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- TradingView Lightweight Charts Library -->
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    
+    <script>
+        // Global variables
+        let mainChart, volumeChart, btcChart, sp500Chart;
+        let candlestickSeries, lineSeries, areaSeries, volumeSeries;
+        let currentChartType = 'candlestick';
+
+        // Generate sample candlestick data
+        function generateCandlestickData(days = 90, basePrice = 180) {
+            const data = [];
+            const now = Math.floor(Date.now() / 1000);
+            const dayInSeconds = 24 * 60 * 60;
+            
+            let price = basePrice;
+            for (let i = days; i >= 0; i--) {
+                const time = now - (i * dayInSeconds);
+                const open = price;
+                const change = (Math.random() - 0.48) * 5;
+                const high = open + Math.abs(change) + Math.random() * 2;
+                const low = open - Math.abs(change) - Math.random() * 2;
+                const close = open + change;
+                
+                data.push({
+                    time: time,
+                    open: parseFloat(open.toFixed(2)),
+                    high: parseFloat(high.toFixed(2)),
+                    low: parseFloat(low.toFixed(2)),
+                    close: parseFloat(close.toFixed(2))
+                });
+                
+                price = close;
+            }
+            return data;
+        }
+
+        // Generate volume data
+        function generateVolumeData(priceData) {
+            return priceData.map(candle => ({
+                time: candle.time,
+                value: Math.floor(Math.random() * 50000000 + 30000000),
+                color: candle.close > candle.open ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)'
+            }));
+        }
+
+        // Generate line data from candlestick data
+        function candlesToLine(candles) {
+            return candles.map(c => ({ time: c.time, value: c.close }));
+        }
+
+        // Initialize main chart
+        function initMainChart() {
+            const chartElement = document.getElementById('tradingview-chart');
+            
+            mainChart = LightweightCharts.createChart(chartElement, {
+                width: chartElement.clientWidth,
+                height: 500,
+                layout: {
+                    background: { color: 'transparent' },
+                    textColor: '#6b7280',
+                },
+                grid: {
+                    vertLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                    horzLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                },
+                rightPriceScale: {
+                    borderColor: 'rgba(107, 114, 128, 0.2)',
+                },
+                timeScale: {
+                    borderColor: 'rgba(107, 114, 128, 0.2)',
+                    timeVisible: true,
+                    secondsVisible: false,
+                },
+            });
+
+            // Add candlestick series
+            candlestickSeries = mainChart.addCandlestickSeries({
+                upColor: '#10b981',
+                downColor: '#ef4444',
+                borderDownColor: '#ef4444',
+                borderUpColor: '#10b981',
+                wickDownColor: '#ef4444',
+                wickUpColor: '#10b981',
+            });
+
+            const priceData = generateCandlestickData(90, 180);
+            candlestickSeries.setData(priceData);
+
+            // Volume chart
+            const volumeElement = document.getElementById('volume-chart');
+            volumeChart = LightweightCharts.createChart(volumeElement, {
+                width: volumeElement.clientWidth,
+                height: 150,
+                layout: {
+                    background: { color: 'transparent' },
+                    textColor: '#6b7280',
+                },
+                grid: {
+                    vertLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                    horzLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                },
+                rightPriceScale: {
+                    borderColor: 'rgba(107, 114, 128, 0.2)',
+                    scaleMargins: {
+                        top: 0.8,
+                        bottom: 0,
+                    },
+                },
+                timeScale: {
+                    borderColor: 'rgba(107, 114, 128, 0.2)',
+                    visible: false,
+                },
+            });
+
+            volumeSeries = volumeChart.addHistogramSeries({
+                color: '#26a69a',
+                priceFormat: {
+                    type: 'volume',
+                },
+                priceScaleId: '',
+            });
+
+            const volumeData = generateVolumeData(priceData);
+            volumeSeries.setData(volumeData);
+
+            // Sync crosshair
+            mainChart.timeScale().subscribeVisibleTimeRangeChange(() => {
+                const timeRange = mainChart.timeScale().getVisibleRange();
+                if (timeRange) {
+                    volumeChart.timeScale().setVisibleRange(timeRange);
+                }
+            });
+        }
+
+        // Initialize BTC chart
+        function initBTCChart() {
+            const chartElement = document.getElementById('btc-chart');
+            
+            btcChart = LightweightCharts.createChart(chartElement, {
+                width: chartElement.clientWidth,
+                height: 300,
+                layout: {
+                    background: { color: 'transparent' },
+                    textColor: '#6b7280',
+                },
+                grid: {
+                    vertLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                    horzLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                },
+                timeScale: {
+                    borderColor: 'rgba(107, 114, 128, 0.2)',
+                    timeVisible: true,
+                },
+            });
+
+            const series = btcChart.addAreaSeries({
+                topColor: 'rgba(45, 108, 223, 0.4)',
+                bottomColor: 'rgba(45, 108, 223, 0.0)',
+                lineColor: '#2d6cdf',
+                lineWidth: 2,
+            });
+
+            const data = generateCandlestickData(90, 65000);
+            series.setData(candlesToLine(data));
+        }
+
+        // Initialize S&P 500 chart
+        function initSP500Chart() {
+            const chartElement = document.getElementById('sp500-chart');
+            
+            sp500Chart = LightweightCharts.createChart(chartElement, {
+                width: chartElement.clientWidth,
+                height: 300,
+                layout: {
+                    background: { color: 'transparent' },
+                    textColor: '#6b7280',
+                },
+                grid: {
+                    vertLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                    horzLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                },
+                timeScale: {
+                    borderColor: 'rgba(107, 114, 128, 0.2)',
+                    timeVisible: true,
+                },
+            });
+
+            const series = sp500Chart.addLineSeries({
+                color: '#10b981',
+                lineWidth: 2,
+            });
+
+            const data = generateCandlestickData(90, 4500);
+            series.setData(candlesToLine(data));
+        }
+
+        // Toggle chart type
+        function toggleChartType(type) {
+            const priceData = candlestickSeries.data();
+            
+            // Remove existing series
+            if (candlestickSeries) mainChart.removeSeries(candlestickSeries);
+            if (lineSeries) mainChart.removeSeries(lineSeries);
+            if (areaSeries) mainChart.removeSeries(areaSeries);
+
+            // Add new series based on type
+            if (type === 'candlestick') {
+                candlestickSeries = mainChart.addCandlestickSeries({
+                    upColor: '#10b981',
+                    downColor: '#ef4444',
+                    borderDownColor: '#ef4444',
+                    borderUpColor: '#10b981',
+                    wickDownColor: '#ef4444',
+                    wickUpColor: '#10b981',
+                });
+                candlestickSeries.setData(generateCandlestickData(90, 180));
+            } else if (type === 'line') {
+                lineSeries = mainChart.addLineSeries({
+                    color: '#2d6cdf',
+                    lineWidth: 2,
+                });
+                const data = generateCandlestickData(90, 180);
+                lineSeries.setData(candlesToLine(data));
+            } else if (type === 'area') {
+                areaSeries = mainChart.addAreaSeries({
+                    topColor: 'rgba(16, 185, 129, 0.4)',
+                    bottomColor: 'rgba(16, 185, 129, 0.0)',
+                    lineColor: '#10b981',
+                    lineWidth: 2,
+                });
+                const data = generateCandlestickData(90, 180);
+                areaSeries.setData(candlesToLine(data));
+            }
+
+            currentChartType = type;
+        }
+
+        // Set timeframe (simplified example)
+        function setTimeframe(tf) {
+            const days = tf === '1D' ? 1 : tf === '1W' ? 7 : tf === '1M' ? 30 : 365;
+            const newData = generateCandlestickData(days, 180);
+            
+            if (currentChartType === 'candlestick' && candlestickSeries) {
+                candlestickSeries.setData(newData);
+            } else if (currentChartType === 'line' && lineSeries) {
+                lineSeries.setData(candlesToLine(newData));
+            } else if (currentChartType === 'area' && areaSeries) {
+                areaSeries.setData(candlesToLine(newData));
+            }
+
+            volumeSeries.setData(generateVolumeData(newData));
+
+            // Update button states
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === tf) btn.classList.add('active');
+            });
+        }
+
+        // Simulate real-time updates
+        function simulateRealTimeUpdate() {
+            if (!candlestickSeries) return;
+
+            const data = candlestickSeries.data();
+            if (data.length === 0) return;
+
+            const lastCandle = data[data.length - 1];
+            const newPrice = lastCandle.close + (Math.random() - 0.5) * 2;
+            
+            const updatedCandle = {
+                time: lastCandle.time,
+                open: lastCandle.open,
+                high: Math.max(lastCandle.high, newPrice),
+                low: Math.min(lastCandle.low, newPrice),
+                close: parseFloat(newPrice.toFixed(2))
+            };
+
+            if (currentChartType === 'candlestick' && candlestickSeries) {
+                candlestickSeries.update(updatedCandle);
+            }
+        }
+
+        // Handle responsive resize
+        window.addEventListener('resize', () => {
+            const chartElement = document.getElementById('tradingview-chart');
+            const volumeElement = document.getElementById('volume-chart');
+            const btcElement = document.getElementById('btc-chart');
+            const sp500Element = document.getElementById('sp500-chart');
+
+            if (mainChart) mainChart.applyOptions({ width: chartElement.clientWidth });
+            if (volumeChart) volumeChart.applyOptions({ width: volumeElement.clientWidth });
+            if (btcChart) btcChart.applyOptions({ width: btcElement.clientWidth });
+            if (sp500Chart) sp500Chart.applyOptions({ width: sp500Element.clientWidth });
+        });
+
+        // Initialize all charts when page loads
+        window.addEventListener('load', () => {
+            initMainChart();
+            initBTCChart();
+            initSP500Chart();
+
+            // Simulate real-time updates every 2 seconds
+            setInterval(simulateRealTimeUpdate, 2000);
+        });
+    </script>
+</body>
+</html>
