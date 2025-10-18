@@ -55,6 +55,32 @@
             background: var(--color-primary);
             color: white;
         }
+        .indicator-btn {
+            padding: 0.4rem 0.8rem;
+            background: var(--color-white);
+            border: 1px solid var(--color-light);
+            border-radius: var(--border-radius-1);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--color-dark);
+            transition: all 0.3s ease;
+        }
+        .indicator-btn:hover {
+            background: var(--color-light);
+            border-color: var(--color-primary);
+        }
+        .indicator-btn.active {
+            background: var(--color-success);
+            color: white;
+            border-color: var(--color-success);
+        }
+        .indicator-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
         #tradingview-chart {
             width: 100%;
             height: 500px;
@@ -110,6 +136,12 @@
                         <button class="chart-btn" onclick="toggleChartType('area')" data-type="area">Area</button>
                     </div>
                 </div>
+                <div class="indicator-controls">
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-dark); margin-right: 0.5rem;">Indicators:</span>
+                    <button class="indicator-btn active" onclick="toggleVolume('main')" id="main-volume-btn">📊 Volume</button>
+                    <button class="indicator-btn" onclick="toggleMA('main')" id="main-ma-btn">📈 Moving Average (20)</button>
+                    <button class="indicator-btn" onclick="toggleMarkers('main')" id="main-markers-btn">📍 Series Markers</button>
+                </div>
                 <div id="tradingview-chart"></div>
                 <div id="volume-chart"></div>
             </div>
@@ -131,6 +163,11 @@
                             <button class="chart-btn" onclick="setBtcTimeframe('1Y')" data-btc-timeframe="1Y">1Y</button>
                         </div>
                     </div>
+                    <div class="indicator-controls">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-dark); margin-right: 0.5rem;">Indicators:</span>
+                        <button class="indicator-btn" onclick="toggleMA('btc')" id="btc-ma-btn">📈 Moving Average (20)</button>
+                        <button class="indicator-btn" onclick="toggleMarkers('btc')" id="btc-markers-btn">📍 Series Markers</button>
+                    </div>
                     <div id="btc-chart" style="width: 100%; height: 300px;"></div>
                 </div>
 
@@ -149,6 +186,11 @@
                             <button class="chart-btn" onclick="setSp500Timeframe('1Y')" data-sp500-timeframe="1Y">1Y</button>
                         </div>
                     </div>
+                    <div class="indicator-controls">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-dark); margin-right: 0.5rem;">Indicators:</span>
+                        <button class="indicator-btn" onclick="toggleMA('sp500')" id="sp500-ma-btn">📈 Moving Average (20)</button>
+                        <button class="indicator-btn" onclick="toggleMarkers('sp500')" id="sp500-markers-btn">📍 Series Markers</button>
+                    </div>
                     <div id="sp500-chart" style="width: 100%; height: 300px;"></div>
                 </div>
             </div>
@@ -159,6 +201,7 @@
                 <strong>Data Source:</strong> 100% Live APIs - CoinGecko (crypto), Twelve Data (stocks), no fallback needed<br>
                 <strong>Update Frequency:</strong> Real-time updates every 5 seconds with persistent data<br>
                 <strong>Features:</strong> Candlestick/Line/Area charts, Volume histogram, Independent timeframe controls per chart, Responsive design<br>
+                <strong>Indicators:</strong> Volume histogram (main chart), 20-period Simple Moving Average (all charts), Series markers with buy/sell signals<br>
                 <strong>Charts:</strong> AAPL (candlestick with chart type toggle), Bitcoin (area chart), S&P 500 (line chart)<br>
                 <strong>Backend:</strong> Not required - Pure frontend JavaScript with direct API integration</p>
             </div>
@@ -180,6 +223,16 @@
         let currentMainTimeframe = '1W';
         let currentBtcTimeframe = '1M';
         let currentSp500Timeframe = '1M';
+        
+        // Indicator series for each chart
+        let mainMASeries = null;
+        let btcMASeries = null;
+        let sp500MASeries = null;
+        
+        // Indicator states
+        let mainIndicators = { volume: true, ma: false, markers: false };
+        let btcIndicators = { ma: false, markers: false };
+        let sp500Indicators = { ma: false, markers: false };
         
         // Master data for all charts (persistent live data)
         let aaplMasterData = [];
@@ -352,6 +405,317 @@
         // Generate line data from candlestick data
         function candlesToLine(candles) {
             return candles.map(c => ({ time: c.time, value: c.close }));
+        }
+
+        /**
+         * Calculate Simple Moving Average
+         * @param {Array} data - Price data array
+         * @param {number} period - MA period (default 20)
+         * @returns {Array} Moving average data
+         */
+        function calculateMA(data, period = 20) {
+            const maData = [];
+            
+            for (let i = 0; i < data.length; i++) {
+                if (i < period - 1) {
+                    // Not enough data for MA yet, skip
+                    continue;
+                }
+                
+                let sum = 0;
+                for (let j = 0; j < period; j++) {
+                    sum += data[i - j].close;
+                }
+                
+                maData.push({
+                    time: data[i].time,
+                    value: sum / period
+                });
+            }
+            
+            return maData;
+        }
+
+        /**
+         * Generate sample markers for demonstration
+         * @param {Array} data - Price data array
+         * @returns {Array} Marker data
+         */
+        function generateMarkers(data) {
+            if (!data || data.length < 10) return [];
+            
+            const markers = [];
+            const interval = Math.floor(data.length / 5); // 5 markers spread across data
+            
+            for (let i = 1; i <= 5; i++) {
+                const index = Math.min(i * interval, data.length - 1);
+                const candle = data[index];
+                
+                // Alternate between buy and sell signals
+                if (i % 2 === 1) {
+                    markers.push({
+                        time: candle.time,
+                        position: 'belowBar',
+                        color: '#10b981',
+                        shape: 'arrowUp',
+                        text: 'Buy Signal'
+                    });
+                } else {
+                    markers.push({
+                        time: candle.time,
+                        position: 'aboveBar',
+                        color: '#ef4444',
+                        shape: 'arrowDown',
+                        text: 'Sell Signal'
+                    });
+                }
+            }
+            
+            return markers;
+        }
+
+        /**
+         * Toggle volume indicator for main chart
+         * @param {string} chartId - Chart identifier
+         */
+        function toggleVolume(chartId) {
+            if (chartId !== 'main') return;
+            
+            mainIndicators.volume = !mainIndicators.volume;
+            const btn = document.getElementById('main-volume-btn');
+            const volumeElement = document.getElementById('volume-chart');
+            
+            if (mainIndicators.volume) {
+                btn.classList.add('active');
+                volumeElement.style.display = 'block';
+                
+                // Recreate volume chart if needed
+                if (!volumeChart) {
+                    volumeChart = LightweightCharts.createChart(volumeElement, {
+                        width: volumeElement.clientWidth,
+                        height: 150,
+                        layout: {
+                            background: { color: 'transparent' },
+                            textColor: '#6b7280',
+                        },
+                        grid: {
+                            vertLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                            horzLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                        },
+                        rightPriceScale: {
+                            borderColor: 'rgba(107, 114, 128, 0.2)',
+                            scaleMargins: {
+                                top: 0.8,
+                                bottom: 0,
+                            },
+                        },
+                        timeScale: {
+                            borderColor: 'rgba(107, 114, 128, 0.2)',
+                            visible: false,
+                        },
+                    });
+
+                    volumeSeries = volumeChart.addHistogramSeries({
+                        color: '#26a69a',
+                        priceFormat: {
+                            type: 'volume',
+                        },
+                        priceScaleId: '',
+                    });
+
+                    const priceData = getTimeframeData(aaplMasterData, currentMainTimeframe);
+                    const volumeData = generateVolumeData(priceData);
+                    volumeSeries.setData(volumeData);
+                }
+            } else {
+                btn.classList.remove('active');
+                volumeElement.style.display = 'none';
+            }
+        }
+
+        /**
+         * Toggle Moving Average indicator
+         * @param {string} chartId - Chart identifier ('main', 'btc', 'sp500')
+         */
+        function toggleMA(chartId) {
+            const btn = document.getElementById(`${chartId}-ma-btn`);
+            
+            if (chartId === 'main') {
+                mainIndicators.ma = !mainIndicators.ma;
+                
+                if (mainIndicators.ma) {
+                    btn.classList.add('active');
+                    
+                    // Remove existing MA series if any
+                    if (mainMASeries) {
+                        try {
+                            mainChart.removeSeries(mainMASeries);
+                        } catch (e) {}
+                    }
+                    
+                    // Add MA series
+                    mainMASeries = mainChart.addLineSeries({
+                        color: '#f59e0b',
+                        lineWidth: 2,
+                        priceLineVisible: false,
+                        lastValueVisible: false,
+                    });
+                    
+                    const data = getTimeframeData(aaplMasterData, currentMainTimeframe);
+                    const maData = calculateMA(data, 20);
+                    mainMASeries.setData(maData);
+                } else {
+                    btn.classList.remove('active');
+                    
+                    if (mainMASeries) {
+                        try {
+                            mainChart.removeSeries(mainMASeries);
+                            mainMASeries = null;
+                        } catch (e) {}
+                    }
+                }
+            } else if (chartId === 'btc') {
+                btcIndicators.ma = !btcIndicators.ma;
+                
+                if (btcIndicators.ma) {
+                    btn.classList.add('active');
+                    
+                    if (btcMASeries) {
+                        try {
+                            btcChart.removeSeries(btcMASeries);
+                        } catch (e) {}
+                    }
+                    
+                    btcMASeries = btcChart.addLineSeries({
+                        color: '#f59e0b',
+                        lineWidth: 2,
+                        priceLineVisible: false,
+                        lastValueVisible: false,
+                    });
+                    
+                    const data = getTimeframeData(btcMasterData, currentBtcTimeframe);
+                    const maData = calculateMA(data, 20);
+                    btcMASeries.setData(maData);
+                } else {
+                    btn.classList.remove('active');
+                    
+                    if (btcMASeries) {
+                        try {
+                            btcChart.removeSeries(btcMASeries);
+                            btcMASeries = null;
+                        } catch (e) {}
+                    }
+                }
+            } else if (chartId === 'sp500') {
+                sp500Indicators.ma = !sp500Indicators.ma;
+                
+                if (sp500Indicators.ma) {
+                    btn.classList.add('active');
+                    
+                    if (sp500MASeries) {
+                        try {
+                            sp500Chart.removeSeries(sp500MASeries);
+                        } catch (e) {}
+                    }
+                    
+                    sp500MASeries = sp500Chart.addLineSeries({
+                        color: '#f59e0b',
+                        lineWidth: 2,
+                        priceLineVisible: false,
+                        lastValueVisible: false,
+                    });
+                    
+                    const data = getTimeframeData(sp500MasterData, currentSp500Timeframe);
+                    const maData = calculateMA(data, 20);
+                    sp500MASeries.setData(maData);
+                } else {
+                    btn.classList.remove('active');
+                    
+                    if (sp500MASeries) {
+                        try {
+                            sp500Chart.removeSeries(sp500MASeries);
+                            sp500MASeries = null;
+                        } catch (e) {}
+                    }
+                }
+            }
+        }
+
+        /**
+         * Toggle series markers
+         * @param {string} chartId - Chart identifier ('main', 'btc', 'sp500')
+         */
+        function toggleMarkers(chartId) {
+            const btn = document.getElementById(`${chartId}-markers-btn`);
+            
+            if (chartId === 'main') {
+                mainIndicators.markers = !mainIndicators.markers;
+                
+                if (mainIndicators.markers) {
+                    btn.classList.add('active');
+                    
+                    const data = getTimeframeData(aaplMasterData, currentMainTimeframe);
+                    const markers = generateMarkers(data);
+                    
+                    // Apply markers to current series
+                    if (currentChartType === 'candlestick' && candlestickSeries) {
+                        candlestickSeries.setMarkers(markers);
+                    } else if (currentChartType === 'line' && lineSeries) {
+                        lineSeries.setMarkers(markers);
+                    } else if (currentChartType === 'area' && areaSeries) {
+                        areaSeries.setMarkers(markers);
+                    }
+                } else {
+                    btn.classList.remove('active');
+                    
+                    // Clear markers
+                    if (currentChartType === 'candlestick' && candlestickSeries) {
+                        candlestickSeries.setMarkers([]);
+                    } else if (currentChartType === 'line' && lineSeries) {
+                        lineSeries.setMarkers([]);
+                    } else if (currentChartType === 'area' && areaSeries) {
+                        areaSeries.setMarkers([]);
+                    }
+                }
+            } else if (chartId === 'btc') {
+                btcIndicators.markers = !btcIndicators.markers;
+                
+                if (btcIndicators.markers) {
+                    btn.classList.add('active');
+                    
+                    const data = getTimeframeData(btcMasterData, currentBtcTimeframe);
+                    const markers = generateMarkers(data);
+                    
+                    if (btcSeries) {
+                        btcSeries.setMarkers(markers);
+                    }
+                } else {
+                    btn.classList.remove('active');
+                    
+                    if (btcSeries) {
+                        btcSeries.setMarkers([]);
+                    }
+                }
+            } else if (chartId === 'sp500') {
+                sp500Indicators.markers = !sp500Indicators.markers;
+                
+                if (sp500Indicators.markers) {
+                    btn.classList.add('active');
+                    
+                    const data = getTimeframeData(sp500MasterData, currentSp500Timeframe);
+                    const markers = generateMarkers(data);
+                    
+                    if (sp500Series) {
+                        sp500Series.setMarkers(markers);
+                    }
+                } else {
+                    btn.classList.remove('active');
+                    
+                    if (sp500Series) {
+                        sp500Series.setMarkers([]);
+                    }
+                }
+            }
         }
 
         // Initialize main chart with live data
@@ -628,12 +992,24 @@
                     wickUpColor: '#10b981',
                 });
                 candlestickSeries.setData(data);
+                
+                // Reapply markers if enabled
+                if (mainIndicators.markers) {
+                    const markers = generateMarkers(data);
+                    candlestickSeries.setMarkers(markers);
+                }
             } else if (type === 'line') {
                 lineSeries = mainChart.addLineSeries({
                     color: '#2d6cdf',
                     lineWidth: 2,
                 });
                 lineSeries.setData(candlesToLine(data));
+                
+                // Reapply markers if enabled
+                if (mainIndicators.markers) {
+                    const markers = generateMarkers(data);
+                    lineSeries.setMarkers(markers);
+                }
             } else if (type === 'area') {
                 areaSeries = mainChart.addAreaSeries({
                     topColor: 'rgba(16, 185, 129, 0.4)',
@@ -642,6 +1018,12 @@
                     lineWidth: 2,
                 });
                 areaSeries.setData(candlesToLine(data));
+                
+                // Reapply markers if enabled
+                if (mainIndicators.markers) {
+                    const markers = generateMarkers(data);
+                    areaSeries.setMarkers(markers);
+                }
             }
 
             currentChartType = type;
@@ -656,8 +1038,14 @@
             });
             
             // Update volume chart
-            if (volumeSeries) {
+            if (volumeSeries && mainIndicators.volume) {
                 volumeSeries.setData(generateVolumeData(data));
+            }
+            
+            // Reapply MA if enabled
+            if (mainIndicators.ma && mainMASeries) {
+                const maData = calculateMA(data, 20);
+                mainMASeries.setData(maData);
             }
         }
 
@@ -669,14 +1057,38 @@
             try {
                 if (currentChartType === 'candlestick' && candlestickSeries) {
                     candlestickSeries.setData(dataToShow);
+                    
+                    // Reapply markers if enabled
+                    if (mainIndicators.markers) {
+                        const markers = generateMarkers(dataToShow);
+                        candlestickSeries.setMarkers(markers);
+                    }
                 } else if (currentChartType === 'line' && lineSeries) {
                     lineSeries.setData(candlesToLine(dataToShow));
+                    
+                    // Reapply markers if enabled
+                    if (mainIndicators.markers) {
+                        const markers = generateMarkers(dataToShow);
+                        lineSeries.setMarkers(markers);
+                    }
                 } else if (currentChartType === 'area' && areaSeries) {
                     areaSeries.setData(candlesToLine(dataToShow));
+                    
+                    // Reapply markers if enabled
+                    if (mainIndicators.markers) {
+                        const markers = generateMarkers(dataToShow);
+                        areaSeries.setMarkers(markers);
+                    }
                 }
 
-                if (volumeSeries) {
+                if (volumeSeries && mainIndicators.volume) {
                     volumeSeries.setData(generateVolumeData(dataToShow));
+                }
+                
+                // Update MA if enabled
+                if (mainIndicators.ma && mainMASeries) {
+                    const maData = calculateMA(dataToShow, 20);
+                    mainMASeries.setData(maData);
                 }
             } catch (e) {
                 console.error('Error setting timeframe:', e);
@@ -699,6 +1111,18 @@
             
             if (btcSeries) {
                 btcSeries.setData(candlesToLine(dataToShow));
+                
+                // Reapply markers if enabled
+                if (btcIndicators.markers) {
+                    const markers = generateMarkers(dataToShow);
+                    btcSeries.setMarkers(markers);
+                }
+                
+                // Update MA if enabled
+                if (btcIndicators.ma && btcMASeries) {
+                    const maData = calculateMA(dataToShow, 20);
+                    btcMASeries.setData(maData);
+                }
             }
 
             // Update button states
@@ -718,6 +1142,18 @@
             
             if (sp500Series) {
                 sp500Series.setData(candlesToLine(dataToShow));
+                
+                // Reapply markers if enabled
+                if (sp500Indicators.markers) {
+                    const markers = generateMarkers(dataToShow);
+                    sp500Series.setMarkers(markers);
+                }
+                
+                // Update MA if enabled
+                if (sp500Indicators.ma && sp500MASeries) {
+                    const maData = calculateMA(dataToShow, 20);
+                    sp500MASeries.setData(maData);
+                }
             }
 
             // Update button states
