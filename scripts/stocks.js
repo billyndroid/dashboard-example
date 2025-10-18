@@ -3,7 +3,7 @@
  * Manages stock data display, modals, and interactions
  */
 
-// Stock data with realistic information
+// Stock data with realistic information and fundamentals
 const stocksData = [
     {
         symbol: 'AAPL',
@@ -17,7 +17,18 @@ const stocksData = [
         pe: 29.4,
         dividend: 0.54,
         high: 179.92,
-        low: 176.23
+        low: 176.23,
+        // Fundamental data
+        eps: 6.07,
+        beta: 1.28,
+        roe: 147.25,
+        debtToEquity: 1.98,
+        profitMargin: 25.31,
+        revenueGrowth: 11.5,
+        analystRating: 'Buy',
+        targetPrice: 195.50,
+        earningsDate: 'Nov 2, 2025',
+        description: 'Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. Known for innovative products like iPhone, Mac, iPad, and services.'
     },
     {
         symbol: 'MSFT',
@@ -31,7 +42,18 @@ const stocksData = [
         pe: 35.2,
         dividend: 0.72,
         high: 389.45,
-        low: 384.12
+        low: 384.12,
+        // Fundamental data
+        eps: 11.02,
+        beta: 0.91,
+        roe: 38.42,
+        debtToEquity: 0.45,
+        profitMargin: 34.09,
+        revenueGrowth: 15.8,
+        analystRating: 'Strong Buy',
+        targetPrice: 425.00,
+        earningsDate: 'Oct 24, 2025',
+        description: 'Microsoft Corporation develops, licenses, and supports software, services, devices, and solutions worldwide. Leading provider of cloud computing, Office suite, and enterprise solutions.'
     },
     {
         symbol: 'GOOGL',
@@ -45,7 +67,17 @@ const stocksData = [
         pe: 27.8,
         dividend: 0.00,
         high: 143.87,
-        low: 141.23
+        low: 141.23,
+        eps: 5.13,
+        beta: 1.05,
+        roe: 28.15,
+        debtToEquity: 0.12,
+        profitMargin: 23.54,
+        revenueGrowth: 13.2,
+        analystRating: 'Buy',
+        targetPrice: 165.00,
+        earningsDate: 'Oct 29, 2025',
+        description: 'Alphabet Inc. offers various products and platforms including search, advertising, operating systems, cloud computing, and hardware. Parent company of Google and YouTube.'
     },
     {
         symbol: 'AMZN',
@@ -59,7 +91,17 @@ const stocksData = [
         pe: 82.5,
         dividend: 0.00,
         high: 169.45,
-        low: 165.89
+        low: 165.89,
+        eps: 2.04,
+        beta: 1.15,
+        roe: 16.83,
+        debtToEquity: 0.58,
+        profitMargin: 5.67,
+        revenueGrowth: 10.9,
+        analystRating: 'Buy',
+        targetPrice: 185.00,
+        earningsDate: 'Nov 1, 2025',
+        description: 'Amazon.com, Inc. engages in e-commerce, cloud computing, digital streaming, and artificial intelligence. Leader in online retail and AWS cloud services.'
     },
     {
         symbol: 'TSLA',
@@ -73,7 +115,17 @@ const stocksData = [
         pe: 68.4,
         dividend: 0.00,
         high: 251.67,
-        low: 238.45
+        low: 238.45,
+        eps: 3.64,
+        beta: 2.01,
+        roe: 24.31,
+        debtToEquity: 0.19,
+        profitMargin: 12.45,
+        revenueGrowth: 47.2,
+        analystRating: 'Hold',
+        targetPrice: 265.00,
+        earningsDate: 'Oct 18, 2025',
+        description: 'Tesla, Inc. designs, develops, manufactures, and sells electric vehicles, energy storage systems, and solar products. Pioneer in electric vehicle technology and autonomous driving.'
     },
     {
         symbol: 'NVDA',
@@ -87,7 +139,17 @@ const stocksData = [
         pe: 115.3,
         dividend: 0.04,
         high: 492.34,
-        low: 456.78
+        low: 456.78,
+        eps: 4.23,
+        beta: 1.69,
+        roe: 89.76,
+        debtToEquity: 0.35,
+        profitMargin: 48.82,
+        revenueGrowth: 206.3,
+        analystRating: 'Strong Buy',
+        targetPrice: 550.00,
+        earningsDate: 'Nov 21, 2025',
+        description: 'NVIDIA Corporation designs graphics processors for gaming, professional markets, and system on a chip units for mobile computing and automotive. Leader in AI computing and data center GPUs.'
     },
     {
         symbol: 'JPM',
@@ -101,7 +163,17 @@ const stocksData = [
         pe: 11.2,
         dividend: 3.80,
         high: 188.92,
-        low: 185.67
+        low: 185.67,
+        eps: 16.74,
+        beta: 1.09,
+        roe: 15.67,
+        debtToEquity: 1.32,
+        profitMargin: 31.24,
+        revenueGrowth: 8.3,
+        analystRating: 'Buy',
+        targetPrice: 205.00,
+        earningsDate: 'Oct 13, 2025',
+        description: 'JPMorgan Chase & Co. operates as a financial services company. Offers investment banking, financial services for consumers and businesses, commercial banking, and asset management.'
     },
     {
         symbol: 'V',
@@ -115,7 +187,17 @@ const stocksData = [
         pe: 32.5,
         dividend: 1.45,
         high: 269.23,
-        low: 265.34
+        low: 265.34,
+        eps: 8.24,
+        beta: 0.98,
+        roe: 42.18,
+        debtToEquity: 0.67,
+        profitMargin: 53.76,
+        revenueGrowth: 11.7,
+        analystRating: 'Buy',
+        targetPrice: 290.00,
+        earningsDate: 'Oct 24, 2025',
+        description: 'Visa Inc. operates as a payments technology company. Facilitates digital payments among consumers, merchants, financial institutions, and government entities across the globe.'
     },
     {
         symbol: 'JNJ',
@@ -129,7 +211,17 @@ const stocksData = [
         pe: 24.1,
         dividend: 4.35,
         high: 157.45,
-        low: 155.23
+        low: 155.23,
+        eps: 6.51,
+        beta: 0.58,
+        roe: 22.34,
+        debtToEquity: 0.48,
+        profitMargin: 18.92,
+        revenueGrowth: 6.5,
+        analystRating: 'Buy',
+        targetPrice: 170.00,
+        earningsDate: 'Oct 15, 2025',
+        description: 'Johnson & Johnson researches, develops, manufactures, and sells healthcare products worldwide. Operates in pharmaceutical, medical devices, and consumer health segments.'
     },
     {
         symbol: 'UNH',
@@ -143,7 +235,17 @@ const stocksData = [
         pe: 28.6,
         dividend: 1.88,
         high: 545.67,
-        low: 538.92
+        low: 538.92,
+        eps: 18.96,
+        beta: 0.76,
+        roe: 26.89,
+        debtToEquity: 0.69,
+        profitMargin: 6.12,
+        revenueGrowth: 14.2,
+        analystRating: 'Strong Buy',
+        targetPrice: 590.00,
+        earningsDate: 'Oct 17, 2025',
+        description: 'UnitedHealth Group Incorporated operates as a diversified healthcare company. Provides health benefits, healthcare services, and healthcare technology solutions.'
     },
     {
         symbol: 'XOM',
@@ -157,7 +259,17 @@ const stocksData = [
         pe: 9.8,
         dividend: 3.52,
         high: 113.89,
-        low: 110.23
+        low: 110.23,
+        eps: 11.47,
+        beta: 0.89,
+        roe: 18.45,
+        debtToEquity: 0.25,
+        profitMargin: 10.34,
+        revenueGrowth: 24.1,
+        analystRating: 'Buy',
+        targetPrice: 125.00,
+        earningsDate: 'Oct 27, 2025',
+        description: 'Exxon Mobil Corporation explores, produces, and sells crude oil and natural gas. Manufactures and sells petroleum products, and engages in chemical manufacturing.'
     },
     {
         symbol: 'CVX',
@@ -171,7 +283,17 @@ const stocksData = [
         pe: 10.4,
         dividend: 3.45,
         high: 159.45,
-        low: 156.78
+        low: 156.78,
+        eps: 15.26,
+        beta: 0.94,
+        roe: 14.23,
+        debtToEquity: 0.21,
+        profitMargin: 9.87,
+        revenueGrowth: 18.6,
+        analystRating: 'Buy',
+        targetPrice: 172.00,
+        earningsDate: 'Oct 27, 2025',
+        description: 'Chevron Corporation engages in integrated energy and chemicals operations worldwide. Upstream operations include oil and gas exploration, development, and production.'
     }
 ];
 
@@ -374,7 +496,7 @@ function updateStockPrices() {
 }
 
 /**
- * Populate watchlist
+ * Populate watchlist with fundamental data
  */
 function populateWatchlist() {
     const watchlist = document.getElementById('watchlist');
@@ -388,20 +510,38 @@ function populateWatchlist() {
     watchlist.innerHTML = topStocks.map(stock => {
         const isPositive = stock.changePercent >= 0;
         const changeClass = isPositive ? 'success' : 'danger';
+        const ratingColors = {
+            'Strong Buy': 'var(--color-success)',
+            'Buy': '#10b981',
+            'Hold': 'var(--color-warning)',
+            'Sell': 'var(--color-danger)'
+        };
         
         return `
-            <div class="update" onclick="openStockModal('${stock.symbol}')">
+            <div class="update watchlist-item" onclick="openWatchlistModal('${stock.symbol}')" style="cursor: pointer; transition: all 0.3s ease;" 
+                 onmouseenter="this.style.background='var(--color-light)'" 
+                 onmouseleave="this.style.background=''">
                 <div class="profile-photo">
-                    <div style="width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, var(--color-primary), var(--color-info-dark)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                    <div style="width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, var(--color-primary), var(--color-info-dark)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.1rem;">
                         ${stock.symbol.charAt(0)}
                     </div>
                 </div>
-                <div class="message">
-                    <p><b>${stock.symbol}</b> ${stock.name}</p>
-                    <small class="text-muted">$${stock.price.toFixed(2)}</small>
+                <div class="message" style="flex: 1;">
+                    <p style="margin-bottom: 0.25rem;"><b>${stock.symbol}</b> $${stock.price.toFixed(2)}</p>
+                    <div style="display: flex; gap: 0.75rem; font-size: 0.75rem; margin-top: 0.25rem;">
+                        <span class="text-muted">P/E: ${stock.pe}</span>
+                        <span class="text-muted">EPS: $${stock.eps}</span>
+                        <span style="color: ${ratingColors[stock.analystRating]}; font-weight: 600;">${stock.analystRating}</span>
+                    </div>
+                    <small class="text-muted" style="font-size: 0.7rem;">Target: $${stock.targetPrice.toFixed(2)}</small>
                 </div>
-                <div class="${changeClass}" style="font-weight: 700;">
-                    ${isPositive ? '+' : ''}${stock.changePercent.toFixed(2)}%
+                <div style="text-align: right;">
+                    <div class="${changeClass}" style="font-weight: 700; font-size: 1rem;">
+                        ${isPositive ? '+' : ''}${stock.changePercent.toFixed(2)}%
+                    </div>
+                    <div style="font-size: 0.7rem; color: var(--color-info-dark); margin-top: 0.25rem;">
+                        ${stock.marketCap}
+                    </div>
                 </div>
             </div>
         `;
@@ -544,6 +684,209 @@ function openStockModal(symbol) {
 }
 
 /**
+ * Open comprehensive watchlist modal with fundamental analysis
+ */
+function openWatchlistModal(symbol) {
+    const stock = stocksData.find(s => s.symbol === symbol);
+    if (!stock) return;
+    
+    const isPositive = stock.changePercent >= 0;
+    const changeClass = isPositive ? 'success' : 'danger';
+    const upside = ((stock.targetPrice - stock.price) / stock.price * 100).toFixed(2);
+    const upsidePositive = upside > 0;
+    
+    // Valuation assessment
+    const peAvg = 25; // Industry average
+    const valuation = stock.pe < peAvg ? 'Undervalued' : stock.pe > peAvg * 1.5 ? 'Overvalued' : 'Fairly Valued';
+    const valuationColor = stock.pe < peAvg ? 'var(--color-success)' : stock.pe > peAvg * 1.5 ? 'var(--color-danger)' : 'var(--color-warning)';
+    
+    // Financial health
+    const financialHealth = stock.debtToEquity < 0.5 ? 'Excellent' : stock.debtToEquity < 1.0 ? 'Good' : stock.debtToEquity < 2.0 ? 'Fair' : 'Poor';
+    const healthColor = stock.debtToEquity < 0.5 ? 'var(--color-success)' : stock.debtToEquity < 1.0 ? '#10b981' : stock.debtToEquity < 2.0 ? 'var(--color-warning)' : 'var(--color-danger)';
+    
+    // Growth assessment
+    const growthAssessment = stock.revenueGrowth > 20 ? 'High Growth' : stock.revenueGrowth > 10 ? 'Moderate Growth' : stock.revenueGrowth > 5 ? 'Stable Growth' : 'Low Growth';
+    const growthColor = stock.revenueGrowth > 20 ? 'var(--color-success)' : stock.revenueGrowth > 10 ? '#10b981' : 'var(--color-primary)';
+    
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('watchlist-detail-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'watchlist-detail-modal';
+        modal.className = 'modal';
+        document.body.appendChild(modal);
+    }
+    
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <div>
+                    <h2>${stock.symbol} - ${stock.name}</h2>
+                    <p style="margin: 0.5rem 0 0 0; color: var(--color-info-dark); font-size: 0.9rem;">${stock.sector}</p>
+                </div>
+                <button class="modal-close" onclick="closeModal('watchlist-detail-modal')">&times;</button>
+            </div>
+            
+            <!-- Price Summary -->
+            <div style="background: linear-gradient(135deg, var(--color-primary), var(--color-info-dark)); padding: 2rem; border-radius: 1rem; color: white; margin-bottom: 1.5rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; align-items: center;">
+                    <div>
+                        <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.25rem;">Current Price</div>
+                        <div style="font-size: 2.5rem; font-weight: 700;">$${stock.price.toFixed(2)}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.25rem;">24h Change</div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: ${isPositive ? '#10b981' : '#ef4444'};">
+                            ${isPositive ? '+' : ''}${stock.changePercent.toFixed(2)}%
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.25rem;">Analyst Target</div>
+                        <div style="font-size: 1.8rem; font-weight: 700;">$${stock.targetPrice.toFixed(2)}</div>
+                        <div style="font-size: 0.8rem; opacity: 0.9;">${upsidePositive ? '+' : ''}${upside}% upside</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.25rem;">Rating</div>
+                        <div style="font-size: 1.3rem; font-weight: 700; background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 0.5rem; display: inline-block;">
+                            ${stock.analystRating}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Fundamental Metrics Grid -->
+            <div class="modal-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">Market Cap</div>
+                    <div class="modal-stat-value">${stock.marketCap}</div>
+                    <small class="text-muted">Company Size</small>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">P/E Ratio</div>
+                    <div class="modal-stat-value">${stock.pe}</div>
+                    <small style="color: ${valuationColor}; font-weight: 600;">${valuation}</small>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">EPS (TTM)</div>
+                    <div class="modal-stat-value">$${stock.eps.toFixed(2)}</div>
+                    <small class="text-muted">Earnings/Share</small>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">Beta</div>
+                    <div class="modal-stat-value">${stock.beta}</div>
+                    <small class="text-muted">${stock.beta > 1 ? 'High' : 'Low'} Volatility</small>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">ROE</div>
+                    <div class="modal-stat-value" style="color: var(--color-success);">${stock.roe.toFixed(2)}%</div>
+                    <small class="text-muted">Return on Equity</small>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">Debt/Equity</div>
+                    <div class="modal-stat-value">${stock.debtToEquity.toFixed(2)}</div>
+                    <small style="color: ${healthColor}; font-weight: 600;">${financialHealth}</small>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">Profit Margin</div>
+                    <div class="modal-stat-value">${stock.profitMargin.toFixed(2)}%</div>
+                    <small class="text-muted">Net Margin</small>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">Revenue Growth</div>
+                    <div class="modal-stat-value" style="color: ${growthColor};">${stock.revenueGrowth.toFixed(1)}%</div>
+                    <small style="color: ${growthColor}; font-weight: 600;">${growthAssessment}</small>
+                </div>
+            </div>
+            
+            <!-- Detailed Information -->
+            <div class="modal-section">
+                <h3><span class="material-icons-sharp">business</span> Company Overview</h3>
+                <p style="line-height: 1.6; color: var(--color-dark-variant);">${stock.description}</p>
+            </div>
+            
+            <div class="modal-section">
+                <h3><span class="material-icons-sharp">assessment</span> Financial Details</h3>
+                <table class="modal-table">
+                    <tbody>
+                        <tr>
+                            <td><strong>Current Price</strong></td>
+                            <td>$${stock.price.toFixed(2)}</td>
+                            <td><strong>52W High</strong></td>
+                            <td>$${stock.high.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Day's Range</strong></td>
+                            <td>$${(stock.price * 0.98).toFixed(2)} - $${(stock.price * 1.02).toFixed(2)}</td>
+                            <td><strong>52W Low</strong></td>
+                            <td>$${stock.low.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Volume</strong></td>
+                            <td>${stock.volume}</td>
+                            <td><strong>Avg Volume</strong></td>
+                            <td>${(parseFloat(stock.volume) * 0.85).toFixed(1)}M</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dividend Yield</strong></td>
+                            <td>${stock.dividend}%</td>
+                            <td><strong>Ex-Dividend Date</strong></td>
+                            <td>${stock.dividend > 0 ? 'Nov 15, 2025' : 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Earnings Date</strong></td>
+                            <td colspan="3"><strong>${stock.earningsDate}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="modal-section">
+                <h3><span class="material-icons-sharp">insights</span> Investment Analysis</h3>
+                <div style="background: var(--color-light); padding: 1.5rem; border-radius: 1rem; border-left: 4px solid var(--color-primary);">
+                    <p style="margin: 0; line-height: 1.6;">
+                        <strong>${stock.symbol}</strong> is currently trading at $${stock.price.toFixed(2)} with a market capitalization of ${stock.marketCap}. 
+                        The stock shows a <strong style="color: ${changeClass === 'success' ? 'var(--color-success)' : 'var(--color-danger)'}">${isPositive ? 'positive' : 'negative'} momentum</strong> 
+                        with ${isPositive ? 'gains' : 'losses'} of ${Math.abs(stock.changePercent).toFixed(2)}% in the last 24 hours.
+                    </p>
+                    <p style="margin: 1rem 0 0 0; line-height: 1.6;">
+                        <strong>Valuation:</strong> With a P/E ratio of ${stock.pe}, the stock appears <strong style="color: ${valuationColor}">${valuation.toLowerCase()}</strong> 
+                        compared to industry averages. The company demonstrates <strong style="color: ${healthColor}">${financialHealth.toLowerCase()} financial health</strong> 
+                        with a debt-to-equity ratio of ${stock.debtToEquity.toFixed(2)}.
+                    </p>
+                    <p style="margin: 1rem 0 0 0; line-height: 1.6;">
+                        <strong>Growth & Profitability:</strong> ${stock.name} has achieved <strong style="color: ${growthColor}">${stock.revenueGrowth.toFixed(1)}% revenue growth</strong> 
+                        with an impressive profit margin of ${stock.profitMargin.toFixed(2)}%. The company's ROE of ${stock.roe.toFixed(2)}% indicates 
+                        ${stock.roe > 20 ? 'excellent' : stock.roe > 15 ? 'strong' : 'moderate'} management efficiency.
+                    </p>
+                    <p style="margin: 1rem 0 0 0; line-height: 1.6;">
+                        <strong>Analyst Outlook:</strong> Analysts have a consensus <strong>${stock.analystRating}</strong> rating with a price target of 
+                        $${stock.targetPrice.toFixed(2)}, suggesting ${upsidePositive ? 'potential upside' : 'limited upside'} of ${upside}% from current levels.
+                        ${stock.dividend > 0 ? `The stock also provides income through dividends with a yield of ${stock.dividend}%.` : ''}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button onclick="alert('Trading feature coming soon!')" 
+                        style="flex: 1; padding: 1rem; background: var(--color-success); color: white; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <span class="material-icons-sharp">add_shopping_cart</span>
+                    Buy ${stock.symbol}
+                </button>
+                <button onclick="alert('Watchlist feature coming soon!')" 
+                        style="flex: 1; padding: 1rem; background: var(--color-primary); color: white; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    <span class="material-icons-sharp">star</span>
+                    Add to Watchlist
+                </button>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+/**
  * Open market cap modal
  */
 function openMarketCapModal() {
@@ -590,6 +933,7 @@ function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
     }
 }
 
