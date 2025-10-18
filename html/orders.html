@@ -244,7 +244,7 @@
             const statusClass = order.status === 'Filled' ? 'success' : order.status === 'Pending' ? 'warning' : 'primary';
             
             row.innerHTML = `
-                <td>${order.asset}</td>
+                <td><strong>${order.asset}</strong></td>
                 <td>${order.type}</td>
                 <td>${order.quantity}</td>
                 <td>$${order.price.toFixed(2)}</td>
@@ -430,11 +430,32 @@
     // Initial updates
     updateOrderUpdates('Order management system initialized');
 </script>
+
+<!-- Chart Tooltip -->
+<div id="chartTooltip" class="chart-tooltip" style="display: none;">
+    <div class="chart-tooltip-header">
+        <span id="chartTooltipAsset" class="chart-tooltip-asset">Asset</span>
+        <span id="chartTooltipPrice" class="chart-tooltip-price">$0.00</span>
+    </div>
+    <canvas id="chartTooltipCanvas" width="280" height="140"></canvas>
+    <div class="chart-tooltip-stats">
+        <div class="stat">
+            <span class="label">Change</span>
+            <span id="chartTooltipChange" class="value">+0.00%</span>
+        </div>
+        <div class="stat">
+            <span class="label">Volume</span>
+            <span id="chartTooltipVolume" class="value">0</span>
+        </div>
+    </div>
+</div>
+
 <script src="../scripts/config.js"></script>
 <script src="../scripts/config.local.js"></script>
 <script src="../scripts/utils.js"></script>
 <script src="../scripts/data-utils.js"></script>
 <script src="../scripts/orders.js"></script>
+<script src="../scripts/chart-tooltip.js"></script>
 <script src="../scripts/main.js"></script>
 </body>
 </html>

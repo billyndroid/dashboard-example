@@ -372,3 +372,29 @@ document.addEventListener('DOMContentLoaded', function() {
 // Export functions to global scope
 window.openMarketModal = openMarketModal;
 window.closeMarketModal = closeMarketModal;
+
+// Export data to global scope for chart tooltip
+window.marketIndices = marketIndices;
+window.commodities = commodities;
+window.activeTrades = activeTrades;
+
+console.log('[IndicesCommodities] Data exported to global scope');
+console.log('[IndicesCommodities] marketIndices:', marketIndices.length, 'items');
+console.log('[IndicesCommodities] commodities:', commodities.length, 'items');
+console.log('[IndicesCommodities] Sample asset names:', marketIndices.map(function(i) { return i.name; }));
+
+// Initialize chart tooltips after data is loaded
+if (window.initChartTooltips) {
+    console.log('[IndicesCommodities] Initializing chart tooltips...');
+    setTimeout(function() {
+        window.initChartTooltips();
+    }, 500);
+} else {
+    console.log('[IndicesCommodities] Chart tooltip init function not found, will retry...');
+    setTimeout(function() {
+        if (window.initChartTooltips) {
+            console.log('[IndicesCommodities] Retry: Initializing chart tooltips...');
+            window.initChartTooltips();
+        }
+    }, 2000);
+}

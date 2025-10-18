@@ -79,16 +79,36 @@
                 
                 // Mouse enter event
                 firstCell.addEventListener('mouseenter', function(e) {
+                    // Cancel any pending hide timeout
+                    if (hideTimeout) {
+                        clearTimeout(hideTimeout);
+                        hideTimeout = null;
+                    }
+                    
                     // Try to get asset name from <strong> tag first, otherwise use textContent
                     var strongTag = this.querySelector('strong');
                     var assetName = strongTag ? strongTag.textContent.trim() : this.textContent.trim();
                     
-                    console.log('[ChartTooltip] Hover detected on:', assetName);
+                    // Remove any trailing symbols or extra text (like ticker symbols)
+                    // For crypto, the format might be "Bitcoin BTC" so we want just "Bitcoin"
+                    var firstWord = assetName.split(/\s+/)[0];
+                    
+                    console.log('[ChartTooltip] Hover detected on:', assetName, '(first word:', firstWord + ')');
                     
                     // Check if this asset exists in any data source
                     var hasData = (window.MarketData && window.MarketData[assetName]) ||
                                 (window.marketIndices && window.marketIndices.some(function(idx) { return idx.name === assetName; })) ||
                                 (window.commodities && window.commodities.some(function(comm) { return comm.name === assetName; }));
+                    
+                    // Also try first word if full name doesn't match
+                    if (!hasData && firstWord !== assetName) {
+                        hasData = (window.MarketData && window.MarketData[firstWord]) ||
+                                (window.marketIndices && window.marketIndices.some(function(idx) { return idx.name === firstWord; })) ||
+                                (window.commodities && window.commodities.some(function(comm) { return comm.name === firstWord; }));
+                        if (hasData) {
+                            assetName = firstWord; // Use first word as the asset name
+                        }
+                    }
                     
                     console.log('[ChartTooltip] Asset has data:', hasData);
                     
@@ -129,7 +149,7 @@
             volatility = marketData.volatility;
         }
         // Check indices data
-        else if (window.marketIndices) {
+        if (!basePrice && window.marketIndices) {
             var index = window.marketIndices.find(function(idx) { return idx.name === assetName; });
             if (index) {
                 basePrice = index.price;
@@ -137,7 +157,7 @@
             }
         }
         // Check commodities data
-        else if (window.commodities) {
+        if (!basePrice && window.commodities) {
             var commodity = window.commodities.find(function(comm) { return comm.name === assetName; });
             if (commodity) {
                 basePrice = commodity.price;
@@ -295,7 +315,7 @@
         var priceChange = 0;
         var volume = 'N/A';
         
-        // Check MarketData
+        // Check MarketData first
         if (window.MarketData && window.MarketData[assetName]) {
             var marketData = window.MarketData[assetName];
             currentPrice = window.getCurrentPrice ? window.getCurrentPrice(assetName) : marketData.basePrice;
@@ -305,8 +325,9 @@
             var order = window.Orders ? window.Orders.find(function(o) { return o.productName === assetName; }) : null;
             volume = order ? order.volume.toLocaleString() : 'N/A';
         }
-        // Check marketIndices
-        else if (window.marketIndices) {
+        
+        // Check marketIndices if not found
+        if (!currentPrice && window.marketIndices) {
             var index = window.marketIndices.find(function(idx) { return idx.name === assetName; });
             if (index) {
                 currentPrice = index.price;
@@ -314,8 +335,9 @@
                 volume = index.volume;
             }
         }
-        // Check commodities
-        else if (window.commodities) {
+        
+        // Check commodities if not found
+        if (!currentPrice && window.commodities) {
             var commodity = window.commodities.find(function(comm) { return comm.name === assetName; });
             if (commodity) {
                 currentPrice = commodity.price;
@@ -389,14 +411,18 @@
     function hideChartTooltip() {
         if (!chartTooltip) return;
         
+        // Clear any existing timeout
+        if (hideTimeout) {
+            clearTimeout(hideTimeout);
+        }
+        
+        // Hide immediately on mouse leave
+        chartTooltip.classList.remove('visible');
         hideTimeout = setTimeout(function() {
-            chartTooltip.classList.remove('visible');
-            setTimeout(function() {
-                if (chartTooltip) {
-                    chartTooltip.style.display = 'none';
-                }
-            }, 200);
-        }, 150);
+            if (chartTooltip) {
+                chartTooltip.style.display = 'none';
+            }
+        }, 200); // Wait for fade-out animation
     }
     
     /**
