@@ -8,6 +8,17 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp"
       rel="stylesheet">
       <link rel="stylesheet" href="styles/style.css">
+    <style>
+        #winRateGauge {
+            background: transparent !important;
+        }
+        #winRateGauge > div {
+            background: transparent !important;
+        }
+        .apexcharts-canvas {
+            background: transparent !important;
+        }
+    </style>
 </head>
 <body>
     <!-- Skip Link for Accessibility -->
@@ -162,20 +173,16 @@
 
                 <div class="income metric-card-clickable" role="article" aria-labelledby="win-rate-label" onclick="openMetricsModal('winrate')" style="cursor: pointer;" title="Click for detailed breakdown">
                     
-                    <span class="material-icons-sharp" aria-hidden="true">assessment</span>
+                    <span class="material-icons-sharp" aria-hidden="true" style="background: var(--color-warning);">assessment</span>
 
                     <div class="middle">
                         <div class="left">
                             <h3 id="win-rate-label">Win Rate</h3>
-                            <h1 data-live-update data-format="percentage" data-base-value="0.73" data-variance="0.05">73%</h1>
+                            <h1 id="winRateValue" data-live-update data-format="percentage" data-base-value="0.73" data-variance="0.05">73%</h1>
                         </div>
-                        <div class="progress">
-                            <svg>
-                                <circle cx=38 cy=36 r=36 ></circle>
-                            </svg>
-                            <div class="number">
-                                <p>73%</p>
-                            </div>
+                        <div class="progress" style="position: relative;">
+                            <!-- Radial Gauge Chart -->
+                            <div id="winRateGauge" style="background: transparent !important;"></div>
                         </div>
                     </div>
                     <small class="text-muted">Success Rate</small>
@@ -460,6 +467,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="scripts/error-handler.js"></script>
     <script src="scripts/security-utils.js"></script>
     <script src="scripts/performance-utils.js"></script>
@@ -474,6 +482,137 @@
     <script src="scripts/position-modal.js"></script>
     <script src="scripts/chart-tooltip.js"></script>
     <script src="scripts/main.js"></script>
+    
+    <!-- Win Rate Gauge Initialization -->
+    <script>
+    // Win rate gauge chart
+    let winRateGaugeChart = null;
+    let winRateData = {
+        correct: 27,
+        total: 37,
+        get percentage() {
+            return Math.round((this.correct / this.total) * 100);
+        }
+    };
+
+    function initWinRateGauge() {
+        const options = {
+            series: [winRateData.percentage],
+            chart: {
+                type: 'radialBar',
+                height: 80,
+                width: 80,
+                sparkline: {
+                    enabled: false
+                },
+                background: 'transparent',
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    speed: 800,
+                    animateGradually: {
+                        enabled: true,
+                        delay: 150
+                    },
+                    dynamicAnimation: {
+                        enabled: true,
+                        speed: 350
+                    }
+                }
+            },
+            plotOptions: {
+                radialBar: {
+                    hollow: {
+                        size: '60%',
+                        background: 'transparent'
+                    },
+                    track: {
+                        background: 'var(--color-light)',
+                        strokeWidth: '100%',
+                        margin: 0,
+                        opacity: 0.3
+                    },
+                    dataLabels: {
+                        show: false
+                    },
+                    startAngle: -90,
+                    endAngle: 90
+                }
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shade: 'dark',
+                    type: 'horizontal',
+                    shadeIntensity: 0.5,
+                    gradientToColors: ['#10b981'],
+                    inverseColors: false,
+                    opacityFrom: 1,
+                    opacityTo: 1,
+                    stops: [0, 100]
+                }
+            },
+            colors: ['#2d6cdf'],
+            stroke: {
+                lineCap: 'round'
+            },
+            grid: {
+                padding: {
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: 0
+                }
+            }
+        };
+
+        const gaugeElement = document.querySelector('#winRateGauge');
+        if (gaugeElement && !winRateGaugeChart) {
+            winRateGaugeChart = new ApexCharts(gaugeElement, options);
+            winRateGaugeChart.render();
+        }
+    }
+
+    function updateWinRateGauge() {
+        // Simulate trade results (70-78% win rate range)
+        const variation = Math.floor(Math.random() * 5); // 0-4
+        winRateData.correct = 27 + variation;
+        winRateData.total = 37 + Math.floor(Math.random() * 3); // 37-39
+        
+        const percentage = winRateData.percentage;
+        
+        // Update the gauge
+        if (winRateGaugeChart) {
+            winRateGaugeChart.updateSeries([percentage]);
+        }
+        
+        // Update the main value display
+        const valueElement = document.getElementById('winRateValue');
+        if (valueElement) {
+            valueElement.textContent = percentage + '%';
+            // Update the data attribute for live updates
+            valueElement.setAttribute('data-base-value', (percentage / 100).toFixed(2));
+        }
+        
+        // Update the stats display
+        const statsElement = document.getElementById('winRateStats');
+        if (statsElement) {
+            statsElement.textContent = `${winRateData.correct}/${winRateData.total}`;
+        }
+    }
+
+    // Initialize gauge when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initWinRateGauge, 500);
+        });
+    } else {
+        setTimeout(initWinRateGauge, 500);
+    }
+
+    // Update win rate gauge every 30 seconds
+    setInterval(updateWinRateGauge, 30000);
+    </script>
     
 </body>
 </html>
