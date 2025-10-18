@@ -104,7 +104,7 @@
             </div>
 
             <div class="insights">
-                <div class="sales">
+                <div class="sales market-card-clickable" onclick="openMarketModal('indices')" style="cursor: pointer;" title="Click for detailed breakdown">
                     <span class="material-icons-sharp">trending_up</span>
                     <div class="middle">
                         <div class="left">
@@ -123,7 +123,7 @@
                     <small class="text-muted">Average Daily Change</small>
                 </div>
 
-                <div class="expenses">
+                <div class="expenses market-card-clickable" onclick="openMarketModal('commodities')" style="cursor: pointer;" title="Click for detailed breakdown">
                     <span class="material-icons-sharp">spa</span>
                     <div class="middle">
                         <div class="left">
@@ -142,7 +142,7 @@
                     <small class="text-muted">Market Volatility</small>
                 </div>
 
-                <div class="income">
+                <div class="income market-card-clickable" onclick="openMarketModal('trades')" style="cursor: pointer;" title="Click for detailed breakdown">
                     <span class="material-icons-sharp">show_chart</span>
                     <div class="middle">
                         <div class="left">
@@ -383,6 +383,23 @@
         </div>
     </div>
 
+    <!-- Market Metrics Modal -->
+    <div id="marketModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeMarketModal()"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="marketModalTitle">Market Details</h2>
+                <button class="modal-close" onclick="closeMarketModal()" aria-label="Close modal">
+                    <span class="material-icons-sharp">close</span>
+                </button>
+            </div>
+            <div class="modal-body" id="marketModalBody">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
 <script src="../scripts/main.js"></script>
+<script src="../scripts/indices-commodities.js"></script>
 </body>
 </html>

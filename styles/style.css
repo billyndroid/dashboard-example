@@ -805,6 +805,20 @@ main .insights > div.metric-card-clickable:hover {
 main .insights > div.metric-card-clickable:active {
     transform: translateY(1px);
 }
+
+main .insights > div.market-card-clickable {
+    cursor: pointer;
+    transition: box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease, background-color 200ms ease;
+}
+
+main .insights > div.market-card-clickable:hover {
+    border-color: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-white) 0%, rgba(126,34,206,0.03) 100%);
+}
+
+main .insights > div.market-card-clickable:active {
+    transform: translateY(1px);
+}
  
 main .insights > div span {
     color: var(--color-white);
