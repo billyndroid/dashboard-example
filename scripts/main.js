@@ -303,6 +303,9 @@ async function populateOrdersTable() {
         
         console.info(`Successfully populated ${Orders.length} orders in table.`);
         
+        // Update dashboard metrics to reflect current data
+        updateDashboardMetrics();
+        
         // Initialize chart tooltips after table is populated
         if (window.initChartTooltips) {
             setTimeout(function() {
@@ -495,62 +498,107 @@ function updateProgressCircles() {
 // Update dashboard metrics with real calculated data
 function updateDashboardMetrics() {
     try {
-        if (typeof DashboardData === 'undefined') {
-            console.warn('DashboardData not available');
+        if (typeof Orders === 'undefined') {
+            console.warn('Orders data not available');
             return;
         }
         
-        // Update portfolio value
+        // Calculate metrics from active positions
+        const activeOrders = Orders.filter(order => order.shipping === 'Active');
+        
+        // Calculate total position value
+        let totalPositionValue = 0;
+        activeOrders.forEach(order => {
+            const currentPrice = order.currentPrice || getCurrentPrice(order.productName);
+            totalPositionValue += currentPrice * order.quantity;
+        });
+        
+        // Calculate total P&L
+        let totalPnL = 0;
+        let totalInvested = 0;
+        activeOrders.forEach(order => {
+            const currentPrice = order.currentPrice || getCurrentPrice(order.productName);
+            const invested = order.entryPrice * order.quantity;
+            const currentValue = currentPrice * order.quantity;
+            const pnl = currentValue - invested;
+            const actualPnL = order.orderType === 'Long' ? pnl : -pnl;
+            
+            totalPnL += actualPnL;
+            totalInvested += invested;
+        });
+        
+        // Calculate win rate
+        let winningPositions = 0;
+        activeOrders.forEach(order => {
+            const currentPrice = order.currentPrice || getCurrentPrice(order.productName);
+            const pnl = (currentPrice - order.entryPrice) * order.quantity;
+            const actualPnL = order.orderType === 'Long' ? pnl : -pnl;
+            if (actualPnL > 0) winningPositions++;
+        });
+        const winRate = activeOrders.length > 0 ? (winningPositions / activeOrders.length) * 100 : 0;
+        
+        // Update Total Position card
         const portfolioElement = document.querySelector('.sales h1');
-        let portfolioGrowth = 2.4; // default
         if (portfolioElement) {
-            const totalValue = DashboardData.getTotalPortfolioValue();
-            portfolioElement.textContent = `$${(totalValue / 1000).toFixed(1)}K`;
+            if (totalPositionValue >= 1000) {
+                portfolioElement.textContent = `$${(totalPositionValue / 1000).toFixed(1)}K`;
+            } else {
+                portfolioElement.textContent = `$${totalPositionValue.toFixed(2)}`;
+            }
+            portfolioElement.setAttribute('data-base-value', totalPositionValue.toString());
             
-            // Calculate growth percentage (assuming base value)
-            const baseValue = parseFloat(portfolioElement.getAttribute('data-base-value')) || 247850;
-            portfolioGrowth = ((totalValue - baseValue) / baseValue * 100);
-            
-            // Update progress indicator
+            // Update portfolio growth percentage (P&L as % of invested)
+            const portfolioGrowth = totalInvested > 0 ? (totalPnL / totalInvested * 100) : 0;
             const portfolioProgress = portfolioElement.closest('.sales')?.querySelector('.number p');
             if (portfolioProgress) {
                 portfolioProgress.textContent = `${portfolioGrowth >= 0 ? '+' : ''}${portfolioGrowth.toFixed(1)}%`;
+                portfolioProgress.className = portfolioGrowth >= 0 ? 'success' : 'danger';
             }
         }
         
-        // Update total P&L
+        // Update Total P&L card
         const pnlElement = document.querySelector('.expenses h1');
         if (pnlElement) {
-            const totalPnL = DashboardData.getTotalPnL();
-            pnlElement.textContent = `${totalPnL >= 0 ? '+' : ''}$${(totalPnL / 1000).toFixed(1)}K`;
+            const absValue = Math.abs(totalPnL);
+            if (absValue >= 1000) {
+                pnlElement.textContent = `${totalPnL >= 0 ? '+' : '-'}$${(absValue / 1000).toFixed(1)}K`;
+            } else {
+                pnlElement.textContent = `${totalPnL >= 0 ? '+' : '-'}$${absValue.toFixed(2)}`;
+            }
+            pnlElement.setAttribute('data-base-value', totalPnL.toString());
+            pnlElement.className = totalPnL >= 0 ? 'success' : 'danger';
             
-            // Update progress indicator
+            // Update P&L percentage
             const pnlProgress = pnlElement.closest('.expenses')?.querySelector('.number p');
             if (pnlProgress) {
-                const totalValue = DashboardData.getTotalPortfolioValue();
-                const percentage = totalValue > 0 ? Math.abs(totalPnL / totalValue * 100) : 0;
-                pnlProgress.textContent = `${totalPnL >= 0 ? '+' : '-'}${percentage.toFixed(1)}%`;
+                const percentage = totalInvested > 0 ? (totalPnL / totalInvested * 100) : 0;
+                pnlProgress.textContent = `${percentage >= 0 ? '+' : ''}${percentage.toFixed(1)}%`;
+                pnlProgress.className = percentage >= 0 ? 'success' : 'danger';
             }
         }
         
-        // Update win rate
-        const winRateH1Element = document.querySelector('.income h1');
-        const winRateElement = document.querySelector('.income .number p');
-        if (winRateElement && winRateH1Element) {
-            const winRate = DashboardData.getWinRate();
+        // Update Win Rate card
+        const winRateH1Element = document.querySelector('.income h1#winRateValue');
+        if (winRateH1Element) {
             winRateH1Element.textContent = `${winRate.toFixed(0)}%`;
-            winRateElement.textContent = `${winRate.toFixed(0)}%`;
+            winRateH1Element.setAttribute('data-base-value', (winRate / 100).toFixed(2));
         }
         
-        // Update counts
+        // Update win rate gauge
+        if (typeof winRateGaugeChart !== 'undefined' && winRateGaugeChart) {
+            winRateGaugeChart.updateSeries([Math.round(winRate)]);
+        }
+        
+        // Update position counts in table header
         const activeCountElement = document.querySelector('#ordersTableBody')?.closest('.recent-orders')?.querySelector('h2');
         if (activeCountElement) {
-            const activeCount = DashboardData.getActiveOrdersCount();
-            const pendingCount = DashboardData.getPendingOrdersCount();
-            activeCountElement.textContent = `Active Positions (${activeCount}) • Pending (${pendingCount})`;
+            const activeCount = activeOrders.length;
+            const pendingCount = Orders.filter(order => order.shipping === 'Pending').length;
+            const declinedCount = Orders.filter(order => order.shipping === 'Declined').length;
+            activeCountElement.textContent = `Active Positions (${activeCount}) • Pending (${pendingCount}) • Closed (${declinedCount})`;
         }
         
-        console.info('Dashboard metrics updated successfully');
+        console.info('[Dashboard] Metrics updated - Position: $' + totalPositionValue.toFixed(2) + ', P&L: $' + totalPnL.toFixed(2) + ', Win Rate: ' + winRate.toFixed(1) + '%');
         
         // Update progress circles to reflect new values
         updateProgressCircles();
@@ -870,10 +918,188 @@ function updateNotificationBadge() {
     }
 }
 
+/**
+ * Initialize Market Analytics from Orders data
+ * Updates best/worst performers based on actual position performance
+ */
+function updateMarketAnalyticsFromOrders() {
+    try {
+        if (typeof Orders === 'undefined' || !Orders.length) {
+            console.warn('[Dashboard] Orders data not available for Market Analytics');
+            return;
+        }
+
+        const activeOrders = Orders.filter(order => order.shipping === 'Active');
+        if (activeOrders.length === 0) {
+            console.warn('[Dashboard] No active orders for Market Analytics');
+            return;
+        }
+
+        // Calculate performance for each active order
+        const performances = activeOrders.map(order => {
+            const currentPrice = order.currentPrice || getCurrentPrice(order.productName);
+            const pnl = (currentPrice - order.entryPrice) * order.quantity;
+            const actualPnL = order.orderType === 'Long' ? pnl : -pnl;
+            const percentage = ((currentPrice - order.entryPrice) / order.entryPrice) * 100;
+            const actualPercentage = order.orderType === 'Long' ? percentage : -percentage;
+
+            return {
+                name: order.productName,
+                price: currentPrice,
+                change: actualPercentage,
+                pnl: actualPnL,
+                order: order
+            };
+        });
+
+        // Sort by performance
+        performances.sort((a, b) => b.change - a.change);
+
+        const bestPerformer = performances[0];
+        const worstPerformer = performances[performances.length - 1];
+
+        // Update best performer card
+        const bestCard = document.querySelector('#bestPerformer');
+        if (bestCard) {
+            const nameEl = bestCard.querySelector('.info small');
+            const changeEl = bestCard.querySelector('h5');
+            const priceEl = bestCard.querySelector('.right h3');
+
+            if (nameEl) nameEl.textContent = bestPerformer.name;
+            if (changeEl) {
+                changeEl.textContent = `${bestPerformer.change >= 0 ? '+' : ''}${bestPerformer.change.toFixed(2)}%`;
+                changeEl.className = bestPerformer.change >= 0 ? 'success' : 'danger';
+            }
+            if (priceEl) {
+                const formattedPrice = bestPerformer.price >= 1000 
+                    ? `$${(bestPerformer.price / 1000).toFixed(1)}K`
+                    : `$${bestPerformer.price.toFixed(2)}`;
+                priceEl.textContent = formattedPrice;
+            }
+        }
+
+        // Update worst performer card
+        const worstCard = document.querySelector('#worstPerformer');
+        if (worstCard) {
+            const nameEl = worstCard.querySelector('.info small');
+            const changeEl = worstCard.querySelector('h5');
+            const priceEl = worstCard.querySelector('.right h3');
+
+            if (nameEl) nameEl.textContent = worstPerformer.name;
+            if (changeEl) {
+                changeEl.textContent = `${worstPerformer.change >= 0 ? '+' : ''}${worstPerformer.change.toFixed(2)}%`;
+                changeEl.className = worstPerformer.change >= 0 ? 'success' : 'danger';
+            }
+            if (priceEl) {
+                const formattedPrice = worstPerformer.price >= 1000 
+                    ? `$${(worstPerformer.price / 1000).toFixed(1)}K`
+                    : `$${worstPerformer.price.toFixed(2)}`;
+                priceEl.textContent = formattedPrice;
+            }
+        }
+
+        console.log('[Dashboard] Market Analytics updated from Orders - Best:', bestPerformer.name, 'Worst:', worstPerformer.name);
+    } catch (error) {
+        console.error('[Dashboard] Error updating Market Analytics from Orders:', error);
+    }
+}
+
+/**
+ * Update Recent Updates section with actual order data
+ */
+function updateRecentUpdatesFromOrders() {
+    try {
+        if (typeof Orders === 'undefined' || !Orders.length) {
+            console.warn('[Dashboard] Orders data not available for Recent Updates');
+            return;
+        }
+
+        const updates = document.querySelectorAll('#recentUpdates .update');
+        if (updates.length === 0) return;
+
+        // Get most recent orders (sorted by timestamp)
+        const sortedOrders = [...Orders].sort((a, b) => {
+            const timeA = new Date(a.timestamp || 0).getTime();
+            const timeB = new Date(b.timestamp || 0).getTime();
+            return timeB - timeA;
+        }).slice(0, 3);
+
+        sortedOrders.forEach((order, index) => {
+            if (index >= updates.length) return;
+
+            const update = updates[index];
+            const messageEl = update.querySelector('.message p');
+            const timestampEl = update.querySelector('.message small');
+
+            if (messageEl && order) {
+                const currentPrice = order.currentPrice || getCurrentPrice(order.productName);
+                const pnl = (currentPrice - order.entryPrice) * order.quantity;
+                const actualPnL = order.orderType === 'Long' ? pnl : -pnl;
+                const percentage = ((currentPrice - order.entryPrice) / order.entryPrice) * 100;
+                const actualPercentage = order.orderType === 'Long' ? percentage : -percentage;
+
+                let statusText = '';
+                if (order.shipping === 'Active') {
+                    statusText = `position at $${order.entryPrice.toFixed(2)} - currently ${actualPercentage >= 0 ? '+' : ''}${actualPercentage.toFixed(2)}%`;
+                } else if (order.shipping === 'Pending') {
+                    statusText = `order pending execution at $${order.entryPrice.toFixed(2)}`;
+                } else {
+                    statusText = `${order.shipping.toLowerCase()} - ${actualPercentage >= 0 ? '+' : ''}${actualPercentage.toFixed(2)}%`;
+                }
+
+                messageEl.innerHTML = `<b>${order.productName}</b> ${statusText}`;
+            }
+
+            if (timestampEl && order.timestamp) {
+                const timeAgo = formatTimeAgo(order.timestamp);
+                timestampEl.textContent = timeAgo;
+            }
+        });
+
+        console.log('[Dashboard] Recent Updates refreshed from Orders data');
+    } catch (error) {
+        console.error('[Dashboard] Error updating Recent Updates from Orders:', error);
+    }
+}
+
+/**
+ * Format timestamp to human-readable time ago
+ */
+function formatTimeAgo(timestamp) {
+    try {
+        const now = new Date();
+        const time = new Date(timestamp);
+        const diffMs = now - time;
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins} minutes ago`;
+        if (diffHours < 24) return `${diffHours} hours ago`;
+        return time.toLocaleDateString();
+    } catch (error) {
+        return 'Recently';
+    }
+}
+
+// Update notification badge count
+function updateNotificationBadge() {
+    if (typeof NotificationService !== 'undefined') {
+        const unreadCount = NotificationService.getUnreadCount();
+        const badge = document.querySelector('.message-count');
+        if (badge) {
+            badge.textContent = unreadCount;
+            badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+        }
+    }
+}
+
 // Initialize dashboard data when page loads
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         updateDashboardMetrics();
+        updateMarketAnalyticsFromOrders();
+        updateRecentUpdatesFromOrders();
         startRealTimeUpdates();
         refreshDashboardData();
         updateNotificationBadge();
@@ -883,9 +1109,15 @@ if (document.readyState === 'loading') {
         setInterval(updateRecentUpdatesWithRealPrices, 90000);
         // Refresh orders table every 90 seconds for live prices
         setInterval(populateOrdersTable, 90000);
+        // Refresh Market Analytics every 30 seconds
+        setInterval(updateMarketAnalyticsFromOrders, 30000);
+        // Refresh Recent Updates every 30 seconds
+        setInterval(updateRecentUpdatesFromOrders, 30000);
     });
 } else {
     updateDashboardMetrics();
+    updateMarketAnalyticsFromOrders();
+    updateRecentUpdatesFromOrders();
     startRealTimeUpdates();
     refreshDashboardData();
     updateNotificationBadge();
@@ -893,6 +1125,10 @@ if (document.readyState === 'loading') {
     updateRecentUpdatesWithRealPrices();
     // Refresh crypto prices every 90 seconds (to avoid rate limits)
     setInterval(updateRecentUpdatesWithRealPrices, 90000);
+    // Refresh Market Analytics every 30 seconds
+    setInterval(updateMarketAnalyticsFromOrders, 30000);
+    // Refresh Recent Updates every 30 seconds
+    setInterval(updateRecentUpdatesFromOrders, 30000);
 }
 
 /**
@@ -1148,5 +1384,7 @@ window.startRealTimeUpdates = startRealTimeUpdates;
 window.refreshDashboardData = refreshDashboardData;
 window.updateRecentUpdatesWithRealPrices = updateRecentUpdatesWithRealPrices;
 window.updateNotificationBadge = updateNotificationBadge;
+window.updateMarketAnalyticsFromOrders = updateMarketAnalyticsFromOrders;
+window.updateRecentUpdatesFromOrders = updateRecentUpdatesFromOrders;
 window.openMetricsModal = openMetricsModal;
 window.closeMetricsModal = closeMetricsModal;

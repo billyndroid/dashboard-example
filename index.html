@@ -133,7 +133,7 @@
                         <div class="left">
                             <h3 id="total-position-label">Total Position</h3>
                             <h3>USD</h3>
-                            <h1 data-live-update data-format="currency" data-base-value="247850" data-variance="0.02">$247.8K</h1>
+                            <h1>$0.00</h1>
                         </div>
 
                         
@@ -142,7 +142,7 @@
                                 <circle cx=38 cy=36 r=36 ></circle>
                             </svg>
                             <div class="number">
-                                <p>+2.4%</p>
+                                <p>+0.0%</p>
                             </div>
                         </div>
                     </div>
@@ -156,14 +156,14 @@
                         <div class="left">
                             <h3 id="pnl-label">Total P&L</h3>
                             <h3>USD</h3>
-                            <h1 data-live-update data-format="currency" data-base-value="12058" data-variance="0.05">+$12.1K</h1>
+                            <h1>$0.00</h1>
                         </div>
                         <div class="progress">
                             <svg>
                                 <circle cx=38 cy=36 r=36 ></circle>
                             </svg>
                             <div class="number">
-                                <p>+4.9%</p>
+                                <p>+0.0%</p>
                             </div>
                         </div>
                     </div>
@@ -178,7 +178,7 @@
                     <div class="middle">
                         <div class="left">
                             <h3 id="win-rate-label">Win Rate</h3>
-                            <h1 id="winRateValue" data-live-update data-format="percentage" data-base-value="0.73" data-variance="0.05">73%</h1>
+                            <h1 id="winRateValue">0%</h1>
                         </div>
                         <div class="progress" style="position: relative;">
                             <!-- Radial Gauge Chart -->
@@ -249,8 +249,8 @@
                             <span class="material-icons-sharp" aria-hidden="true">savings</span>
                         </div>
                         <div class="message">
-                            <p><b>Gold</b> position opened at $1,942.70 - currently +1.74%</p>
-                            <small class="text-muted">30 minutes ago</small>
+                            <p><b>Gold</b> Loading...</p>
+                            <small class="text-muted">Loading...</small>
                         </div>
                     </div>
                     
@@ -259,8 +259,8 @@
                             <span class="material-icons-sharp" aria-hidden="true">show_chart</span>
                         </div>
                         <div class="message">
-                            <p><b>S&P 500</b> showing strong momentum - up +0.24% today</p>
-                            <small class="text-muted">15 minutes ago</small>
+                            <p><b>S&P 500</b> Loading...</p>
+                            <small class="text-muted">Loading...</small>
                         </div>
                     </div>
                     
@@ -269,8 +269,8 @@
                             <span class="material-icons-sharp" aria-hidden="true">currency_bitcoin</span>
                         </div>
                         <div class="message">
-                            <p><b>Bitcoin</b> order pending execution at $65,230.50</p>
-                            <small class="text-muted">2 minutes ago</small>
+                            <p><b>Bitcoin</b> Loading...</p>
+                            <small class="text-muted">Loading...</small>
                         </div>
                     </div>
                 </div>
@@ -289,10 +289,10 @@
                     <div class="right">
                         <div class="info">
                             <h3 id="top-performer-label">TOP PERFORMER</h3>
-                            <small class="text-muted">Gold</small>
+                            <small class="text-muted">--</small>
                         </div>
-                        <h5 class="success">+1.74%</h5>
-                        <h3>$1,976</h3>
+                        <h5 class="success">+0.00%</h5>
+                        <h3>$--</h3>
                     </div>   
                 </div>
 
@@ -303,10 +303,10 @@
                     <div class="right">
                         <div class="info">
                             <h3 id="needs-attention-label">NEEDS ATTENTION</h3>
-                            <small class="text-muted">Crude Oil</small>
+                            <small class="text-muted">--</small>
                         </div>
-                        <h5 class="danger">-1.04%</h5>
-                        <h3>$89.65</h3>
+                        <h5 class="danger">+0.00%</h5>
+                        <h3>$--</h3>
                     </div>
                 </div>   
 
@@ -574,10 +574,21 @@
     }
 
     function updateWinRateGauge() {
-        // Simulate trade results (70-78% win rate range)
-        const variation = Math.floor(Math.random() * 5); // 0-4
-        winRateData.correct = 27 + variation;
-        winRateData.total = 37 + Math.floor(Math.random() * 3); // 37-39
+        // Calculate real win rate from active positions
+        if (typeof Orders !== 'undefined') {
+            const activeOrders = Orders.filter(order => order.shipping === 'Active');
+            let winningPositions = 0;
+            
+            activeOrders.forEach(order => {
+                const currentPrice = order.currentPrice || (typeof getCurrentPrice !== 'undefined' ? getCurrentPrice(order.productName) : order.entryPrice);
+                const pnl = (currentPrice - order.entryPrice) * order.quantity;
+                const actualPnL = order.orderType === 'Long' ? pnl : -pnl;
+                if (actualPnL > 0) winningPositions++;
+            });
+            
+            winRateData.correct = winningPositions;
+            winRateData.total = activeOrders.length;
+        }
         
         const percentage = winRateData.percentage;
         
