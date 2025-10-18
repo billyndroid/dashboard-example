@@ -420,6 +420,25 @@
         </div>
     </div>
 
+    <!-- Chart Tooltip -->
+    <div id="chartTooltip" class="chart-tooltip" style="display: none;">
+        <div class="chart-tooltip-header">
+            <span id="chartTooltipAsset" class="chart-tooltip-asset">Asset</span>
+            <span id="chartTooltipPrice" class="chart-tooltip-price">$0.00</span>
+        </div>
+        <canvas id="chartTooltipCanvas" width="280" height="140"></canvas>
+        <div class="chart-tooltip-stats">
+            <div class="stat">
+                <span class="label">Change</span>
+                <span id="chartTooltipChange" class="value">+0.00%</span>
+            </div>
+            <div class="stat">
+                <span class="label">Volume</span>
+                <span id="chartTooltipVolume" class="value">0</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Metrics Modal -->
     <div id="metricsModal" class="modal" style="display: none;">
         <div class="modal-overlay"></div>
@@ -448,6 +467,7 @@
     <script src="scripts/countup-enhanced.js"></script>
     <script src="scripts/orders.js"></script>
     <script src="scripts/position-modal.js"></script>
+    <script src="scripts/chart-tooltip.js"></script>
     <script src="scripts/main.js"></script>
     
 </body>

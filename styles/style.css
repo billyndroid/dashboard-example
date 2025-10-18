@@ -2094,6 +2094,99 @@ canvas#myChart {
     border-color: var(--color-primary);
 }
 
+/* Chart Tooltip Styles */
+.chart-tooltip {
+    position: fixed;
+    z-index: 9999;
+    background: var(--color-white);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    padding: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    width: 300px;
+    border: 2px solid var(--color-primary);
+}
+
+.chart-tooltip.visible {
+    opacity: 1;
+}
+
+.chart-tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #5a1fa8 100%);
+    border-radius: 10px 10px 0 0;
+}
+
+.chart-tooltip-asset {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: white;
+}
+
+.chart-tooltip-price {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: white;
+}
+
+.chart-tooltip canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: linear-gradient(to bottom, #f9fafb 0%, #ffffff 100%);
+}
+
+.chart-tooltip-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-white);
+    border-radius: 0 0 10px 10px;
+}
+
+.chart-tooltip-stats .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.chart-tooltip-stats .label {
+    font-size: 0.7rem;
+    color: var(--color-info-dark);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.chart-tooltip-stats .value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-dark);
+}
+
+.dark-theme-variables .chart-tooltip {
+    background: var(--color-dark);
+    border-color: var(--color-primary);
+}
+
+.dark-theme-variables .chart-tooltip canvas {
+    background: linear-gradient(to bottom, #1f2937 0%, #111827 100%);
+}
+
+.dark-theme-variables .chart-tooltip-stats {
+    background: var(--color-dark);
+}
+
+.dark-theme-variables .chart-tooltip-stats .value {
+    color: var(--color-white);
+}
+
 /* Responsive Design for News Page */
 @media (max-width: 1200px) {
     #newsGrid {

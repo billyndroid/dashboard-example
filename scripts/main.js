@@ -303,6 +303,13 @@ async function populateOrdersTable() {
         
         console.info(`Successfully populated ${Orders.length} orders in table.`);
         
+        // Initialize chart tooltips after table is populated
+        if (window.initChartTooltips) {
+            setTimeout(function() {
+                window.initChartTooltips();
+            }, 100);
+        }
+        
     } catch (error) {
         console.error('Error populating orders table:', error);
     }
