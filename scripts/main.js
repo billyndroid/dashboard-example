@@ -670,7 +670,8 @@ async function refreshDashboardData() {
                 }
             }
             
-            const marketData = DataService.getMarketData(assets, 1);
+            const marketData = await DataService.getMarketData(assets, 1);
+            console.log('[Dashboard] Market data loaded with', Object.keys(marketData).length, 'assets');
             
             // Calculate top performers
             const performers = DataService.getTopPerformers(marketData);

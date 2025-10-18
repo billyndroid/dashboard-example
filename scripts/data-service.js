@@ -7,7 +7,7 @@
 const DataService = {
     // Cache for API responses
     _cache: {},
-    _cacheTimeout: 60000, // Cache for 60 seconds
+    _cacheTimeout: 600000, // Cache for 10 minutes (600 seconds) - reduces API calls by 10x!
     
     /**
      * Get cached data if available and not expired
@@ -98,23 +98,68 @@ const DataService = {
     },
     
     /**
-     * Fetch stock/forex/commodity data from Twelve Data API
+     * Fetch stock/forex/commodity data from Twelve Data API with Alpha Vantage fallback
      * @param {string} symbol - Asset symbol
      * @returns {Promise<Object>} Quote data
      */
     async fetchAssetQuote(symbol) {
         try {
+            // Try Twelve Data FIRST (preferred API)
             const config = window.AppConfig?.thirdPartyApis?.twelveData;
-            if (!config?.enabled || !config?.key) {
-                console.warn('[DataService] Twelve Data not configured');
-                return null;
+            let shouldFallbackToAlpha = false;
+            
+            if (config?.enabled && config?.key) {
+                const result = await this._fetchTwelveDataQuote(symbol, config);
+                if (result.success) {
+                    return result.data;
+                } else if (result.rateLimitExceeded) {
+                    console.warn('[DataService] ⚠️ Twelve Data rate limit exceeded, falling back to Alpha Vantage');
+                    shouldFallbackToAlpha = true;
+                }
+            } else {
+                console.log('[DataService] Twelve Data not configured, trying Alpha Vantage');
+                shouldFallbackToAlpha = true;
             }
             
+            // Fall back to Alpha Vantage if Twelve Data failed or rate limited
+            if (shouldFallbackToAlpha) {
+                const alphaConfig = window.AppConfig?.thirdPartyApis?.alphaVantage;
+                if (alphaConfig?.enabled && alphaConfig?.key && alphaConfig?.key !== 'YOUR_ALPHA_VANTAGE_KEY_HERE') {
+                    console.log('[DataService] Trying Alpha Vantage fallback...');
+                    const alphaData = await this.fetchAlphaVantageQuote(symbol);
+                    if (alphaData) {
+                        console.log('[DataService] ✅ Alpha Vantage fallback succeeded!');
+                        return alphaData;
+                    } else {
+                        console.warn('[DataService] Alpha Vantage fallback failed');
+                    }
+                } else {
+                    console.warn('[DataService] ⚠️ Alpha Vantage not configured! Add API key to config.local.js');
+                    console.warn('[DataService] Get free key: https://www.alphavantage.co/support/#api-key');
+                }
+            }
+            
+            console.log('[DataService] All API attempts failed');
+            return null;
+        } catch (error) {
+            console.error('[DataService] Asset quote fetch error:', error.message);
+            return null;
+        }
+    },
+    
+    /**
+     * Internal method to fetch from Twelve Data
+     * @param {string} symbol - Asset symbol
+     * @param {Object} config - Twelve Data config
+     * @returns {Promise<Object>} {success, data, rateLimitExceeded}
+     */
+    async _fetchTwelveDataQuote(symbol, config) {
+        try {
             const cacheKey = 'quote_' + symbol;
             
             // Check cache first
             const cached = this._getCached(cacheKey);
-            if (cached) return cached;
+            if (cached) return { success: true, data: cached };
             
             const apiUrl = `${config.baseUrl}/quote?symbol=${symbol}&apikey=${config.key}`;
             
@@ -123,59 +168,330 @@ const DataService = {
                 const response = await fetch(apiUrl);
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.status !== 'error') {
+                    
+                    // Check for rate limit
+                    if (data.code === 429 || (data.status === 'error' && data.message?.includes('run out of API credits'))) {
+                        console.error('[DataService] Twelve Data rate limit:', data.message);
+                        return { success: false, rateLimitExceeded: true };
+                    }
+                    
+                    if (data.status !== 'error' && data.close) {
+                        console.log(`[DataService] ✅ Twelve Data quote for ${symbol}: $${data.close}`);
                         this._setCache(cacheKey, data);
-                        return data;
+                        return { success: true, data };
                     } else {
-                        console.warn('[DataService] Twelve Data API error:', data.message);
-                        const oldCached = this._cache[cacheKey];
-                        if (oldCached) {
-                            console.log('[DataService] Using expired cache due to API error');
-                            return oldCached.data;
-                        }
-                        throw new Error(data.message);
+                        console.warn('[DataService] Twelve Data API error:', data.message || 'No data');
+                        return { success: false, rateLimitExceeded: false };
                     }
                 }
             } catch (corsError) {
-                console.warn('[DataService] CORS error with Twelve Data, trying proxies...');
+                console.log('[DataService] CORS error, trying proxies...');
             }
             
             // Try multiple CORS proxies
             const proxies = [
                 'https://api.allorigins.win/raw?url=',
-                'https://api.codetabs.com/v1/proxy?quest='
+                'https://api.codetabs.com/v1/proxy?quest=',
+                'https://corsproxy.io/?'
             ];
             
             for (let i = 0; i < proxies.length; i++) {
                 try {
                     const proxy = proxies[i];
                     const proxyUrl = proxy + encodeURIComponent(apiUrl);
-                    console.log(`[DataService] Trying proxy ${i + 1}/${proxies.length} for Twelve Data...`);
+                    console.log(`[DataService] Trying proxy ${i + 1}/${proxies.length}...`);
                     
                     const response = await fetch(proxyUrl);
                     if (response.ok) {
                         const data = await response.json();
-                        if (data.status !== 'error') {
-                            console.log('[DataService] ✅ Proxy succeeded!');
+                        
+                        // Check for rate limit
+                        if (data.code === 429 || (data.status === 'error' && data.message?.includes('run out of API credits'))) {
+                            console.error('[DataService] Twelve Data rate limit via proxy:', data.message);
+                            return { success: false, rateLimitExceeded: true };
+                        }
+                        
+                        if (data.status !== 'error' && data.close) {
+                            console.log(`[DataService] ✅ Twelve Data proxy succeeded! ${symbol}: $${data.close}`);
                             this._setCache(cacheKey, data);
-                            return data;
+                            return { success: true, data };
                         }
                     }
                 } catch (proxyError) {
-                    console.warn(`[DataService] Proxy ${i + 1} failed:`, proxyError.message);
+                    console.log(`[DataService] Proxy ${i + 1} failed`);
                 }
             }
             
             // If all proxies fail, try to use expired cache
             const oldCached = this._cache[cacheKey];
             if (oldCached) {
-                console.log('[DataService] Using expired cache as last resort');
-                return oldCached.data;
+                console.log('[DataService] Using expired cache for Twelve Data');
+                return { success: true, data: oldCached.data };
             }
             
-            throw new Error('All proxy attempts failed');
+            return { success: false, rateLimitExceeded: false };
         } catch (error) {
-            console.error('[DataService] Asset quote fetch error:', error);
+            console.error('[DataService] Twelve Data quote error:', error.message);
+            return { success: false, rateLimitExceeded: false };
+        }
+    },
+    
+    /**
+     * Fetch time series data from Twelve Data with Alpha Vantage fallback
+     * @param {string} symbol - Asset symbol
+     * @param {number} days - Number of days
+     * @returns {Promise<Array>} Time series data
+     */
+    async fetchStockTimeSeries(symbol, days = 30) {
+        try {
+            // Try Twelve Data FIRST (preferred API)
+            const config = window.AppConfig?.thirdPartyApis?.twelveData;
+            let shouldFallbackToAlpha = false;
+            
+            if (config?.enabled && config?.key) {
+                const result = await this._fetchTwelveDataTimeSeries(symbol, days, config);
+                if (result.success) {
+                    return result.data;
+                } else if (result.rateLimitExceeded) {
+                    console.warn('[DataService] ⚠️ Twelve Data rate limit exceeded, falling back to Alpha Vantage');
+                    shouldFallbackToAlpha = true;
+                }
+            } else {
+                console.log('[DataService] Twelve Data not configured, trying Alpha Vantage');
+                shouldFallbackToAlpha = true;
+            }
+            
+            // Fall back to Alpha Vantage if Twelve Data failed or rate limited
+            if (shouldFallbackToAlpha) {
+                const alphaConfig = window.AppConfig?.thirdPartyApis?.alphaVantage;
+                if (alphaConfig?.enabled && alphaConfig?.key && alphaConfig?.key !== 'YOUR_ALPHA_VANTAGE_KEY_HERE') {
+                    console.log(`[DataService] Trying Alpha Vantage fallback for ${symbol}...`);
+                    const alphaData = await this.fetchAlphaVantageTimeSeries(symbol, days);
+                    if (alphaData && alphaData.length > 0) {
+                        console.log(`[DataService] ✅ Alpha Vantage fallback succeeded! Got ${alphaData.length} days`);
+                        return alphaData;
+                    } else {
+                        console.warn('[DataService] Alpha Vantage fallback failed');
+                    }
+                } else {
+                    console.warn('[DataService] ⚠️ Alpha Vantage not configured! Add API key to config.local.js');
+                    console.warn('[DataService] Get free key: https://www.alphavantage.co/support/#api-key');
+                }
+            }
+            
+            console.warn('[DataService] Could not fetch time series data from any API');
+            return null;
+        } catch (error) {
+            console.error('[DataService] Time series fetch error:', error.message);
+            return null;
+        }
+    },
+    
+    /**
+     * Internal method to fetch time series from Twelve Data
+     * @param {string} symbol - Asset symbol
+     * @param {number} days - Number of days
+     * @param {Object} config - Twelve Data config
+     * @returns {Promise<Object>} {success, data, rateLimitExceeded}
+     */
+    async _fetchTwelveDataTimeSeries(symbol, days, config) {
+        try {
+            const cacheKey = `stock_hist_${symbol}_${days}`;
+            const cached = this._getCached(cacheKey);
+            if (cached) return { success: true, data: cached };
+            
+            const interval = '1day';
+            const outputsize = Math.min(days + 10, 5000);
+            const apiUrl = `${config.baseUrl}/time_series?symbol=${symbol}&interval=${interval}&outputsize=${outputsize}&apikey=${config.key}`;
+            
+            console.log(`[DataService] Fetching ${days} days from Twelve Data for ${symbol}...`);
+            console.log(`[DataService] API Key: ${config.key ? config.key.substring(0, 8) + '...' : 'NONE'}`);
+            
+            // Try proxies immediately (direct calls often fail due to CORS)
+            const proxies = [
+                'https://api.allorigins.win/raw?url=',
+                'https://api.codetabs.com/v1/proxy?quest=',
+                'https://corsproxy.io/?'
+            ];
+            
+            for (let i = 0; i < proxies.length; i++) {
+                try {
+                    const proxy = proxies[i];
+                    const proxyUrl = proxy + encodeURIComponent(apiUrl);
+                    console.log(`[DataService] Trying proxy ${i + 1}/${proxies.length} for time series...`);
+                    
+                    const response = await fetch(proxyUrl);
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        // Check for rate limit FIRST
+                        if (data.code === 429 || (data.status === 'error' && data.message?.includes('run out of API credits'))) {
+                            console.error(`[DataService] Twelve Data rate limit: ${data.message}`);
+                            return { success: false, rateLimitExceeded: true };
+                        }
+                        
+                        // Check for other API errors
+                        if (data.status === 'error') {
+                            console.error(`[DataService] Twelve Data API Error: ${data.message || 'Unknown error'}`);
+                            continue; // Try next proxy
+                        }
+                        
+                        if (data.values && Array.isArray(data.values)) {
+                            console.log(`[DataService] ✅ Twelve Data got ${data.values.length} days for ${symbol}`);
+                            const formatted = this._formatTwelveDataTimeSeries(data.values);
+                            this._setCache(cacheKey, formatted);
+                            return { success: true, data: formatted };
+                        } else {
+                            console.warn(`[DataService] No values in Twelve Data response for ${symbol}`);
+                        }
+                    } else {
+                        console.warn(`[DataService] HTTP ${response.status} from proxy ${i + 1}`);
+                    }
+                } catch (proxyError) {
+                    console.log(`[DataService] Proxy ${i + 1} failed:`, proxyError.message);
+                }
+            }
+            
+            return { success: false, rateLimitExceeded: false };
+        } catch (error) {
+            console.error('[DataService] Twelve Data time series error:', error.message);
+            return { success: false, rateLimitExceeded: false };
+        }
+    },
+    
+    /**
+     * Format Twelve Data time series
+     * @param {Array} values - Raw time series values
+     * @returns {Array} Formatted data
+     */
+    _formatTwelveDataTimeSeries(values) {
+        if (!values || !Array.isArray(values)) return [];
+        
+        return values.reverse().map(item => ({
+            time: item.datetime, // TradingView format: 'YYYY-MM-DD' or timestamp
+            date: item.datetime,
+            timestamp: new Date(item.datetime).getTime(),
+            open: parseFloat(item.open),
+            high: parseFloat(item.high),
+            low: parseFloat(item.low),
+            close: parseFloat(item.close),
+            price: parseFloat(item.close),
+            value: parseFloat(item.close), // For line charts
+            volume: parseInt(item.volume) || 0,
+            change: 0
+        }));
+    },
+    
+    /**
+     * Fetch quote from Alpha Vantage
+     * @param {string} symbol - Stock symbol
+     * @returns {Promise<Object>} Quote data
+     */
+    async fetchAlphaVantageQuote(symbol) {
+        try {
+            const config = window.AppConfig?.thirdPartyApis?.alphaVantage;
+            const cacheKey = `alpha_quote_${symbol}`;
+            
+            const cached = this._getCached(cacheKey);
+            if (cached) return cached;
+            
+            const apiUrl = `${config.baseUrl}?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${config.key}`;
+            
+            const response = await fetch(apiUrl);
+            if (response.ok) {
+                const data = await response.json();
+                if (data['Global Quote'] && data['Global Quote']['05. price']) {
+                    const quote = {
+                        close: parseFloat(data['Global Quote']['05. price']),
+                        high: parseFloat(data['Global Quote']['03. high']),
+                        low: parseFloat(data['Global Quote']['04. low']),
+                        open: parseFloat(data['Global Quote']['02. open']),
+                        volume: parseInt(data['Global Quote']['06. volume'])
+                    };
+                    this._setCache(cacheKey, quote);
+                    return quote;
+                }
+            }
+            return null;
+        } catch (error) {
+            console.warn('[DataService] Alpha Vantage quote error:', error.message);
+            return null;
+        }
+    },
+    
+    /**
+     * Fetch time series from Alpha Vantage
+     * @param {string} symbol - Stock symbol
+     * @param {number} days - Number of days
+     * @returns {Promise<Array>} Time series data
+     */
+    async fetchAlphaVantageTimeSeries(symbol, days = 30) {
+        try {
+            const config = window.AppConfig?.thirdPartyApis?.alphaVantage;
+            
+            // Map symbols that Alpha Vantage doesn't support
+            const symbolMap = {
+                'SPX': 'SPY',  // S&P 500 index → SPDR S&P 500 ETF
+                '^GSPC': 'SPY',
+                'S&P 500': 'SPY'
+            };
+            
+            const mappedSymbol = symbolMap[symbol] || symbol;
+            if (mappedSymbol !== symbol) {
+                console.log(`[DataService] Mapping ${symbol} → ${mappedSymbol} for Alpha Vantage`);
+            }
+            
+            const cacheKey = `alpha_ts_${mappedSymbol}_${days}`;
+            
+            const cached = this._getCached(cacheKey);
+            if (cached) return cached;
+            
+            const outputsize = days > 100 ? 'full' : 'compact';
+            const apiUrl = `${config.baseUrl}?function=TIME_SERIES_DAILY&symbol=${mappedSymbol}&outputsize=${outputsize}&apikey=${config.key}`;
+            
+            console.log(`[DataService] Alpha Vantage API URL: ${config.baseUrl}?function=TIME_SERIES_DAILY&symbol=${mappedSymbol}&outputsize=${outputsize}&apikey=***`);
+            
+            const response = await fetch(apiUrl);
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data['Time Series (Daily)']) {
+                    const timeSeries = data['Time Series (Daily)'];
+                    const formatted = Object.entries(timeSeries)
+                        .slice(0, days)
+                        .reverse()
+                        .map(([dateStr, values]) => {
+                            const date = new Date(dateStr);
+                            return {
+                                time: dateStr, // TradingView format: 'YYYY-MM-DD'
+                                date: dateStr,
+                                timestamp: date.getTime(),
+                                open: parseFloat(values['1. open']),
+                                high: parseFloat(values['2. high']),
+                                low: parseFloat(values['3. low']),
+                                close: parseFloat(values['4. close']),
+                                price: parseFloat(values['4. close']),
+                                value: parseFloat(values['4. close']), // For line charts
+                                volume: parseInt(values['5. volume']) || 0,
+                                change: 0
+                            };
+                        });
+                    
+                    this._setCache(cacheKey, formatted);
+                    return formatted;
+                } else if (data.Note) {
+                    console.warn('[DataService] Alpha Vantage rate limit:', data.Note);
+                    console.warn('[DataService] ⚠️ Alpha Vantage free tier: 25 calls/day limit reached!');
+                    console.warn('[DataService] Your Twelve Data resets at midnight UTC. Wait until then for live data.');
+                } else if (data['Error Message']) {
+                    console.error('[DataService] Alpha Vantage error:', data['Error Message']);
+                } else {
+                    console.warn('[DataService] Alpha Vantage unexpected response:', data);
+                }
+            }
+            return null;
+        } catch (error) {
+            console.warn('[DataService] Alpha Vantage time series error:', error.message);
             return null;
         }
     },
@@ -201,6 +517,91 @@ const DataService = {
             console.error('[DataService] Forex fetch error:', error);
             return null;
         }
+    },
+    
+    /**
+     * Fetch historical data from CoinGecko for crypto assets
+     * @param {string} coinId - CoinGecko coin ID
+     * @param {number} days - Number of days of historical data
+     * @returns {Promise<Array>} Historical data
+     */
+    async fetchCryptoHistoricalData(coinId, days = 30) {
+        try {
+            const config = window.AppConfig?.thirdPartyApis?.coingecko;
+            if (!config?.enabled) return null;
+            
+            const cacheKey = `crypto_hist_${coinId}_${days}`;
+            const cached = this._getCached(cacheKey);
+            if (cached) return cached;
+            
+            const apiUrl = `${config.baseUrl}/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`;
+            
+            try {
+                const response = await fetch(apiUrl);
+                if (response.ok) {
+                    const data = await response.json();
+                    const formatted = this._formatCoinGeckoHistoricalData(data);
+                    this._setCache(cacheKey, formatted);
+                    return formatted;
+                }
+            } catch (corsError) {
+                console.warn('[DataService] CORS error, trying proxy...');
+            }
+            
+            // Try proxy
+            const proxies = [
+                'https://api.allorigins.win/raw?url=',
+                'https://api.codetabs.com/v1/proxy?quest='
+            ];
+            
+            for (const proxy of proxies) {
+                try {
+                    const proxyUrl = proxy + encodeURIComponent(apiUrl);
+                    const response = await fetch(proxyUrl);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const formatted = this._formatCoinGeckoHistoricalData(data);
+                        this._setCache(cacheKey, formatted);
+                        return formatted;
+                    }
+                } catch (proxyError) {
+                    console.warn('[DataService] Proxy failed:', proxyError.message);
+                }
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('[DataService] Error fetching crypto historical data:', error);
+            return null;
+        }
+    },
+    
+    /**
+     * Format CoinGecko historical data
+     * @param {Object} data - Raw CoinGecko data
+     * @returns {Array} Formatted historical data
+     */
+    _formatCoinGeckoHistoricalData(data) {
+        if (!data || !data.prices) return [];
+        
+        return data.prices.map((price, index) => {
+            const date = new Date(price[0]);
+            const volume = data.total_volumes?.[index]?.[1] || 0;
+            const marketCap = data.market_caps?.[index]?.[1] || 0;
+            
+            return {
+                date: date.toISOString().split('T')[0],
+                timestamp: price[0],
+                price: parseFloat(price[1].toFixed(2)),
+                volume: Math.floor(volume),
+                marketCap: Math.floor(marketCap),
+                high: parseFloat((price[1] * 1.02).toFixed(2)),
+                low: parseFloat((price[1] * 0.98).toFixed(2)),
+                open: parseFloat(price[1].toFixed(2)),
+                close: parseFloat(price[1].toFixed(2)),
+                change: 0
+            };
+        });
     },
     
     /**
@@ -355,13 +756,14 @@ const DataService = {
     },
 
     /**
-     * Get market data for multiple assets
+     * Get market data for multiple assets (with live API integration)
      * @param {Array} assets - Array of asset names
      * @param {number} days - Number of days of historical data
-     * @returns {Object} Map of asset -> historical data
+     * @returns {Promise<Object>} Map of asset -> historical data
      */
-    getMarketData(assets = ['S&P 500', 'NASDAQ', 'Gold', 'Oil', 'Bitcoin'], days = 30) {
+    async getMarketData(assets = ['S&P 500', 'NASDAQ', 'Gold', 'Oil', 'Bitcoin'], days = 30) {
         const marketData = {};
+        const useMockData = window.AppConfig?.useMockData ?? true;
         
         const basePrices = {
             'S&P 500': 4200,
@@ -389,14 +791,58 @@ const DataService = {
             'QQQ': 0.022
         };
         
-        assets.forEach(asset => {
-            marketData[asset] = this.generateHistoricalData(
-                asset,
-                days,
-                basePrices[asset] || 100,
-                volatilities[asset] || 0.02
-            );
-        });
+        // Crypto ID mapping
+        const cryptoMap = {
+            'Bitcoin': 'bitcoin',
+            'Ethereum': 'ethereum',
+            'Solana': 'solana',
+            'Cardano': 'cardano',
+            'XRP': 'ripple'
+        };
+        
+        // Try to fetch real data if not in mock mode
+        if (!useMockData) {
+            const fetchPromises = assets.map(async (asset) => {
+                // Check if it's a crypto asset
+                if (cryptoMap[asset]) {
+                    try {
+                        const historicalData = await this.fetchCryptoHistoricalData(cryptoMap[asset], days);
+                        if (historicalData && historicalData.length > 0) {
+                            console.log(`[DataService] ✅ Loaded live historical data for ${asset}:`, historicalData.length, 'days');
+                            return { asset, data: historicalData };
+                        }
+                    } catch (error) {
+                        console.warn(`[DataService] Failed to fetch live data for ${asset}, using fallback`);
+                    }
+                }
+                
+                // Fallback to generated data
+                return {
+                    asset,
+                    data: this.generateHistoricalData(
+                        asset,
+                        days,
+                        basePrices[asset] || 100,
+                        volatilities[asset] || 0.02
+                    )
+                };
+            });
+            
+            const results = await Promise.all(fetchPromises);
+            results.forEach(({ asset, data }) => {
+                marketData[asset] = data;
+            });
+        } else {
+            // Use generated data only
+            assets.forEach(asset => {
+                marketData[asset] = this.generateHistoricalData(
+                    asset,
+                    days,
+                    basePrices[asset] || 100,
+                    volatilities[asset] || 0.02
+                );
+            });
+        }
         
         return marketData;
     },

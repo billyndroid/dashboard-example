@@ -274,8 +274,8 @@ function setDefaultDateRange() {
     };
 }
 
-// Load and render all charts
-function loadChartData() {
+// Load and render all charts (async to support live data)
+async function loadChartData() {
     if (!window.DataService) {
         console.error('DataService not loaded');
         return;
@@ -286,7 +286,9 @@ function loadChartData() {
     const days = currentDateRange.start && currentDateRange.end ? 
         Math.ceil((new Date(currentDateRange.end) - new Date(currentDateRange.start)) / (1000 * 60 * 60 * 24)) : 30;
     
-    marketData = DataService.getMarketData(assets, days);
+    console.log('[Analytics] Fetching market data for', assets.length, 'assets...');
+    marketData = await DataService.getMarketData(assets, days);
+    console.log('[Analytics] Market data loaded:', Object.keys(marketData).length, 'assets');
     
     // Update volume chart
     const volumeData = DataService.aggregateVolumeData(marketData);

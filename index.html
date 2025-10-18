@@ -578,8 +578,38 @@
         'USD/JPY': { type: 'forex', symbol: 'USD/JPY', coinGeckoId: null, twelveDataSymbol: 'USD/JPY' }
     };
 
-    // Generate historical chart data from current price
-    function generateChartData(currentPrice, days = 30) {
+    // Generate historical chart data from current price (with live API support)
+    async function generateChartData(currentPrice, days = 30) {
+        // Try to fetch real historical data for crypto assets
+        const useMockData = window.AppConfig?.useMockData ?? false;
+        if (!useMockData && window.DataService && window.DataService.fetchCryptoHistoricalData && tvCurrentAsset) {
+            const cryptoMap = {
+                'Bitcoin': 'bitcoin',
+                'Ethereum': 'ethereum',
+                'Solana': 'solana',
+                'Cardano': 'cardano',
+                'XRP': 'ripple'
+            };
+            
+            if (cryptoMap[tvCurrentAsset]) {
+                try {
+                    console.log('[TradingView Modal] Fetching live historical data for', tvCurrentAsset);
+                    const historicalData = await window.DataService.fetchCryptoHistoricalData(cryptoMap[tvCurrentAsset], days);
+                    if (historicalData && historicalData.length > 0) {
+                        console.log('[TradingView Modal] ✅ Using', historicalData.length, 'days of live data');
+                        return historicalData.map(d => ({
+                            time: Math.floor(new Date(d.date).getTime() / 1000),
+                            value: d.price
+                        }));
+                    }
+                } catch (error) {
+                    console.warn('[TradingView Modal] Failed to fetch live data, using fallback');
+                }
+            }
+        }
+        
+        // Fallback to generated data
+        console.log('[TradingView Modal] Using generated chart data');
         const data = [];
         const now = Math.floor(Date.now() / 1000);
         const dayInSeconds = 24 * 60 * 60;
@@ -967,8 +997,8 @@
         initTradingViewChart(assetName, currentPrice || 1000);
     }
 
-    // Initialize the TradingView chart
-    function initTradingViewChart(assetName, currentPrice) {
+    // Initialize the TradingView chart (async to support live data)
+    async function initTradingViewChart(assetName, currentPrice) {
         const container = document.getElementById('tradingViewChartContainer');
         if (!container) return;
         
@@ -1034,8 +1064,8 @@
                 });
             }
             
-            // Generate and set data
-            const chartData = generateChartData(currentPrice, 30);
+            // Generate and set data (await for live data)
+            const chartData = await generateChartData(currentPrice, 30);
             tvModalSeries.setData(chartData);
             
             console.log('[TradingView Modal] Chart initialized with', chartData.length, 'points');

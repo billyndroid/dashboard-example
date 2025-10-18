@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Data Test - Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 { color: #2d6cdf; }
+        h2 { color: #333; border-bottom: 2px solid #2d6cdf; padding-bottom: 10px; }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #2d6cdf;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.success { background: #10b981; color: white; }
+        .status.warning { background: #f59e0b; color: white; }
+        .status.error { background: #ef4444; color: white; }
+        button {
+            background: #2d6cdf;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #1e4fb8; }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .result.success { border-color: #10b981; background: #f0fdf4; }
+        .result.error { border-color: #ef4444; background: #fef2f2; }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .chart-preview {
+            width: 100%;
+            height: 200px;
+            background: #f9f9f9;
+            border: 2px dashed #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Live Data Charts - Test Suite</h1>
+    
+    <div class="container">
+        <h2>1. Configuration Check</h2>
+        <div class="test-section">
+            <button onclick="testConfig()">Test Configuration</button>
+            <div id="configResult"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>2. API Connectivity Test</h2>
+        <div class="test-section">
+            <button onclick="testCoinGeckoAPI()">Test CoinGecko API</button>
+            <button onclick="testTwelveDataAPI()">Test Twelve Data API</button>
+            <div id="apiResult"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>3. Historical Data Test</h2>
+        <div class="test-section">
+            <button onclick="testHistoricalData()">Test Bitcoin Historical Data</button>
+            <button onclick="testMultipleAssets()">Test Multiple Crypto Assets</button>
+            <div id="historicalResult"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>4. Chart Data Generation Test</h2>
+        <div class="test-section">
+            <button onclick="testChartData()">Test Chart Data Generation</button>
+            <div id="chartDataResult"></div>
+            <div class="chart-preview" id="chartPreview">
+                Chart preview will appear here
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>5. Live vs Mock Data Test</h2>
+        <div class="test-section">
+            <button onclick="toggleMockData()">Toggle Mock Data Mode</button>
+            <button onclick="compareDataSources()">Compare Data Sources</button>
+            <div id="dataSourceResult"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>6. Cache Performance Test</h2>
+        <div class="test-section">
+            <button onclick="testCachePerformance()">Test Cache Performance</button>
+            <div id="cacheResult"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Test Results Summary</h2>
+        <div id="summary"></div>
+    </div>
+
+    <!-- Load required scripts -->
+    <script src="../scripts/config.js"></script>
+    <script src="../scripts/config.local.js"></script>
+    <script src="../scripts/data-service.js"></script>
+
+    <script>
+        let testResults = {
+            passed: 0,
+            failed: 0,
+            warnings: 0
+        };
+
+        function addResult(containerId, message, type = 'success') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = 'result ' + type;
+            div.innerHTML = message;
+            container.appendChild(div);
+            
+            if (type === 'success') testResults.passed++;
+            else if (type === 'error') testResults.failed++;
+            else if (type === 'warning') testResults.warnings++;
+            
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const summary = document.getElementById('summary');
+            const total = testResults.passed + testResults.failed + testResults.warnings;
+            summary.innerHTML = `
+                <div class="result">
+                    <strong>Total Tests: ${total}</strong><br>
+                    ✅ Passed: ${testResults.passed}<br>
+                    ❌ Failed: ${testResults.failed}<br>
+                    ⚠️ Warnings: ${testResults.warnings}
+                </div>
+            `;
+        }
+
+        async function testConfig() {
+            const container = document.getElementById('configResult');
+            container.innerHTML = '<p>Testing configuration...</p>';
+            
+            try {
+                if (typeof AppConfig === 'undefined') {
+                    addResult('configResult', '❌ AppConfig not found!', 'error');
+                    return;
+                }
+                
+                addResult('configResult', `✅ AppConfig loaded successfully`);
+                addResult('configResult', `📊 Mock Data: ${AppConfig.useMockData ? 'ENABLED ⚠️' : 'DISABLED ✅'}`);
+                addResult('configResult', `🪙 CoinGecko: ${AppConfig.thirdPartyApis.coingecko.enabled ? 'Enabled ✅' : 'Disabled ❌'}`);
+                
+                const tdKey = AppConfig.thirdPartyApis.twelveData.key;
+                const hasKey = tdKey && tdKey !== '' && tdKey !== 'YOUR_TWELVE_DATA_KEY_HERE';
+                addResult('configResult', `📈 Twelve Data: ${hasKey ? 'Key configured ✅' : 'No API key ⚠️'}`, hasKey ? 'success' : 'warning');
+                
+            } catch (error) {
+                addResult('configResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCoinGeckoAPI() {
+            const container = document.getElementById('apiResult');
+            container.innerHTML = '<p>Testing CoinGecko API...</p>';
+            
+            try {
+                if (!window.DataService) {
+                    addResult('apiResult', '❌ DataService not loaded!', 'error');
+                    return;
+                }
+                
+                const startTime = performance.now();
+                const data = await DataService.fetchCryptoPrices(['bitcoin', 'ethereum']);
+                const endTime = performance.now();
+                
+                if (data && data.bitcoin) {
+                    addResult('apiResult', `✅ CoinGecko API working! Response time: ${(endTime - startTime).toFixed(0)}ms`);
+                    addResult('apiResult', `💰 Bitcoin: $${data.bitcoin.usd.toLocaleString()}`);
+                    if (data.ethereum) {
+                        addResult('apiResult', `💰 Ethereum: $${data.ethereum.usd.toLocaleString()}`);
+                    }
+                } else {
+                    addResult('apiResult', '⚠️ API returned null - check console for details', 'warning');
+                }
+            } catch (error) {
+                addResult('apiResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testTwelveDataAPI() {
+            const container = document.getElementById('apiResult');
+            
+            try {
+                const startTime = performance.now();
+                const data = await DataService.fetchAssetQuote('SPY');
+                const endTime = performance.now();
+                
+                if (data && data.close) {
+                    addResult('apiResult', `✅ Twelve Data API working! Response time: ${(endTime - startTime).toFixed(0)}ms`);
+                    addResult('apiResult', `📈 S&P 500 (SPY): $${parseFloat(data.close).toFixed(2)}`);
+                } else {
+                    addResult('apiResult', '⚠️ Twelve Data returned null - check API key', 'warning');
+                }
+            } catch (error) {
+                addResult('apiResult', `⚠️ Twelve Data error: ${error.message}`, 'warning');
+            }
+        }
+
+        async function testHistoricalData() {
+            const container = document.getElementById('historicalResult');
+            container.innerHTML = '<p>Fetching Bitcoin historical data...</p>';
+            
+            try {
+                const startTime = performance.now();
+                const data = await DataService.fetchCryptoHistoricalData('bitcoin', 30);
+                const endTime = performance.now();
+                
+                if (data && data.length > 0) {
+                    addResult('historicalResult', `✅ Fetched ${data.length} days of historical data in ${(endTime - startTime).toFixed(0)}ms`);
+                    addResult('historicalResult', `📅 Date range: ${data[0].date} to ${data[data.length - 1].date}`);
+                    addResult('historicalResult', `💰 Price range: $${Math.min(...data.map(d => d.price)).toFixed(2)} - $${Math.max(...data.map(d => d.price)).toFixed(2)}`);
+                    
+                    // Show sample data
+                    const sample = data[0];
+                    addResult('historicalResult', `📊 Sample: ${sample.date} - Price: $${sample.price}, Volume: ${sample.volume.toLocaleString()}`);
+                } else {
+                    addResult('historicalResult', '⚠️ No historical data returned', 'warning');
+                }
+            } catch (error) {
+                addResult('historicalResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testMultipleAssets() {
+            const container = document.getElementById('historicalResult');
+            
+            try {
+                const assets = ['Bitcoin', 'Ethereum', 'Solana'];
+                addResult('historicalResult', `🔄 Testing ${assets.length} assets...`);
+                
+                const startTime = performance.now();
+                const marketData = await DataService.getMarketData(assets, 7);
+                const endTime = performance.now();
+                
+                let liveCount = 0;
+                let generatedCount = 0;
+                
+                for (const asset of assets) {
+                    if (marketData[asset] && marketData[asset].length > 0) {
+                        const hasRealData = marketData[asset][0].marketCap !== undefined;
+                        if (hasRealData) liveCount++;
+                        else generatedCount++;
+                        
+                        addResult('historicalResult', 
+                            `${hasRealData ? '✅' : '⚠️'} ${asset}: ${marketData[asset].length} days (${hasRealData ? 'Live' : 'Generated'})`
+                        );
+                    }
+                }
+                
+                addResult('historicalResult', `📊 Summary: ${liveCount} live, ${generatedCount} generated in ${(endTime - startTime).toFixed(0)}ms`);
+            } catch (error) {
+                addResult('historicalResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testChartData() {
+            const container = document.getElementById('chartDataResult');
+            container.innerHTML = '<p>Testing chart data generation...</p>';
+            
+            try {
+                const assets = ['Bitcoin', 'Ethereum'];
+                
+                for (const asset of assets) {
+                    const data = await DataService.getMarketData([asset], 30);
+                    
+                    if (data[asset] && data[asset].length > 0) {
+                        const prices = data[asset].map(d => d.price);
+                        const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+                        const minPrice = Math.min(...prices);
+                        const maxPrice = Math.max(...prices);
+                        const volatility = ((maxPrice - minPrice) / avgPrice * 100).toFixed(2);
+                        
+                        addResult('chartDataResult', `✅ ${asset}: ${prices.length} data points`);
+                        addResult('chartDataResult', `📊 Avg: $${avgPrice.toFixed(2)}, Range: $${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}, Volatility: ${volatility}%`);
+                    }
+                }
+                
+                // Simple ASCII chart
+                const btcData = await DataService.getMarketData(['Bitcoin'], 10);
+                if (btcData.Bitcoin) {
+                    const prices = btcData.Bitcoin.map(d => d.price);
+                    const max = Math.max(...prices);
+                    const min = Math.min(...prices);
+                    
+                    let chart = '<pre>Bitcoin Price Trend (Last 10 days):\n';
+                    prices.forEach((price, i) => {
+                        const normalized = ((price - min) / (max - min)) * 20;
+                        chart += '█'.repeat(Math.floor(normalized)) + `  $${price.toFixed(0)}\n`;
+                    });
+                    chart += '</pre>';
+                    
+                    document.getElementById('chartPreview').innerHTML = chart;
+                }
+                
+            } catch (error) {
+                addResult('chartDataResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function toggleMockData() {
+            const current = AppConfig.useMockData;
+            AppConfig.useMockData = !current;
+            
+            addResult('dataSourceResult', 
+                `🔄 Mock Data ${AppConfig.useMockData ? 'ENABLED' : 'DISABLED'}`,
+                AppConfig.useMockData ? 'warning' : 'success'
+            );
+            
+            addResult('dataSourceResult', '💡 Refresh the page to see the change in other components');
+        }
+
+        async function compareDataSources() {
+            const container = document.getElementById('dataSourceResult');
+            container.innerHTML = '<p>Comparing data sources...</p>';
+            
+            try {
+                // Test with live data
+                AppConfig.useMockData = false;
+                const liveStart = performance.now();
+                const liveData = await DataService.getMarketData(['Bitcoin'], 7);
+                const liveTime = performance.now() - liveStart;
+                
+                // Test with mock data
+                AppConfig.useMockData = true;
+                const mockStart = performance.now();
+                const mockData = await DataService.getMarketData(['Bitcoin'], 7);
+                const mockTime = performance.now() - mockStart;
+                
+                // Restore setting
+                AppConfig.useMockData = false;
+                
+                addResult('dataSourceResult', `⚡ Live data: ${liveTime.toFixed(0)}ms (${liveData.Bitcoin ? 'Success' : 'Failed'})`);
+                addResult('dataSourceResult', `🔧 Mock data: ${mockTime.toFixed(0)}ms (${mockData.Bitcoin ? 'Success' : 'Failed'})`);
+                addResult('dataSourceResult', `📊 Speed difference: ${(liveTime - mockTime).toFixed(0)}ms`);
+                
+            } catch (error) {
+                addResult('dataSourceResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCachePerformance() {
+            const container = document.getElementById('cacheResult');
+            container.innerHTML = '<p>Testing cache performance...</p>';
+            
+            try {
+                // First call (not cached)
+                const firstStart = performance.now();
+                await DataService.fetchCryptoPrices(['bitcoin']);
+                const firstTime = performance.now() - firstStart;
+                
+                // Second call (should be cached)
+                const secondStart = performance.now();
+                await DataService.fetchCryptoPrices(['bitcoin']);
+                const secondTime = performance.now() - secondStart;
+                
+                addResult('cacheResult', `⏱️ First call (no cache): ${firstTime.toFixed(0)}ms`);
+                addResult('cacheResult', `⚡ Second call (cached): ${secondTime.toFixed(0)}ms`);
+                
+                const speedup = ((firstTime - secondTime) / firstTime * 100).toFixed(1);
+                addResult('cacheResult', `🚀 Cache speedup: ${speedup}% faster`);
+                
+                if (secondTime < firstTime / 2) {
+                    addResult('cacheResult', '✅ Cache is working efficiently!');
+                } else {
+                    addResult('cacheResult', '⚠️ Cache may not be working optimally', 'warning');
+                }
+                
+            } catch (error) {
+                addResult('cacheResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run basic tests on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testConfig();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

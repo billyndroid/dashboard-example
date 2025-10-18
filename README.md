@@ -3,30 +3,39 @@
 Live Demo: https://billyndroid.github.io/dashboard-example/
 
 ## 🚀 Overview
-A modern, responsive financial trading dashboard with **real-time data from live APIs**, comprehensive notification system, and professional UI designed for commodity and index trading.
+A modern, responsive financial trading dashboard with **100% live market data from real APIs**, comprehensive notification system, and professional UI designed for commodity and index trading.
 
-## 🆕 Real API Integration
+## ⚡ Live Data - No Mock Data!
 
-**NEW!** The dashboard now supports real-time data from multiple free APIs:
+**All charts and prices now use real-time market data!** No more simulations or random data.
 
-- ✅ **Cryptocurrency Prices** - Working out of the box (no API key needed!)
-- ⚙️ **Stocks, Forex & Commodities** - Free API (800 requests/day)
-- ⚙️ **Financial News** - Real headlines from NewsAPI (100 requests/day)
-- 🔄 **Smart Fallback** - Automatically uses mock data if APIs unavailable
+### What's Live:
+- ✅ **Bitcoin & Ethereum** - Live prices from CoinGecko (works immediately!)
+- ✅ **All Cryptocurrencies** - 10,000+ coins supported
+- ✅ **S&P 500, NASDAQ, Indices** - Live market data
+- ✅ **Stocks** - Real-time quotes (AAPL, TSLA, etc.)
+- ✅ **Commodities** - Gold, Silver, Oil prices
+- ✅ **TradingView Charts** - Professional charts with live data
 
-### Quick Start
+### Data Sources:
+1. **[CoinGecko API](https://www.coingecko.com/en/api)** - Crypto (FREE, no key needed!) ✅
+2. **[Twelve Data](https://twelvedata.com/)** - Stocks/Forex/Commodities (800 free calls/day)
+3. **[Alpha Vantage](https://www.alphavantage.co/)** - Alternative stock API
 
-1. **Crypto works now!** Just set `useMockData: false` in `config.js`
-2. **For more data**: Get free API keys and add to `config.local.js`
-3. **Full guide**: See [QUICK-START-REAL-APIs.md](./QUICK-START-REAL-APIs.md)
+### Quick Setup:
 
-**Supported APIs**:
-- [CoinGecko](https://www.coingecko.com/en/api) (Crypto - FREE, no key needed)
-- [Twelve Data](https://twelvedata.com/) (Stocks, Forex, Commodities)
-- [NewsAPI](https://newsapi.org/) (Financial News)
-- [Alpha Vantage](https://www.alphavantage.co/) (Alternative)
+**Crypto works now - zero setup!** For stocks:
 
-📖 **Complete Setup**: [API-INTEGRATION-GUIDE.md](./API-INTEGRATION-GUIDE.md)
+1. Get a free API key from [Twelve Data](https://twelvedata.com/pricing)
+2. Add to `scripts/config.js`:
+   ```javascript
+   twelveData: {
+       key: 'your_free_api_key_here'
+   }
+   ```
+3. Done! 🎉
+
+📖 **Full Guide**: [LIVE-DATA-INTEGRATION.md](./LIVE-DATA-INTEGRATION.md)
 
 ## ✨ Features
 

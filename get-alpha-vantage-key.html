@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Alpha Vantage API Key</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .status.error {
+            background: #fee;
+            color: #c33;
+            border: 2px solid #fcc;
+        }
+        
+        .status.success {
+            background: #efe;
+            color: #3c3;
+            border: 2px solid #cfc;
+        }
+        
+        .status.warning {
+            background: #ffc;
+            color: #ca0;
+            border: 2px solid #fea;
+        }
+        
+        .step {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .step h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .step p {
+            color: #555;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+        
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+        }
+        
+        .button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .code {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .highlight {
+            background: #fef3c7;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        
+        .icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .copy-btn {
+            background: #10b981;
+            cursor: pointer;
+            border: none;
+            margin-left: 10px;
+        }
+        
+        .copy-btn:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Get Alpha Vantage API Key</h1>
+        <p class="subtitle">Free backup API for stock data when Twelve Data hits rate limits</p>
+        
+        <div class="status error">
+            <span class="icon">⚠️</span>
+            <strong>Rate Limit Exceeded!</strong> Your Twelve Data API has run out of daily credits. Add Alpha Vantage as fallback.
+        </div>
+        
+        <div class="step">
+            <h2>Step 1: Get Your Free API Key</h2>
+            <p>Alpha Vantage offers <span class="highlight">500 FREE API calls per day</span>. No credit card required!</p>
+            <a href="https://www.alphavantage.co/support/#api-key" target="_blank" class="button">
+                <span class="icon">🚀</span> Get Free API Key (30 seconds)
+            </a>
+            <p style="margin-top: 15px; font-size: 0.9em; color: #888;">
+                Opens in new tab. Enter your email and click "GET FREE API KEY". Copy the key they give you.
+            </p>
+        </div>
+        
+        <div class="step">
+            <h2>Step 2: Add Key to config.local.js</h2>
+            <p>Open the file: <span class="highlight">scripts/config.local.js</span></p>
+            <p>Find this line:</p>
+            <div class="code">AppConfig.thirdPartyApis.alphaVantage.key = 'YOUR_ALPHA_VANTAGE_KEY_HERE';</div>
+            <p>Replace with your actual key:</p>
+            <div class="code">AppConfig.thirdPartyApis.alphaVantage.key = '<span style="color: #fbbf24;">PASTE_YOUR_KEY_HERE</span>';</div>
+            
+            <p style="margin-top: 20px;">Test your key here (paste it below):</p>
+            <input type="text" id="apiKeyInput" placeholder="Paste your Alpha Vantage API key here...">
+            <button class="button copy-btn" onclick="copyToConfig()">
+                <span class="icon">📋</span> Copy Full Config Line
+            </button>
+        </div>
+        
+        <div class="step">
+            <h2>Step 3: Refresh the Page</h2>
+            <p>Save config.local.js and refresh your dashboard. You should see:</p>
+            <div class="code">
+[DataService] ⚠️ Twelve Data rate limit exceeded, falling back to Alpha Vantage
+[DataService] Trying Alpha Vantage fallback for AAPL...
+[DataService] ✅ Alpha Vantage fallback succeeded! Got 365 days
+            </div>
+        </div>
+        
+        <div class="status success" style="display: none;" id="successMessage">
+            <span class="icon">✅</span>
+            <strong>Config line copied!</strong> Paste it into config.local.js and save the file.
+        </div>
+        
+        <div class="step" style="border-left-color: #10b981;">
+            <h2>✨ What You Get</h2>
+            <p><strong>Combined API Power:</strong></p>
+            <ul style="margin-left: 20px; line-height: 2;">
+                <li>🥇 Twelve Data: 800 calls/day (primary)</li>
+                <li>🥈 Alpha Vantage: 500 calls/day (fallback)</li>
+                <li>🎯 <strong>Total: 1,300 calls/day!</strong></li>
+            </ul>
+            <p style="margin-top: 15px;">
+                The system automatically switches to Alpha Vantage when Twelve Data hits rate limits. 
+                <strong>No manual intervention needed!</strong>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function copyToConfig() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            if (!apiKey) {
+                alert('Please paste your API key first!');
+                return;
+            }
+            
+            if (apiKey === 'YOUR_ALPHA_VANTAGE_KEY_HERE') {
+                alert('That\'s the placeholder! Get your real key from Alpha Vantage first.');
+                return;
+            }
+            
+            const configLine = `AppConfig.thirdPartyApis.alphaVantage.key = '${apiKey}';`;
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(configLine).then(() => {
+                document.getElementById('successMessage').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 5000);
+            }).catch(err => {
+                alert('Could not copy to clipboard. Copy this manually:\n\n' + configLine);
+            });
+        }
+        
+        // Allow Enter key to copy
+        document.getElementById('apiKeyInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                copyToConfig();
+            }
+        });
+    </script>
+</body>
+</html>

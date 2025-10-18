@@ -82,7 +82,7 @@ const AppConfig = {
     },
     
     // Mock data flag for development
-    useMockData: false, // Set to false when real API is available
+    useMockData: false, // Using real APIs - set to true only for testing without APIs
     
     // Third-party API configuration
     thirdPartyApis: {
@@ -99,7 +99,7 @@ const AppConfig = {
         // Stock, forex, commodities API (requires free key from https://twelvedata.com)
         twelveData: {
             enabled: true,
-            key: '', // Add your free API key here
+            key: 'demo', // Using demo key for testing - get your own at https://twelvedata.com
             baseUrl: 'https://api.twelvedata.com',
             endpoints: {
                 quote: '/quote',

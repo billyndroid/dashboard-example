@@ -129,12 +129,36 @@
     }
     
     /**
-     * Generate historical price data for chart
+     * Generate historical price data for chart (with live API support)
      */
-    function generateChartData(assetName) {
+    async function generateChartData(assetName) {
         // Check cache first
         if (chartDataCache[assetName] && Date.now() - chartDataCache[assetName].timestamp < 60000) {
             return chartDataCache[assetName].data;
+        }
+        
+        // Try to fetch live historical data if available
+        var useMockData = window.AppConfig?.useMockData ?? true;
+        if (!useMockData && window.DataService && window.DataService.fetchCryptoHistoricalData) {
+            var cryptoMap = {
+                'Bitcoin': 'bitcoin',
+                'Ethereum': 'ethereum',
+                'Solana': 'solana'
+            };
+            
+            if (cryptoMap[assetName]) {
+                try {
+                    var historicalData = await window.DataService.fetchCryptoHistoricalData(cryptoMap[assetName], 30);
+                    if (historicalData && historicalData.length > 0) {
+                        var prices = historicalData.map(function(d) { return d.price; });
+                        chartDataCache[assetName] = { data: prices, timestamp: Date.now() };
+                        console.log('[ChartTooltip] ✅ Using live historical data for', assetName);
+                        return prices;
+                    }
+                } catch (error) {
+                    console.warn('[ChartTooltip] Failed to fetch live data, using fallback');
+                }
+            }
         }
         
         // Try to get market data from different sources
@@ -305,9 +329,9 @@
     }
     
     /**
-     * Show chart tooltip
+     * Show chart tooltip (async to support live data)
      */
-    function showChartTooltip(assetName, element) {
+    async function showChartTooltip(assetName, element) {
         console.log('[ChartTooltip] Attempting to show tooltip for:', assetName);
         
         if (!chartTooltip) {
@@ -381,8 +405,8 @@
         
         document.getElementById('chartTooltipVolume').textContent = volume;
         
-        // Generate and draw chart
-        var prices = generateChartData(assetName);
+        // Generate and draw chart (await for live data)
+        var prices = await generateChartData(assetName);
         if (prices) {
             drawChart(assetName, prices);
         } else {
