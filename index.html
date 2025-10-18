@@ -116,12 +116,116 @@
 
         </aside>
         <!--((((((((((((((End of Aside Section))))))))))))))-->
-        <main id="main-content" role="main" aria-label="Dashboard content">
-            <h1>Main Dashboard</h1>
-            <h2>Positions *Live/Historical</h2>
 
-            <div class="date">
-                <input type="date" aria-label="Select date for historical data" id="date-picker">
+        <main id="main-content" role="main" aria-label="Dashboard content">
+            <!--Trading View Ticker Tape-->
+            <!-- TradingView Widget BEGIN -->
+            <div class="tradingview-widget-container" style="margin-bottom: 2rem;">
+              <div class="tradingview-widget-container__widget"></div>
+              <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/markets/" rel="noopener nofollow" target="_blank"><span class="blue-text">Ticker tape</span></a><span class="trademark"> by TradingView</span></div>
+              <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+              {
+              "symbols": [
+                {
+                  "proName": "FOREXCOM:SPXUSD",
+                  "title": "S&P 500 Index"
+                },
+                {
+                  "proName": "FX_IDC:EURUSD",
+                  "title": "EUR to USD"
+                },
+                {
+                  "proName": "BITSTAMP:BTCUSD",
+                  "title": "Bitcoin"
+                },
+                {
+                  "proName": "BITSTAMP:ETHUSD",
+                  "title": "Ethereum"
+                },
+                {
+                  "proName": "TVC:GOLD",
+                  "title": "Gold"
+                },
+                {
+                  "proName": "NASDAQ:NVDA",
+                  "title": "NVDA"
+                },
+                {
+                  "proName": "NASDAQ:AAPL",
+                  "title": "Apple"
+                },
+                {
+                  "proName": "CRYPTOCAP:BTC.D",
+                  "title": "BTC Dominance"
+                },
+                {
+                  "proName": "NASDAQ:QQQ",
+                  "title": "QQQ"
+                },
+                {
+                  "proName": "NASDAQ:AMZN",
+                  "title": "Amazon"
+                },
+                {
+                  "proName": "NASDAQ:AMD",
+                  "title": "AMD"
+                },
+                {
+                  "proName": "NASDAQ:MSTR",
+                  "title": "Microstrategy/Strategy"
+                },
+                {
+                  "proName": "NASDAQ:COIN",
+                  "title": "Coinbase"
+                },
+                {
+                  "proName": "NASDAQ:ASML",
+                  "title": "ASML"
+                },
+                {
+                  "proName": "BCBA:TSMC",
+                  "title": "TSMC"
+                },
+                {
+                  "proName": "AMEX:MSTY",
+                  "title": "MSTY"
+                },
+                {
+                  "proName": "NASDAQ:META",
+                  "title": "META"
+                },
+                {
+                  "proName": "NASDAQ:GOOGL",
+                  "title": "Alphabet/Google"
+                },
+                {
+                  "proName": "NASDAQ:MSTR",
+                  "title": "MSTR"
+                },
+                {
+                  "proName": "AMEX:WNTR",
+                  "title": "WNTR"
+                }
+              ],
+              "colorTheme": "dark",
+              "locale": "en",
+              "largeChartUrl": "",
+              "isTransparent": true,
+              "showSymbolLogo": false,
+              "displayMode": "adaptive"
+            }
+              </script>
+            </div>
+            <!-- TradingView Widget END -->
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h1>Main Dashboard</h1>
+                    <h2>Positions *Live/Historical</h2>
+                </div>
+                <div class="date">
+                    <input type="date" aria-label="Select date for historical data" id="date-picker">
+                </div>
             </div>
 
  <!--((((((((((((((End of Date))))))))))))))-->
