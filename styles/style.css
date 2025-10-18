@@ -609,8 +609,10 @@ textarea:focus,
 
 .trading-view-chart-info {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
 }
 
 .chart-info-item {
@@ -620,6 +622,14 @@ textarea:focus,
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.chart-info-item:hover {
+    background: rgba(45, 108, 223, 0.05);
+    border-left-color: var(--color-primary);
+    transform: translateX(2px);
 }
 
 .chart-info-label {
@@ -703,7 +713,14 @@ textarea:focus,
     }
     
     .trading-view-chart-info {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Extra small devices (phones) */
+@media screen and (max-width: 480px) {
+    .trading-view-chart-info {
+        grid-template-columns: 1fr;
     }
     
     .chart-info-item {
@@ -716,6 +733,26 @@ textarea:focus,
     
     .trading-view-modal-title-section h2 {
         font-size: 1.25rem;
+    }
+}
+
+/* Large desktop screens - keep 4 columns */
+@media screen and (min-width: 1200px) {
+    .trading-view-chart-info {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .chart-info-item {
+        padding: 1.25rem 1.75rem;
+    }
+}
+
+/* Medium laptops */
+@media screen and (min-width: 769px) and (max-width: 1199px) {
+    .trading-view-chart-info {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
     }
 }
 

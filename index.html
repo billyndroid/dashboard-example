@@ -498,8 +498,24 @@
                         <span class="chart-info-label">24h Low</span>
                         <span class="chart-info-value" id="tv24hLow">--</span>
                     </div>
+                    <div class="chart-info-item">
+                        <span class="chart-info-label">Market Cap</span>
+                        <span class="chart-info-value" id="tvMarketCap">--</span>
+                    </div>
+                    <div class="chart-info-item">
+                        <span class="chart-info-label">24h Volume</span>
+                        <span class="chart-info-value" id="tv24hVolume">--</span>
+                    </div>
+                    <div class="chart-info-item">
+                        <span class="chart-info-label">Circulating Supply</span>
+                        <span class="chart-info-value" id="tvCircSupply">--</span>
+                    </div>
+                    <div class="chart-info-item">
+                        <span class="chart-info-label">All Time High</span>
+                        <span class="chart-info-value" id="tvATH">--</span>
+                    </div>
                 </div>
-                <div id="tradingViewChartContainer" style="width: 100%; height: calc(100vh - 300px); min-height: 500px;"></div>
+                <div id="tradingViewChartContainer" style="width: 100%; height: calc(100vh - 400px); min-height: 400px;"></div>
             </div>
         </div>
     </div>
@@ -530,11 +546,36 @@
 
     // Asset symbol mapping for different data sources
     const assetSymbolMap = {
-        'Gold': { type: 'commodity', symbol: 'XAU/USD', coinGeckoId: null },
-        'S&P 500': { type: 'index', symbol: 'SPY', coinGeckoId: null },
-        'Bitcoin': { type: 'crypto', symbol: 'BTC', coinGeckoId: 'bitcoin' },
-        'Ethereum': { type: 'crypto', symbol: 'ETH', coinGeckoId: 'ethereum' },
-        'Oil': { type: 'commodity', symbol: 'CL', coinGeckoId: null }
+        // Cryptocurrencies
+        'Bitcoin': { type: 'crypto', symbol: 'BTC', coinGeckoId: 'bitcoin', twelveDataSymbol: 'BTC/USD' },
+        'Ethereum': { type: 'crypto', symbol: 'ETH', coinGeckoId: 'ethereum', twelveDataSymbol: 'ETH/USD' },
+        'Solana': { type: 'crypto', symbol: 'SOL', coinGeckoId: 'solana', twelveDataSymbol: 'SOL/USD' },
+        'Cardano': { type: 'crypto', symbol: 'ADA', coinGeckoId: 'cardano', twelveDataSymbol: 'ADA/USD' },
+        'XRP': { type: 'crypto', symbol: 'XRP', coinGeckoId: 'ripple', twelveDataSymbol: 'XRP/USD' },
+        'Dogecoin': { type: 'crypto', symbol: 'DOGE', coinGeckoId: 'dogecoin', twelveDataSymbol: 'DOGE/USD' },
+        'BNB': { type: 'crypto', symbol: 'BNB', coinGeckoId: 'binancecoin', twelveDataSymbol: 'BNB/USD' },
+        
+        // Indices & ETFs
+        'S&P 500': { type: 'index', symbol: 'SPY', coinGeckoId: null, twelveDataSymbol: 'SPY' },
+        'S&P': { type: 'index', symbol: 'SPY', coinGeckoId: null, twelveDataSymbol: 'SPY' }, // Alias
+        'SPY': { type: 'index', symbol: 'SPY', coinGeckoId: null, twelveDataSymbol: 'SPY' }, // Alias
+        'NASDAQ': { type: 'index', symbol: 'QQQ', coinGeckoId: null, twelveDataSymbol: 'QQQ' },
+        'QQQ': { type: 'index', symbol: 'QQQ', coinGeckoId: null, twelveDataSymbol: 'QQQ' },
+        'FTSE': { type: 'index', symbol: 'ISF.LON', coinGeckoId: null, twelveDataSymbol: 'ISF.LON' },
+        
+        // Commodities
+        'Gold': { type: 'commodity', symbol: 'XAU/USD', coinGeckoId: null, twelveDataSymbol: 'XAUUSD' },
+        'Silver': { type: 'commodity', symbol: 'XAG/USD', coinGeckoId: null, twelveDataSymbol: 'XAGUSD' },
+        'Oil': { type: 'commodity', symbol: 'CL', coinGeckoId: null, twelveDataSymbol: 'USOIL' },
+        'Crude Oil': { type: 'commodity', symbol: 'CL', coinGeckoId: null, twelveDataSymbol: 'USOIL' },
+        'Crude': { type: 'commodity', symbol: 'CL', coinGeckoId: null, twelveDataSymbol: 'USOIL' }, // Alias
+        'Natural Gas': { type: 'commodity', symbol: 'NG', coinGeckoId: null, twelveDataSymbol: 'NATGAS' },
+        'Natural': { type: 'commodity', symbol: 'NG', coinGeckoId: null, twelveDataSymbol: 'NATGAS' }, // Alias
+        
+        // Forex
+        'EUR/USD': { type: 'forex', symbol: 'EUR/USD', coinGeckoId: null, twelveDataSymbol: 'EUR/USD' },
+        'GBP/USD': { type: 'forex', symbol: 'GBP/USD', coinGeckoId: null, twelveDataSymbol: 'GBP/USD' },
+        'USD/JPY': { type: 'forex', symbol: 'USD/JPY', coinGeckoId: null, twelveDataSymbol: 'USD/JPY' }
     };
 
     // Generate historical chart data from current price
@@ -562,7 +603,64 @@
         return data;
     }
 
-    // Fetch live crypto data
+    // Fetch stock/commodity/index/forex data
+    async function fetchStockCommodityData(assetName) {
+        try {
+            const assetInfo = assetSymbolMap[assetName];
+            if (!assetInfo) {
+                console.warn('[TradingView Modal] No asset info for:', assetName);
+                return null;
+            }
+
+            // Try Twelve Data API first
+            if (typeof DataService !== 'undefined' && DataService.fetchAssetQuote) {
+                try {
+                    const quoteData = await DataService.fetchAssetQuote(assetInfo.twelveDataSymbol || assetInfo.symbol);
+                    if (quoteData && (quoteData.close || quoteData.price)) {
+                        console.log('[TradingView Modal] Stock/Commodity API data received:', quoteData);
+                        return {
+                            price: parseFloat(quoteData.close || quoteData.price),
+                            change: parseFloat(quoteData.percent_change || quoteData.change_percent || 0),
+                            high: parseFloat(quoteData.high || 0),
+                            low: parseFloat(quoteData.low || 0),
+                            volume: parseFloat(quoteData.volume || 0),
+                            symbol: quoteData.symbol || assetInfo.symbol
+                        };
+                    }
+                } catch (apiError) {
+                    console.warn('[TradingView Modal] API failed, using fallback data:', apiError.message);
+                }
+            }
+
+            // Fallback to mock data based on asset type
+            const mockData = {
+                // Indices
+                'SPY': { price: 450.25, change: 0.85, high: 452.10, low: 448.30, volume: 75000000 },
+                'QQQ': { price: 364.42, change: 1.20, high: 366.80, low: 362.50, volume: 45000000 },
+                // Commodities
+                'XAUUSD': { price: 1985.50, change: -0.35, high: 1992.00, low: 1978.20, volume: 125000 },
+                'XAGUSD': { price: 23.45, change: -0.80, high: 23.75, low: 23.10, volume: 85000 },
+                'USOIL': { price: 82.35, change: 1.45, high: 83.20, low: 81.50, volume: 250000 },
+                'NATGAS': { price: 2.87, change: -2.35, high: 2.95, low: 2.82, volume: 180000 },
+                // Forex
+                'EUR/USD': { price: 1.0725, change: 0.15, high: 1.0745, low: 1.0710, volume: 0 },
+                'GBP/USD': { price: 1.2150, change: -0.25, high: 1.2180, low: 1.2130, volume: 0 }
+            };
+
+            const mockKey = assetInfo.twelveDataSymbol || assetInfo.symbol;
+            if (mockData[mockKey]) {
+                console.log('[TradingView Modal] Using mock data for:', mockKey);
+                return { ...mockData[mockKey], symbol: assetInfo.symbol };
+            }
+
+            return null;
+        } catch (error) {
+            console.error('[TradingView Modal] Error fetching stock/commodity data:', error);
+            return null;
+        }
+    }
+
+    // Fetch live crypto data with comprehensive details
     async function fetchCryptoDataForChart(assetName) {
         try {
             const assetInfo = assetSymbolMap[assetName];
@@ -571,10 +669,40 @@
                 return null;
             }
 
+            // Fetch detailed crypto data from CoinGecko
+            const coinId = assetInfo.coinGeckoId;
+            const apiUrl = `https://api.coingecko.com/api/v3/coins/${coinId}?localization=false&tickers=false&community_data=false&developer_data=false`;
+            
+            try {
+                const response = await fetch(apiUrl);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('[TradingView Modal] Detailed crypto data received:', data);
+                    
+                    // Extract all relevant data
+                    return {
+                        usd: data.market_data?.current_price?.usd,
+                        usd_24h_change: data.market_data?.price_change_percentage_24h,
+                        high_24h: data.market_data?.high_24h?.usd,
+                        low_24h: data.market_data?.low_24h?.usd,
+                        market_cap: data.market_data?.market_cap?.usd,
+                        total_volume: data.market_data?.total_volume?.usd,
+                        circulating_supply: data.market_data?.circulating_supply,
+                        ath: data.market_data?.ath?.usd,
+                        ath_date: data.market_data?.ath_date?.usd,
+                        ath_change_percentage: data.market_data?.ath_change_percentage?.usd,
+                        symbol: data.symbol?.toUpperCase()
+                    };
+                }
+            } catch (directError) {
+                console.warn('[TradingView Modal] Direct API call failed, trying fallback...');
+            }
+            
+            // Fallback to simple price endpoint
             if (typeof DataService !== 'undefined' && DataService.fetchCryptoPrices) {
-                const data = await DataService.fetchCryptoPrices([assetInfo.coinGeckoId]);
-                if (data && data[assetInfo.coinGeckoId]) {
-                    return data[assetInfo.coinGeckoId];
+                const data = await DataService.fetchCryptoPrices([coinId]);
+                if (data && data[coinId]) {
+                    return data[coinId];
                 }
             }
             return null;
@@ -597,6 +725,7 @@
     // Open TradingView modal with asset data
     async function openTradingViewModal(assetName, messageText) {
         console.log('[TradingView Modal] Opening for:', assetName);
+        console.log('[TradingView Modal] Message text:', messageText);
         
         tvCurrentAsset = assetName;
         const modal = document.getElementById('tradingViewModal');
@@ -605,8 +734,28 @@
         const changeEl = document.getElementById('tv24hChange');
         const highEl = document.getElementById('tv24hHigh');
         const lowEl = document.getElementById('tv24hLow');
+        const marketCapEl = document.getElementById('tvMarketCap');
+        const volumeEl = document.getElementById('tv24hVolume');
+        const supplyEl = document.getElementById('tvCircSupply');
+        const athEl = document.getElementById('tvATH');
         
-        if (!modal) return;
+        console.log('[TradingView Modal] Modal element found:', !!modal);
+        console.log('[TradingView Modal] Elements check:', {
+            title: !!titleEl,
+            price: !!currentPriceEl,
+            change: !!changeEl,
+            high: !!highEl,
+            low: !!lowEl,
+            marketCap: !!marketCapEl,
+            volume: !!volumeEl,
+            supply: !!supplyEl,
+            ath: !!athEl
+        });
+        
+        if (!modal) {
+            console.error('[TradingView Modal] Modal element not found!');
+            return;
+        }
         
         // Show modal
         modal.style.display = 'block';
@@ -616,42 +765,202 @@
         // Set title
         if (titleEl) titleEl.textContent = `${assetName} - Live Chart`;
         
+        // Reset all fields to loading state
+        if (currentPriceEl) currentPriceEl.textContent = 'Loading...';
+        if (changeEl) changeEl.textContent = 'Loading...';
+        if (highEl) highEl.textContent = 'Loading...';
+        if (lowEl) lowEl.textContent = 'Loading...';
+        if (marketCapEl) marketCapEl.textContent = 'Loading...';
+        if (volumeEl) volumeEl.textContent = 'Loading...';
+        if (supplyEl) supplyEl.textContent = 'Loading...';
+        if (athEl) athEl.textContent = 'Loading...';
+        
         // Extract price from message or fetch live data
         let currentPrice = extractPriceFromMessage(messageText);
         let change24h = null;
         let high24h = null;
         let low24h = null;
+        let marketCap = null;
+        let volume24h = null;
+        let circulatingSupply = null;
+        let ath = null;
+        let athChangePercentage = null;
+        let symbol = null;
         
         // Try to get live data
         const assetInfo = assetSymbolMap[assetName];
-        if (assetInfo && assetInfo.type === 'crypto') {
-            const liveData = await fetchCryptoDataForChart(assetName);
-            if (liveData) {
-                currentPrice = liveData.usd;
-                change24h = liveData.usd_24h_change;
-                high24h = liveData.high_24h;
-                low24h = liveData.low_24h;
+        console.log('[TradingView Modal] Asset info:', assetInfo);
+        
+        // Adjust field labels and visibility based on asset type
+        const marketCapItem = document.querySelector('#tvMarketCap').closest('.chart-info-item');
+        const supplyItem = document.querySelector('#tvCircSupply').closest('.chart-info-item');
+        const athItem = document.querySelector('#tvATH').closest('.chart-info-item');
+        const changeLabel = document.querySelector('#tv24hChange').previousElementSibling;
+        const highLabel = document.querySelector('#tv24hHigh').previousElementSibling;
+        const lowLabel = document.querySelector('#tv24hLow').previousElementSibling;
+        
+        if (assetInfo && (assetInfo.type === 'commodity' || assetInfo.type === 'index' || assetInfo.type === 'forex' || assetInfo.type === 'stock')) {
+            // For non-crypto assets, hide market cap, supply, and ATH
+            if (marketCapItem) marketCapItem.style.display = 'none';
+            if (supplyItem) supplyItem.style.display = 'none';
+            if (athItem) athItem.style.display = 'none';
+            
+            // Change labels from "24h" to "Daily" for stocks/commodities
+            if (changeLabel) changeLabel.textContent = 'Daily Change';
+            if (highLabel) highLabel.textContent = 'Daily High';
+            if (lowLabel) lowLabel.textContent = 'Daily Low';
+        } else {
+            // For crypto, show all fields with "24h" labels
+            if (marketCapItem) marketCapItem.style.display = '';
+            if (supplyItem) supplyItem.style.display = '';
+            if (athItem) athItem.style.display = '';
+            
+            if (changeLabel) changeLabel.textContent = '24h Change';
+            if (highLabel) highLabel.textContent = '24h High';
+            if (lowLabel) lowLabel.textContent = '24h Low';
+        }
+        
+        if (assetInfo) {
+            if (assetInfo.type === 'crypto') {
+                // Fetch cryptocurrency data
+                console.log('[TradingView Modal] Fetching crypto data...');
+                const liveData = await fetchCryptoDataForChart(assetName);
+                console.log('[TradingView Modal] Crypto data received:', liveData);
+                
+                if (liveData) {
+                    currentPrice = liveData.usd;
+                    change24h = liveData.usd_24h_change;
+                    high24h = liveData.high_24h;
+                    low24h = liveData.low_24h;
+                    marketCap = liveData.market_cap;
+                    volume24h = liveData.total_volume;
+                    circulatingSupply = liveData.circulating_supply;
+                    ath = liveData.ath;
+                    athChangePercentage = liveData.ath_change_percentage;
+                    symbol = liveData.symbol;
+                    
+                    console.log('[TradingView Modal] Data parsed:', {
+                        price: currentPrice,
+                        change: change24h,
+                        marketCap: marketCap,
+                        volume: volume24h
+                    });
+                }
+            } else if (assetInfo.type === 'commodity' || assetInfo.type === 'index' || assetInfo.type === 'forex' || assetInfo.type === 'stock') {
+                // Fetch stock/commodity/index/forex data
+                console.log('[TradingView Modal] Fetching stock/commodity/index/forex data...');
+                const stockData = await fetchStockCommodityData(assetName);
+                console.log('[TradingView Modal] Stock/Commodity data received:', stockData);
+                
+                if (stockData) {
+                    currentPrice = stockData.price;
+                    change24h = stockData.change;
+                    high24h = stockData.high;
+                    low24h = stockData.low;
+                    volume24h = stockData.volume;
+                    symbol = stockData.symbol || assetInfo.symbol;
+                    
+                    console.log('[TradingView Modal] Data parsed:', {
+                        price: currentPrice,
+                        change: change24h,
+                        high: high24h,
+                        low: low24h,
+                        volume: volume24h
+                    });
+                }
             }
+        } else {
+            console.warn('[TradingView Modal] Asset not found in map:', assetName);
         }
         
-        // Update price info
+        // Helper function to format large numbers
+        function formatLargeNumber(num) {
+            if (!num) return '--';
+            if (num >= 1e12) return `$${(num / 1e12).toFixed(2)}T`;
+            if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
+            if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
+            if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}K`;
+            return `$${num.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        }
+        
+        // Update current price
         if (currentPrice && currentPriceEl) {
-            currentPriceEl.textContent = `$${currentPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            const priceText = `$${currentPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            currentPriceEl.textContent = priceText;
+            console.log('[TradingView Modal] Updated current price to:', priceText);
+        } else if (currentPriceEl) {
+            currentPriceEl.textContent = '--';
+            console.log('[TradingView Modal] No current price, set to --');
+        } else {
+            console.warn('[TradingView Modal] currentPriceEl not found!');
         }
         
+        // Update 24h change
         if (change24h !== null && changeEl) {
             const changeClass = change24h >= 0 ? 'success' : 'danger';
             const changeSign = change24h >= 0 ? '+' : '';
-            changeEl.textContent = `${changeSign}${change24h.toFixed(2)}%`;
+            const changeText = `${changeSign}${change24h.toFixed(2)}%`;
+            changeEl.textContent = changeText;
             changeEl.className = `chart-info-value ${changeClass}`;
+            console.log('[TradingView Modal] Updated 24h change to:', changeText, 'class:', changeClass);
+        } else if (changeEl) {
+            changeEl.textContent = '--';
+            changeEl.className = 'chart-info-value';
+            console.log('[TradingView Modal] No change data, set to --');
+        } else {
+            console.warn('[TradingView Modal] changeEl not found!');
         }
         
+        // Update 24h high
         if (high24h && highEl) {
             highEl.textContent = `$${high24h.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        } else if (highEl) {
+            highEl.textContent = '--';
         }
         
+        // Update 24h low
         if (low24h && lowEl) {
             lowEl.textContent = `$${low24h.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        } else if (lowEl) {
+            lowEl.textContent = '--';
+        }
+        
+        // Update market cap
+        if (marketCap && marketCapEl) {
+            marketCapEl.textContent = formatLargeNumber(marketCap);
+        } else if (marketCapEl) {
+            marketCapEl.textContent = '--';
+        }
+        
+        // Update 24h volume
+        if (volume24h && volumeEl) {
+            volumeEl.textContent = formatLargeNumber(volume24h);
+        } else if (volumeEl) {
+            volumeEl.textContent = '--';
+        }
+        
+        // Update circulating supply
+        if (circulatingSupply && supplyEl && symbol) {
+            const formattedSupply = circulatingSupply >= 1e9 ? 
+                `${(circulatingSupply / 1e9).toFixed(2)}B ${symbol}` :
+                circulatingSupply >= 1e6 ?
+                `${(circulatingSupply / 1e6).toFixed(2)}M ${symbol}` :
+                `${circulatingSupply.toLocaleString('en-US', {maximumFractionDigits: 0})} ${symbol}`;
+            supplyEl.textContent = formattedSupply;
+        } else if (supplyEl) {
+            supplyEl.textContent = '--';
+        }
+        
+        // Update ATH
+        if (ath && athEl) {
+            let athText = `$${ath.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            if (athChangePercentage !== null) {
+                const athClass = athChangePercentage >= 0 ? 'success' : 'danger';
+                athText += ` <span class="${athClass}" style="font-size: 0.85em;">(${athChangePercentage.toFixed(1)}%)</span>`;
+            }
+            athEl.innerHTML = athText;
+        } else if (athEl) {
+            athEl.textContent = '--';
         }
         
         // Initialize chart
@@ -778,7 +1087,8 @@
                 this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
                 
                 const messageText = messageEl.textContent;
-                const assetMatch = messageText.match(/\*\*([^*]+)\*\*|<b>([^<]+)<\/b>|^([A-Za-z&\s0-9]+)/);
+                // Extract asset name - first word only (no spaces to avoid "Bitcoin trading at")
+                const assetMatch = messageText.match(/\*\*([^*]+)\*\*|<b>([^<]+)<\/b>|^([A-Za-z&0-9]+)/);
                 const assetName = assetMatch ? (assetMatch[1] || assetMatch[2] || assetMatch[3]).trim() : null;
                 
                 if (!assetName) return;
@@ -808,7 +1118,8 @@
                 }
                 
                 const messageText = messageEl.textContent;
-                const assetMatch = messageText.match(/\*\*([^*]+)\*\*|<b>([^<]+)<\/b>|^([A-Za-z&\s0-9]+)/);
+                // Extract asset name - first word only (no spaces to avoid "Bitcoin trading at")
+                const assetMatch = messageText.match(/\*\*([^*]+)\*\*|<b>([^<]+)<\/b>|^([A-Za-z&0-9]+)/);
                 const assetName = assetMatch ? (assetMatch[1] || assetMatch[2] || assetMatch[3]).trim() : null;
                 
                 if (assetName) {
