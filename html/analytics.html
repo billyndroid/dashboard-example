@@ -46,19 +46,29 @@
                     <h3>Dashboard</h3>
                 </a>
 
+                <a href="news.html">
+                    <span class="material-icons-sharp">newspaper</span>
+                    <h3>Financial News</h3>
+                </a>
+
+                <a href="stocks.html">
+                    <span class="material-icons-sharp">trending_up</span>
+                    <h3>Stocks</h3>
+                </a>
+
                 <a href="indecescommodities.html">
                     <span class="material-icons-sharp">show_chart</span>
                     <h3>Indices & Commodities</h3>
                 </a>
 
-                <a href="analytics.html">
-                    <span class="material-icons-sharp">insights</span>
-                    <h3>Analytics</h3>
-                </a>
-
                 <a href="crypto.html">
                     <span class="material-icons-sharp">currency_bitcoin</span>
                     <h3>Cryptocurrency</h3>
+                </a>
+
+                <a href="analytics.html">
+                    <span class="material-icons-sharp">insights</span>
+                    <h3>Analytics</h3>
                 </a>
 
                 <a href="messages.html">
@@ -75,11 +85,6 @@
                 <a href="reports.html">
                     <span class="material-icons-sharp">error</span>
                     <h3>Reports</h3>
-                </a>
-
-                <a href="news.html">
-                    <span class="material-icons-sharp">newspaper</span>
-                    <h3>Financial News</h3>
                 </a>
 
                 <a href="settings.html">
@@ -113,26 +118,48 @@
                     <option value="30">Last 30 Days</option>
                     <option value="90">Last 90 Days</option>
                 </select>
+                
+                <!-- Live Update Indicator -->
+                <div id="liveUpdateIndicator" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--color-success); color: white; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600; margin-left: 1rem;">
+                    <span class="material-icons-sharp" style="font-size: 1rem; animation: pulse 2s infinite;">sync</span>
+                    <span>Auto-Refresh</span>
+                </div>
             </div>
 
-            <!--Trading Volume Chart-------------------------------------------------------------------------------------------->
+            <!--Trading Volume Chart------------------------------------------------------------------------------------------->
             <div style="margin: 20px 0;">
                 <h2>Trading Volume Analysis</h2>
                 <div id="volumeChart"></div>
             </div>
 
-            <!--Price Movement Chart-------------------------------------------------------------------------------------------->
+            <!--Price Movement Chart------------------------------------------------------------------------------------------->
             <div style="margin: 20px 0;">
                 <h2>Price Movement Trends</h2>
                 <div id="priceChart"></div>
             </div>
 
-            <!--Historical Price Chart-------------------------------------------------------------------------------------------->
+            <!--Historical Price Chart------------------------------------------------------------------------------------------->
             <div style="margin: 20px 0;">
                 <h2>Historical Price Trends</h2>
                 <div id="historicalChart"></div>
             </div>
         </main>
+
+        <!-- Analytics Modal -->
+        <div id="analyticsModal" class="modal" style="display: none;">
+            <div class="modal-overlay" onclick="closeAnalyticsModal()"></div>
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h2 id="analyticsModalTitle">Analytics Details</h2>
+                    <button class="modal-close" onclick="closeAnalyticsModal()">
+                        <span class="material-icons-sharp">close</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="analyticsModalBody">
+                    <!-- Content will be dynamically loaded -->
+                </div>
+            </div>
+        </div>
 
         <div class="right">
             <div class="top">
@@ -189,6 +216,9 @@
 
             <div class="sales-analytics">
                 <h2>Quick Stats</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div id="lastRefresh" style="font-size: 0.8rem; color: var(--color-info-dark);">Last updated: Just now</div>
+                </div>
                 <div class="item online">
                     <div class="icon">
                         <span class="material-icons-sharp">trending_up</span>
@@ -557,9 +587,30 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 </script>
 
+    <!-- Chart Tooltip -->
+    <div id="chartTooltip" class="chart-tooltip" style="display: none;">
+        <div class="chart-tooltip-header">
+            <span id="chartTooltipAsset" class="chart-tooltip-asset">Asset</span>
+            <span id="chartTooltipPrice" class="chart-tooltip-price">$0.00</span>
+        </div>
+        <canvas id="chartTooltipCanvas" width="280" height="140"></canvas>
+        <div class="chart-tooltip-stats">
+            <div class="stat">
+                <span class="label">Change</span>
+                <span id="chartTooltipChange" class="value">+0.00%</span>
+            </div>
+            <div class="stat">
+                <span class="label">Volume</span>
+                <span id="chartTooltipVolume" class="value">0</span>
+            </div>
+        </div>
+    </div>
+
 <script src="../scripts/error-handler.js"></script>
 <script src="../scripts/security-utils.js"></script>
 <script src="../scripts/performance-utils.js"></script>
-<script src="../scripts/main.js"></script>
+    <script src="../scripts/chart-tooltip.js"></script>
+    <script src="../scripts/analytics-modal.js"></script>
+    <script src="../scripts/main.js"></script>
 </body>
 </html>

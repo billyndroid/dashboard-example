@@ -43,6 +43,21 @@
                     <h3>Dashboard</h3>
                 </a>
 
+                <a href="news.html">
+                    <span class="material-icons-sharp">newspaper</span>
+                    <h3>Financial News</h3>
+                </a>
+
+                <a href="stocks.html">
+                    <span class="material-icons-sharp">trending_up</span>
+                    <h3>Stocks</h3>
+                </a>
+
+                <a href="indecescommodities.html">
+                    <span class="material-icons-sharp">show_chart</span>
+                    <h3>Indices & Commodities</h3>
+                </a>
+
                 <a href="customers.html">
                     <span class="material-icons-sharp">person_outline</span>
                     <h3>Customers</h3>
@@ -51,6 +66,11 @@
                 <a href="orders.html">
                     <span class="material-icons-sharp">receipt_long</span>
                     <h3>Orders</h3>
+                </a>
+
+                <a href="crypto.html">
+                    <span class="material-icons-sharp">currency_bitcoin</span>
+                    <h3>Cryptocurrency</h3>
                 </a>
 
                 <a href="analytics.html">
@@ -72,11 +92,6 @@
                 <a href="reports.html">
                     <span class="material-icons-sharp">error</span>
                     <h3>Reports</h3>
-                </a>
-
-                <a href="news.html">
-                    <span class="material-icons-sharp">newspaper</span>
-                    <h3>Financial News</h3>
                 </a>
 
                 <a href="settings.html">
@@ -296,6 +311,90 @@
         </div>
     </div>
 
+    <!-- Settings Detail Modal -->
+    <div id="settingsModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeSettingsModal()"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="settingsModalTitle">Setting Details</h2>
+                <button class="modal-close" onclick="closeSettingsModal()">
+                    <span class="material-icons-sharp">close</span>
+                </button>
+            </div>
+            <div class="modal-body" id="settingsModalBody">
+                <div class="modal-section">
+                    <h3>Edit Setting</h3>
+                    <form id="settingForm" style="display: grid; gap: 1rem;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Setting Name</label>
+                            <input type="text" id="settingName" readonly style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-info-dark); border-radius: 0.5rem;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Value</label>
+                            <input type="text" id="settingValue" style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-info-dark); border-radius: 0.5rem;">
+                        </div>
+                        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1;">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()" style="flex: 1;">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function closeSettingsModal() {
+        document.getElementById('settingsModal').style.display = 'none';
+    }
+    
+    // Make table rows clickable for editing
+    document.addEventListener('DOMContentLoaded', function() {
+        const editButtons = document.querySelectorAll('td.primary');
+        editButtons.forEach(btn => {
+            if (btn.textContent === 'Edit') {
+                btn.style.cursor = 'pointer';
+                btn.onclick = function() {
+                    const row = this.closest('tr');
+                    const settingName = row.cells[0].textContent;
+                    const currentValue = row.cells[2].textContent;
+                    
+                    document.getElementById('settingName').value = settingName;
+                    document.getElementById('settingValue').value = currentValue;
+                    document.getElementById('settingsModalTitle').textContent = 'Edit ' + settingName;
+                    document.getElementById('settingsModal').style.display = 'flex';
+                };
+            }
+        });
+        
+        document.getElementById('settingForm').onsubmit = function(e) {
+            e.preventDefault();
+            alert('Settings saved successfully!');
+            closeSettingsModal();
+        };
+    });
+    </script>
+
+    <!-- Chart Tooltip -->
+    <div id="chartTooltip" class="chart-tooltip" style="display: none;">
+        <div class="chart-tooltip-header">
+            <span id="chartTooltipAsset" class="chart-tooltip-asset">Asset</span>
+            <span id="chartTooltipPrice" class="chart-tooltip-price">$0.00</span>
+        </div>
+        <canvas id="chartTooltipCanvas" width="280" height="140"></canvas>
+        <div class="chart-tooltip-stats">
+            <div class="stat">
+                <span class="label">Change</span>
+                <span id="chartTooltipChange" class="value">+0.00%</span>
+            </div>
+            <div class="stat">
+                <span class="label">Volume</span>
+                <span id="chartTooltipVolume" class="value">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/chart-tooltip.js"></script>
     <script src="../scripts/main.js"></script>
 </body>
 </html>

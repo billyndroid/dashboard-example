@@ -164,6 +164,14 @@
                 volatility = 0.025;
             }
         }
+        // Check stocks data
+        if (!basePrice && window.stocksData) {
+            var stock = window.stocksData.find(function(s) { return s.symbol === assetName || s.name === assetName; });
+            if (stock) {
+                basePrice = stock.price;
+                volatility = 0.020;
+            }
+        }
         
         if (!basePrice) return null;
         
@@ -343,6 +351,16 @@
                 currentPrice = commodity.price;
                 priceChange = commodity.changePercent;
                 volume = 'N/A';
+            }
+        }
+        
+        // Check stocks data if not found
+        if (!currentPrice && window.stocksData) {
+            var stock = window.stocksData.find(function(s) { return s.symbol === assetName || s.name === assetName; });
+            if (stock) {
+                currentPrice = stock.price;
+                priceChange = stock.changePercent;
+                volume = stock.volume;
             }
         }
         

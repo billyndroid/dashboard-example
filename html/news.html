@@ -46,19 +46,29 @@
                     <h3>Dashboard</h3>
                 </a>
 
+                <a href="#" aria-current="page">
+                    <span class="material-icons-sharp">newspaper</span>
+                    <h3>Financial News</h3>
+                </a>
+
+                <a href="stocks.html">
+                    <span class="material-icons-sharp">trending_up</span>
+                    <h3>Stocks</h3>
+                </a>
+
                 <a href="indecescommodities.html">
                     <span class="material-icons-sharp">show_chart</span>
                     <h3>Indices & Commodities</h3>
                 </a>
 
-                <a href="analytics.html">
-                    <span class="material-icons-sharp">insights</span>
-                    <h3>Analytics</h3>
-                </a>
-
                 <a href="crypto.html">
                     <span class="material-icons-sharp">currency_bitcoin</span>
                     <h3>Cryptocurrency</h3>
+                </a>
+
+                <a href="analytics.html">
+                    <span class="material-icons-sharp">insights</span>
+                    <h3>Analytics</h3>
                 </a>
 
                 <a href="messages.html">
@@ -175,6 +185,13 @@
                     <span class="material-icons-sharp active" role="button" aria-label="Light mode" aria-pressed="true" tabindex="0">light_mode</span>
                     <span class="material-icons-sharp" role="button" aria-label="Dark mode" aria-pressed="false" tabindex="0">dark_mode</span>
                 </div>
+                
+                <!-- API Status Indicator -->
+                <div id="apiStatus" style="display: none; padding: 0.5rem 1rem; background: #10b981; color: white; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600; margin-left: 1rem;">
+                    <span class="material-icons-sharp" style="font-size: 1rem; vertical-align: middle;">cloud_done</span>
+                    Live Data
+                </div>
+                
                 <div class="profile">
                     <div class="info">
                         <p> Key: <b>Gavin</b></p>
@@ -224,12 +241,32 @@
         </div>
     </div>
 
+    <!-- Chart Tooltip -->
+    <div id="chartTooltip" class="chart-tooltip" style="display: none;">
+        <div class="chart-tooltip-header">
+            <span id="chartTooltipAsset" class="chart-tooltip-asset">Asset</span>
+            <span id="chartTooltipPrice" class="chart-tooltip-price">$0.00</span>
+        </div>
+        <canvas id="chartTooltipCanvas" width="280" height="140"></canvas>
+        <div class="chart-tooltip-stats">
+            <div class="stat">
+                <span class="label">Change</span>
+                <span id="chartTooltipChange" class="value">+0.00%</span>
+            </div>
+            <div class="stat">
+                <span class="label">Volume</span>
+                <span id="chartTooltipVolume" class="value">0</span>
+            </div>
+        </div>
+    </div>
+
     <script src="../scripts/error-handler.js"></script>
     <script src="../scripts/security-utils.js"></script>
     <script src="../scripts/config.js"></script>
     <script src="../scripts/config.local.js"></script>
     <script src="../scripts/news-service.js"></script>
     <script src="../scripts/news.js"></script>
+    <script src="../scripts/chart-tooltip.js"></script>
     <script src="../scripts/main.js"></script>
     
 </body>

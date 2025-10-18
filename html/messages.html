@@ -184,6 +184,21 @@
                     <h3>Dashboard</h3>
                 </a>
 
+                <a href="news.html">
+                    <span class="material-icons-sharp">newspaper</span>
+                    <h3>Financial News</h3>
+                </a>
+
+                <a href="stocks.html">
+                    <span class="material-icons-sharp">trending_up</span>
+                    <h3>Stocks</h3>
+                </a>
+
+                <a href="indecescommodities.html">
+                    <span class="material-icons-sharp">show_chart</span>
+                    <h3>Indices & Commodities</h3>
+                </a>
+
                 <a href="customers.html">
                     <span class="material-icons-sharp">person_outline</span>
                     <h3>Customers</h3>
@@ -192,6 +207,11 @@
                 <a href="orders.html">
                     <span class="material-icons-sharp">receipt_long</span>
                     <h3>Orders</h3>
+                </a>
+
+                <a href="crypto.html">
+                    <span class="material-icons-sharp">currency_bitcoin</span>
+                    <h3>Cryptocurrency</h3>
                 </a>
 
                 <a href="analytics.html">
@@ -213,11 +233,6 @@
                 <a href="reports.html">
                     <span class="material-icons-sharp">error</span>
                     <h3>Reports</h3>
-                </a>
-
-                <a href="news.html">
-                    <span class="material-icons-sharp">newspaper</span>
-                    <h3>Financial News</h3>
                 </a>
 
                 <a href="settings.html">
@@ -371,8 +386,44 @@
         </div>
     </div>
 
+    <!-- Message Detail Modal -->
+    <div id="messageModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeMessageModal()"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="messageModalTitle">Message Details</h2>
+                <button class="modal-close" onclick="closeMessageModal()">
+                    <span class="material-icons-sharp">close</span>
+                </button>
+            </div>
+            <div class="modal-body" id="messageModalBody">
+                <!-- Content will be dynamically loaded -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Tooltip -->
+    <div id="chartTooltip" class="chart-tooltip" style="display: none;">
+        <div class="chart-tooltip-header">
+            <span id="chartTooltipAsset" class="chart-tooltip-asset">Asset</span>
+            <span id="chartTooltipPrice" class="chart-tooltip-price">$0.00</span>
+        </div>
+        <canvas id="chartTooltipCanvas" width="280" height="140"></canvas>
+        <div class="chart-tooltip-stats">
+            <div class="stat">
+                <span class="label">Change</span>
+                <span id="chartTooltipChange" class="value">+0.00%</span>
+            </div>
+            <div class="stat">
+                <span class="label">Volume</span>
+                <span id="chartTooltipVolume" class="value">0</span>
+            </div>
+        </div>
+    </div>
+
     <script src="../scripts/notification-service.js"></script>
     <script src="../scripts/messages.js"></script>
+    <script src="../scripts/chart-tooltip.js"></script>
     <script src="../scripts/main.js"></script>
 </body>
 </html>

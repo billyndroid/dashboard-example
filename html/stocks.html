@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Market - Dashboard</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/style.css">
+    <style>
+        .stocks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .stocks-header h1 {
+            margin: 0;
+            color: var(--color-dark);
+        }
+        
+        .market-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: linear-gradient(135deg, var(--color-success), #059669);
+            color: white;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        .market-status.closed {
+            background: linear-gradient(135deg, var(--color-danger), #dc2626);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+        
+        .market-pulse {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse-dot 1.5s infinite;
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+        
+        /* Market Overview Cards */
+        .market-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .overview-card {
+            background: var(--color-white);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .overview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .overview-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-info-dark));
+        }
+        
+        .overview-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .overview-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+        
+        .overview-icon.market-cap {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        }
+        
+        .overview-icon.volume {
+            background: linear-gradient(135deg, #06b6d4, #0284c7);
+        }
+        
+        .overview-icon.gainers {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .overview-icon.losers {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .overview-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .overview-label {
+            font-size: 0.9rem;
+            color: var(--color-info-dark);
+            font-weight: 500;
+        }
+        
+        .overview-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .overview-change.positive {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--color-success);
+        }
+        
+        .overview-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--color-danger);
+        }
+        
+        /* Stock Grid */
+        .stocks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stock-card {
+            background: var(--color-white);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .stock-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .stock-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .stock-info {
+            flex: 1;
+        }
+        
+        .stock-symbol {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--color-dark);
+            margin-bottom: 0.25rem;
+        }
+        
+        .stock-name {
+            font-size: 0.9rem;
+            color: var(--color-info-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stock-sector {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--color-light);
+            color: var(--color-info-dark);
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .stock-price-section {
+            margin: 1rem 0;
+        }
+        
+        .stock-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stock-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.4rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .stock-change.positive {
+            background: var(--color-success);
+            color: white;
+        }
+        
+        .stock-change.negative {
+            background: var(--color-danger);
+            color: white;
+        }
+        
+        .stock-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--color-light);
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--color-info-dark);
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-dark);
+        }
+        
+        /* Tables */
+        .stocks-table-section {
+            background: var(--color-white);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .table-header h2 {
+            margin: 0;
+            color: var(--color-dark);
+        }
+        
+        .table-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--color-light);
+            padding: 0.25rem;
+            border-radius: 0.75rem;
+        }
+        
+        .tab-button {
+            padding: 0.5rem 1.25rem;
+            border: none;
+            background: transparent;
+            color: var(--color-info-dark);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            background: white;
+            color: var(--color-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stocks-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .stocks-table thead th {
+            text-align: left;
+            padding: 1rem;
+            background: var(--color-light);
+            color: var(--color-dark);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .stocks-table tbody tr {
+            border-bottom: 1px solid var(--color-light);
+            transition: background 0.2s ease;
+        }
+        
+        .stocks-table tbody tr:hover {
+            background: rgba(132, 139, 200, 0.05);
+        }
+        
+        .stocks-table tbody td {
+            padding: 1rem;
+            color: var(--color-dark);
+        }
+        
+        .stock-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .stock-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-info-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        
+        .stock-name-info strong {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stock-name-info small {
+            color: var(--color-info-dark);
+            font-size: 0.85rem;
+        }
+        
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: var(--color-white);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--color-light);
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            color: var(--color-dark);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--color-info-dark);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            padding: 0;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close:hover {
+            color: var(--color-danger);
+        }
+        
+        .modal-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .modal-stat-card {
+            background: linear-gradient(135deg, rgba(132, 139, 200, 0.1), rgba(132, 139, 200, 0.05));
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border-left: 4px solid var(--color-primary);
+        }
+        
+        .modal-stat-label {
+            font-size: 0.85rem;
+            color: var(--color-info-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .modal-stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-dark);
+        }
+        
+        .modal-section {
+            margin-bottom: 2rem;
+        }
+        
+        .modal-section h3 {
+            color: var(--color-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .modal-section p {
+            color: var(--color-info-dark);
+            line-height: 1.6;
+        }
+        
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .modal-table th,
+        .modal-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--color-light);
+        }
+        
+        .modal-table th {
+            background: var(--color-light);
+            font-weight: 600;
+            color: var(--color-dark);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stocks-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .market-overview-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .modal-content {
+                padding: 1.5rem;
+                width: 95%;
+            }
+            
+            .modal-stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside>
+            <div class="top">
+                <svg class="logo" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="2" y="46" width="6" height="10" rx="1" class="logo-bar" opacity="0.22" />
+                  <rect x="12" y="36" width="6" height="20" rx="1" class="logo-bar" opacity="0.18" />
+                  <rect x="22" y="30" width="6" height="26" rx="1" class="logo-bar" opacity="0.22" />
+                  <rect x="32" y="22" width="6" height="34" rx="1" class="logo-bar-active" />
+                  <rect x="42" y="16" width="6" height="40" rx="1" class="logo-bar" opacity="0.18" />
+                  <polyline points="12,42 20,34 28,26 36,20 44,16" fill="none" class="logo-line" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <circle cx="44" cy="16" r="3.2" class="logo-accent" />
+                </svg>
+                <h2>SQU^RE<span class="danger">DOFF</span></h2>
+            </div>
+            <div class="close" id="close-btn" role="button" aria-label="Close sidebar" tabindex="0">
+                <span class="material-icons-sharp" aria-hidden="true">close</span>
+            </div>
+
+            <nav class="sidebar" role="navigation" aria-label="Main navigation">
+                <a href="../index.html">
+                    <span class="material-icons-sharp">grid_view</span>
+                    <h3>Dashboard</h3>
+                </a>
+
+                <a href="news.html">
+                    <span class="material-icons-sharp">newspaper</span>
+                    <h3>Financial News</h3>
+                </a>
+
+                <a href="#" aria-current="page">
+                    <span class="material-icons-sharp">trending_up</span>
+                    <h3>Stocks</h3>
+                </a>
+
+                <a href="indecescommodities.html">
+                    <span class="material-icons-sharp">show_chart</span>
+                    <h3>Indices & Commodities</h3>
+                </a>
+
+                <a href="crypto.html">
+                    <span class="material-icons-sharp">currency_bitcoin</span>
+                    <h3>Cryptocurrency</h3>
+                </a>
+
+                <a href="analytics.html">
+                    <span class="material-icons-sharp">insights</span>
+                    <h3>Analytics</h3>
+                </a>
+
+                <a href="messages.html">
+                    <span class="material-icons-sharp" aria-hidden="true">mail_outline</span>
+                    <h3>Messages</h3>
+                    <span class="message-count" aria-label="21 unread messages">21</span>
+                </a>
+
+                <a href="orders.html">
+                    <span class="material-icons-sharp">inventory</span>
+                    <h3>Orders</h3>
+                </a>
+
+                <a href="reports.html">
+                    <span class="material-icons-sharp">error</span>
+                    <h3>Reports</h3>
+                </a>
+
+                <a href="settings.html">
+                    <span class="material-icons-sharp">settings</span>
+                    <h3>Settings</h3>
+                </a>
+
+                <a href="#">
+                    <span class="material-icons-sharp">add</span>
+                    <h3>Add Stock</h3>
+                </a>
+
+                <a href="#" id="logout-link">
+                    <span class="material-icons-sharp">logout</span>
+                    <h3>Logout</h3>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="main-content" role="main" aria-label="Stock market content">
+            <div class="stocks-header">
+                <h1>Stock Market</h1>
+                <div class="market-status" id="market-status">
+                    <div class="market-pulse"></div>
+                    <span>Market Open</span>
+                </div>
+            </div>
+
+            <!-- Market Overview Cards -->
+            <div class="market-overview-grid">
+                <div class="overview-card" onclick="openMarketCapModal()">
+                    <div class="overview-card-header">
+                        <div>
+                            <div class="overview-value" id="total-market-cap">$45.8T</div>
+                            <div class="overview-label">Total Market Cap</div>
+                            <div class="overview-change positive">
+                                <span class="material-icons-sharp" style="font-size: 1rem;">arrow_upward</span>
+                                <span>+2.4%</span>
+                            </div>
+                        </div>
+                        <div class="overview-icon market-cap">
+                            <span class="material-icons-sharp">account_balance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overview-card" onclick="openVolumeModal()">
+                    <div class="overview-card-header">
+                        <div>
+                            <div class="overview-value" id="total-volume">$342B</div>
+                            <div class="overview-label">24h Trading Volume</div>
+                            <div class="overview-change positive">
+                                <span class="material-icons-sharp" style="font-size: 1rem;">arrow_upward</span>
+                                <span>+15.8%</span>
+                            </div>
+                        </div>
+                        <div class="overview-icon volume">
+                            <span class="material-icons-sharp">bar_chart</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overview-card" onclick="openGainersModal()">
+                    <div class="overview-card-header">
+                        <div>
+                            <div class="overview-value" id="top-gainers">127</div>
+                            <div class="overview-label">Top Gainers (24h)</div>
+                            <div class="overview-change positive">
+                                <span class="material-icons-sharp" style="font-size: 1rem;">trending_up</span>
+                                <span>Bullish</span>
+                            </div>
+                        </div>
+                        <div class="overview-icon gainers">
+                            <span class="material-icons-sharp">trending_up</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overview-card" onclick="openLosersModal()">
+                    <div class="overview-card-header">
+                        <div>
+                            <div class="overview-value" id="top-losers">89</div>
+                            <div class="overview-label">Top Losers (24h)</div>
+                            <div class="overview-change negative">
+                                <span class="material-icons-sharp" style="font-size: 1rem;">trending_down</span>
+                                <span>Bearish</span>
+                            </div>
+                        </div>
+                        <div class="overview-icon losers">
+                            <span class="material-icons-sharp">trending_down</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Stocks Grid -->
+            <h2 style="margin-bottom: 1.5rem; color: var(--color-dark);">Featured Stocks</h2>
+            <div class="stocks-grid" id="stocks-grid">
+                <!-- Stock cards will be populated by JavaScript -->
+            </div>
+
+            <!-- Stocks Table Section -->
+            <div class="stocks-table-section">
+                <div class="table-header">
+                    <h2>All Stocks</h2>
+                    <div class="table-tabs">
+                        <button class="tab-button active" onclick="filterStocks('all')">All</button>
+                        <button class="tab-button" onclick="filterStocks('technology')">Technology</button>
+                        <button class="tab-button" onclick="filterStocks('finance')">Finance</button>
+                        <button class="tab-button" onclick="filterStocks('healthcare')">Healthcare</button>
+                        <button class="tab-button" onclick="filterStocks('energy')">Energy</button>
+                    </div>
+                </div>
+                <table class="stocks-table">
+                    <thead>
+                        <tr>
+                            <th>Stock</th>
+                            <th>Price</th>
+                            <th>Change (24h)</th>
+                            <th>Market Cap</th>
+                            <th>Volume</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stocks-table-body">
+                        <!-- Rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- Right Section -->
+        <div class="right">
+            <div class="top">
+                <button id="menu-btn" aria-label="Toggle menu">
+                    <span class="material-icons-sharp">menu</span>
+                </button>
+                <div class="theme-toggler" role="button" aria-label="Toggle theme" tabindex="0">
+                    <span class="material-icons-sharp active">light_mode</span>
+                    <span class="material-icons-sharp">dark_mode</span>
+                </div>
+                <div class="profile">
+                    <div class="info">
+                        <p>Hey, <b>Trader</b></p>
+                        <small class="text-muted">Investor</small>
+                    </div>
+                    <div class="profile-photo">
+                        <img src="../assets/profile-1.jpg" alt="Profile picture" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%237380ec%22 width=%22100%22 height=%22100%22/%3E%3Ctext fill=%22white%22 font-size=%2240%22 font-family=%22Arial%22 x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22%3EU%3C/text%3E%3C/svg%3E'">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Watchlist -->
+            <div class="recent-updates">
+                <h2>Watchlist</h2>
+                <div class="updates" id="watchlist">
+                    <!-- Watchlist items will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Market News -->
+            <div class="sales-analytics">
+                <h2>Market News</h2>
+                <div id="market-news">
+                    <!-- News items will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="market-cap-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 Total Market Capitalization</h2>
+                <button class="modal-close" onclick="closeModal('market-cap-modal')">&times;</button>
+            </div>
+            <div class="modal-stats-grid">
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">US Markets</div>
+                    <div class="modal-stat-value">$52.8T</div>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">Global Markets</div>
+                    <div class="modal-stat-value">$109.4T</div>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">24h Change</div>
+                    <div class="modal-stat-value" style="color: var(--color-success);">+2.4%</div>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">YTD Change</div>
+                    <div class="modal-stat-value" style="color: var(--color-success);">+18.7%</div>
+                </div>
+            </div>
+            <div class="modal-section">
+                <h3><span class="material-icons-sharp">insights</span> Market Overview</h3>
+                <p>The total market capitalization represents the combined value of all publicly traded stocks. Current market sentiment is bullish with strong institutional buying pressure across technology and healthcare sectors.</p>
+            </div>
+            <div class="modal-section">
+                <h3><span class="material-icons-sharp">trending_up</span> Top Sectors by Market Cap</h3>
+                <table class="modal-table">
+                    <thead>
+                        <tr>
+                            <th>Sector</th>
+                            <th>Market Cap</th>
+                            <th>Change</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Technology</td>
+                            <td>$14.2T</td>
+                            <td style="color: var(--color-success);">+3.2%</td>
+                        </tr>
+                        <tr>
+                            <td>Finance</td>
+                            <td>$10.8T</td>
+                            <td style="color: var(--color-success);">+1.8%</td>
+                        </tr>
+                        <tr>
+                            <td>Healthcare</td>
+                            <td>$7.5T</td>
+                            <td style="color: var(--color-success);">+2.6%</td>
+                        </tr>
+                        <tr>
+                            <td>Consumer</td>
+                            <td>$6.3T</td>
+                            <td style="color: var(--color-danger);">-0.5%</td>
+                        </tr>
+                        <tr>
+                            <td>Energy</td>
+                            <td>$4.9T</td>
+                            <td style="color: var(--color-success);">+4.1%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="volume-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📈 Trading Volume Analysis</h2>
+                <button class="modal-close" onclick="closeModal('volume-modal')">&times;</button>
+            </div>
+            <div class="modal-stats-grid">
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">NYSE Volume</div>
+                    <div class="modal-stat-value">$187B</div>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">NASDAQ Volume</div>
+                    <div class="modal-stat-value">$155B</div>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">Average Daily</div>
+                    <div class="modal-stat-value">$298B</div>
+                </div>
+                <div class="modal-stat-card">
+                    <div class="modal-stat-label">vs Average</div>
+                    <div class="modal-stat-value" style="color: var(--color-success);">+15.8%</div>
+                </div>
+            </div>
+            <div class="modal-section">
+                <h3><span class="material-icons-sharp">insights</span> Volume Insights</h3>
+                <p>Trading volume is significantly above average, indicating strong market participation. High volume with upward price movement suggests bullish momentum and institutional accumulation.</p>
+            </div>
+            <div class="modal-section">
+                <h3><span class="material-icons-sharp">bar_chart</span> Top Volume Stocks</h3>
+                <table class="modal-table">
+                    <thead>
+                        <tr>
+                            <th>Stock</th>
+                            <th>Volume</th>
+                            <th>Avg Volume</th>
+                            <th>% of Avg</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>AAPL</strong></td>
+                            <td>142M</td>
+                            <td>85M</td>
+                            <td style="color: var(--color-success);">+67%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TSLA</strong></td>
+                            <td>198M</td>
+                            <td>120M</td>
+                            <td style="color: var(--color-success);">+65%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NVDA</strong></td>
+                            <td>87M</td>
+                            <td>52M</td>
+                            <td style="color: var(--color-success);">+67%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AMD</strong></td>
+                            <td>76M</td>
+                            <td>48M</td>
+                            <td style="color: var(--color-success);">+58%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="gainers-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🚀 Top Gainers (24h)</h2>
+                <button class="modal-close" onclick="closeModal('gainers-modal')">&times;</button>
+            </div>
+            <div class="modal-section">
+                <table class="modal-table">
+                    <thead>
+                        <tr>
+                            <th>Stock</th>
+                            <th>Price</th>
+                            <th>Change</th>
+                            <th>Volume</th>
+                            <th>Market Cap</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>NVDA</strong> - NVIDIA Corp</td>
+                            <td>$487.25</td>
+                            <td style="color: var(--color-success); font-weight: 700;">+8.4%</td>
+                            <td>87.2M</td>
+                            <td>$1.2T</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AMD</strong> - Advanced Micro Devices</td>
+                            <td>$142.68</td>
+                            <td style="color: var(--color-success); font-weight: 700;">+7.9%</td>
+                            <td>76.5M</td>
+                            <td>$231B</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TSLA</strong> - Tesla Inc</td>
+                            <td>$248.92</td>
+                            <td style="color: var(--color-success); font-weight: 700;">+6.5%</td>
+                            <td>198M</td>
+                            <td>$790B</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PLTR</strong> - Palantir Technologies</td>
+                            <td>$28.45</td>
+                            <td style="color: var(--color-success); font-weight: 700;">+6.2%</td>
+                            <td>45.8M</td>
+                            <td>$58B</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SHOP</strong> - Shopify Inc</td>
+                            <td>$78.92</td>
+                            <td style="color: var(--color-success); font-weight: 700;">+5.8%</td>
+                            <td>12.4M</td>
+                            <td>$98B</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SQ</strong> - Block Inc</td>
+                            <td>$67.34</td>
+                            <td style="color: var(--color-success); font-weight: 700;">+5.3%</td>
+                            <td>18.9M</td>
+                            <td>$39B</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="losers-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📉 Top Losers (24h)</h2>
+                <button class="modal-close" onclick="closeModal('losers-modal')">&times;</button>
+            </div>
+            <div class="modal-section">
+                <table class="modal-table">
+                    <thead>
+                        <tr>
+                            <th>Stock</th>
+                            <th>Price</th>
+                            <th>Change</th>
+                            <th>Volume</th>
+                            <th>Market Cap</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>COIN</strong> - Coinbase Global</td>
+                            <td>$142.58</td>
+                            <td style="color: var(--color-danger); font-weight: 700;">-5.2%</td>
+                            <td>34.2M</td>
+                            <td>$34B</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ROKU</strong> - Roku Inc</td>
+                            <td>$78.45</td>
+                            <td style="color: var(--color-danger); font-weight: 700;">-4.8%</td>
+                            <td>15.7M</td>
+                            <td>$11B</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SNAP</strong> - Snap Inc</td>
+                            <td>$12.34</td>
+                            <td style="color: var(--color-danger); font-weight: 700;">-4.5%</td>
+                            <td>42.1M</td>
+                            <td>$19B</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PINS</strong> - Pinterest Inc</td>
+                            <td>$34.67</td>
+                            <td style="color: var(--color-danger); font-weight: 700;">-3.9%</td>
+                            <td>18.5M</td>
+                            <td>$23B</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ZM</strong> - Zoom Video</td>
+                            <td>$67.89</td>
+                            <td style="color: var(--color-danger); font-weight: 700;">-3.6%</td>
+                            <td>8.9M</td>
+                            <td>$20B</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Tooltip -->
+    <div class="chart-tooltip" id="chart-tooltip">
+        <div class="chart-tooltip-header">
+            <span id="chartTooltipAsset">Asset</span>
+        </div>
+        <canvas id="chartTooltipCanvas" width="280" height="140"></canvas>
+        <div class="chart-tooltip-stats">
+            <div class="stat">
+                <div class="label">Price</div>
+                <div class="value" id="chartTooltipPrice">$0.00</div>
+            </div>
+            <div class="stat">
+                <div class="label">Change</div>
+                <div class="value" id="chartTooltipChange">0.00%</div>
+            </div>
+            <div class="stat">
+                <div class="label">Volume</div>
+                <div class="value" id="chartTooltipVolume">0</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/orders.js"></script>
+    <script src="../scripts/stocks.js"></script>
+    <script src="../scripts/chart-tooltip.js"></script>
+    <script src="../scripts/main.js"></script>
+</body>
+</html>

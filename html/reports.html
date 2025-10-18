@@ -43,6 +43,21 @@
                     <h3>Dashboard</h3>
                 </a>
 
+                <a href="news.html">
+                    <span class="material-icons-sharp">newspaper</span>
+                    <h3>Financial News</h3>
+                </a>
+
+                <a href="stocks.html">
+                    <span class="material-icons-sharp">trending_up</span>
+                    <h3>Stocks</h3>
+                </a>
+
+                <a href="indecescommodities.html">
+                    <span class="material-icons-sharp">show_chart</span>
+                    <h3>Indices & Commodities</h3>
+                </a>
+
                 <a href="customers.html">
                     <span class="material-icons-sharp">person_outline</span>
                     <h3>Customers</h3>
@@ -51,6 +66,11 @@
                 <a href="orders.html">
                     <span class="material-icons-sharp">receipt_long</span>
                     <h3>Orders</h3>
+                </a>
+
+                <a href="crypto.html">
+                    <span class="material-icons-sharp">currency_bitcoin</span>
+                    <h3>Cryptocurrency</h3>
                 </a>
 
                 <a href="analytics.html">
@@ -72,11 +92,6 @@
                 <a href="reports.html">
                     <span class="material-icons-sharp">error</span>
                     <h3>Reports</h3>
-                </a>
-
-                <a href="news.html">
-                    <span class="material-icons-sharp">newspaper</span>
-                    <h3>Financial News</h3>
                 </a>
 
                 <a href="settings.html">
@@ -108,7 +123,7 @@
                     <div class="middle">
                         <div class="left">
                             <h3>P&L Today</h3>
-                            <h1>+$1,247</h1>
+                            <h1 data-live-update data-format="currency" data-base-value="1247" data-variance="0.05">+$1,247</h1>
                         </div>
                         <div class="progress">
                             <svg>
@@ -127,7 +142,7 @@
                     <div class="middle">
                         <div class="left">
                             <h3>Win Rate</h3>
-                            <h1>73%</h1>
+                            <h1 data-live-update data-format="percentage" data-base-value="0.73" data-variance="0.02">73%</h1>
                         </div>
                         <div class="progress">
                             <svg>
@@ -146,7 +161,7 @@
                     <div class="middle">
                         <div class="left">
                             <h3>Total Volume</h3>
-                            <h1>$124K</h1>
+                            <h1 data-live-update data-format="currency" data-base-value="124000" data-variance="0.03">$124K</h1>
                         </div>
                         <div class="progress">
                             <svg>
@@ -285,6 +300,106 @@
         </div>
     </div>
 
+    <!-- Report Detail Modal -->
+    <div id="reportModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeReportModal()"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="reportModalTitle">Report Details</h2>
+                <button class="modal-close" onclick="closeReportModal()">
+                    <span class="material-icons-sharp">close</span>
+                </button>
+            </div>
+            <div class="modal-body" id="reportModalBody">
+                <div class="modal-section">
+                    <h3>Report Summary</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0;">
+                        <div style="background: var(--color-light); padding: 1rem; border-radius: 0.5rem;">
+                            <p style="color: var(--color-info-dark); font-size: 0.85rem; margin-bottom: 0.5rem;">Total P&L</p>
+                            <h3 id="reportPnL" style="color: var(--color-success);">--</h3>
+                        </div>
+                        <div style="background: var(--color-light); padding: 1rem; border-radius: 0.5rem;">
+                            <p style="color: var(--color-info-dark); font-size: 0.85rem; margin-bottom: 0.5rem;">Win Rate</p>
+                            <h3 id="reportWinRate">--</h3>
+                        </div>
+                        <div style="background: var(--color-light); padding: 1rem; border-radius: 0.5rem;">
+                            <p style="color: var(--color-info-dark); font-size: 0.85rem; margin-bottom: 0.5rem;">Total Trades</p>
+                            <h3 id="reportTrades">--</h3>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <button class="btn btn-primary" onclick="downloadReport()">
+                            <span class="material-icons-sharp" style="vertical-align: middle;">download</span>
+                            Download PDF
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportReport()" style="margin-left: 0.5rem;">
+                            <span class="material-icons-sharp" style="vertical-align: middle;">table_chart</span>
+                            Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function closeReportModal() {
+        document.getElementById('reportModal').style.display = 'none';
+    }
+    
+    function downloadReport() {
+        alert('Downloading report as PDF...');
+        closeReportModal();
+    }
+    
+    function exportReport() {
+        alert('Exporting report as CSV...');
+        closeReportModal();
+    }
+    
+    // Make table rows clickable
+    document.addEventListener('DOMContentLoaded', function() {
+        const actionButtons = document.querySelectorAll('td.primary');
+        actionButtons.forEach(btn => {
+            if (btn.textContent === 'Download' || btn.textContent === 'View') {
+                btn.style.cursor = 'pointer';
+                btn.onclick = function() {
+                    const row = this.closest('tr');
+                    const reportType = row.cells[0].textContent;
+                    const pnl = row.cells[2].textContent;
+                    
+                    document.getElementById('reportModalTitle').textContent = reportType;
+                    document.getElementById('reportPnL').textContent = pnl;
+                    document.getElementById('reportWinRate').textContent = '73%';
+                    document.getElementById('reportTrades').textContent = '37';
+                    document.getElementById('reportModal').style.display = 'flex';
+                };
+            }
+        });
+    });
+    </script>
+
+    <!-- Chart Tooltip -->
+    <div id="chartTooltip" class="chart-tooltip" style="display: none;">
+        <div class="chart-tooltip-header">
+            <span id="chartTooltipAsset" class="chart-tooltip-asset">Asset</span>
+            <span id="chartTooltipPrice" class="chart-tooltip-price">$0.00</span>
+        </div>
+        <canvas id="chartTooltipCanvas" width="280" height="140"></canvas>
+        <div class="chart-tooltip-stats">
+            <div class="stat">
+                <span class="label">Change</span>
+                <span id="chartTooltipChange" class="value">+0.00%</span>
+            </div>
+            <div class="stat">
+                <span class="label">Volume</span>
+                <span id="chartTooltipVolume" class="value">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/chart-tooltip.js"></script>
+    <script src="../scripts/countup-enhanced.js"></script>
     <script src="../scripts/main.js"></script>
 </body>
 </html>
