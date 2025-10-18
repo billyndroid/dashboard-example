@@ -791,6 +791,20 @@ main .insights > div {
 }
 
 main .insights > div:hover { box-shadow: 0 12px 28px var(--shadow-color); transform: translateY(-1px); }
+
+main .insights > div.metric-card-clickable {
+    cursor: pointer;
+    transition: box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease, background-color 200ms ease;
+}
+
+main .insights > div.metric-card-clickable:hover {
+    border-color: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-white) 0%, rgba(126,34,206,0.03) 100%);
+}
+
+main .insights > div.metric-card-clickable:active {
+    transform: translateY(1px);
+}
  
 main .insights > div span {
     color: var(--color-white);
@@ -840,30 +854,14 @@ main .insights svg circle {
     transform: translate(5px, 5px);
 }
 
-main .insights .sales svg circle {
-    stroke-dasharray: 200;
-    stroke-dashoffset: -30;
-    animation: dash 4s linear forwards;
-}
-
-main .insights .expenses svg circle {
-    stroke-dasharray: 110;
-    stroke-dashoffset: 92;
-    animation: dash 4.5s linear forwards;
-
-}
-
+main .insights .sales svg circle,
+main .insights .expenses svg circle,
 main .insights .income svg circle {
-    stroke-dasharray: 135;
-    stroke-dashoffset: 50;
-    animation: dash 5s linear forwards;
+    stroke-dasharray: 226;
+    stroke-dashoffset: 226;
+    transition: stroke-dashoffset 2s ease-out;
+}
 
-}
-@keyframes dash {
-    to {
-      stroke-dashoffset: 30;
-    }
-}
 
 main .insights .progress .number {
     position: absolute;

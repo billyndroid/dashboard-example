@@ -430,6 +430,61 @@ if (document.readyState === 'loading') {
     populateOrdersTable();
 }
 
+/**
+ * Update circular progress animations based on metric values
+ */
+function updateProgressCircles() {
+    try {
+        if (typeof DashboardData === 'undefined') return;
+        
+        const circumference = 226; // 2 * π * r (where r = 36)
+        
+        // Get the portfolio growth percentage from the card
+        const portfolioProgress = document.querySelector('.sales .number p');
+        if (portfolioProgress) {
+            const percentText = portfolioProgress.textContent.replace(/[+%]/g, '');
+            const percent = parseFloat(percentText);
+            // Map growth percentage to circle fill (0-10% growth = 70-100% fill)
+            const fillPercent = Math.min(100, 70 + (percent * 3));
+            const offset = circumference - (circumference * fillPercent / 100);
+            const circle = document.querySelector('.sales svg circle');
+            if (circle) {
+                circle.style.strokeDashoffset = offset;
+            }
+        }
+        
+        // Get the P&L percentage from the card
+        const pnlProgress = document.querySelector('.expenses .number p');
+        if (pnlProgress) {
+            const percentText = pnlProgress.textContent.replace(/[+\-%]/g, '');
+            const percent = parseFloat(percentText);
+            // Map P&L percentage to circle fill (0-10% = 70-100% fill)
+            const fillPercent = Math.min(100, 70 + (percent * 3));
+            const offset = circumference - (circumference * fillPercent / 100);
+            const circle = document.querySelector('.expenses svg circle');
+            if (circle) {
+                circle.style.strokeDashoffset = offset;
+            }
+        }
+        
+        // Get the win rate percentage from the card
+        const winRateProgress = document.querySelector('.income .number p');
+        if (winRateProgress) {
+            const percentText = winRateProgress.textContent.replace(/%/g, '');
+            const percent = parseFloat(percentText);
+            // Win rate directly maps to circle fill
+            const fillPercent = percent;
+            const offset = circumference - (circumference * fillPercent / 100);
+            const circle = document.querySelector('.income svg circle');
+            if (circle) {
+                circle.style.strokeDashoffset = offset;
+            }
+        }
+    } catch (error) {
+        console.error('Error updating progress circles:', error);
+    }
+}
+
 // Update dashboard metrics with real calculated data
 function updateDashboardMetrics() {
     try {
@@ -440,9 +495,20 @@ function updateDashboardMetrics() {
         
         // Update portfolio value
         const portfolioElement = document.querySelector('.sales h1');
+        let portfolioGrowth = 2.4; // default
         if (portfolioElement) {
             const totalValue = DashboardData.getTotalPortfolioValue();
             portfolioElement.textContent = `$${(totalValue / 1000).toFixed(1)}K`;
+            
+            // Calculate growth percentage (assuming base value)
+            const baseValue = parseFloat(portfolioElement.getAttribute('data-base-value')) || 247850;
+            portfolioGrowth = ((totalValue - baseValue) / baseValue * 100);
+            
+            // Update progress indicator
+            const portfolioProgress = portfolioElement.closest('.sales')?.querySelector('.number p');
+            if (portfolioProgress) {
+                portfolioProgress.textContent = `${portfolioGrowth >= 0 ? '+' : ''}${portfolioGrowth.toFixed(1)}%`;
+            }
         }
         
         // Update total P&L
@@ -454,15 +520,18 @@ function updateDashboardMetrics() {
             // Update progress indicator
             const pnlProgress = pnlElement.closest('.expenses')?.querySelector('.number p');
             if (pnlProgress) {
-                const percentage = Math.abs(totalPnL / DashboardData.getTotalPortfolioValue() * 100);
+                const totalValue = DashboardData.getTotalPortfolioValue();
+                const percentage = totalValue > 0 ? Math.abs(totalPnL / totalValue * 100) : 0;
                 pnlProgress.textContent = `${totalPnL >= 0 ? '+' : '-'}${percentage.toFixed(1)}%`;
             }
         }
         
         // Update win rate
+        const winRateH1Element = document.querySelector('.income h1');
         const winRateElement = document.querySelector('.income .number p');
-        if (winRateElement) {
+        if (winRateElement && winRateH1Element) {
             const winRate = DashboardData.getWinRate();
+            winRateH1Element.textContent = `${winRate.toFixed(0)}%`;
             winRateElement.textContent = `${winRate.toFixed(0)}%`;
         }
         
@@ -475,6 +544,9 @@ function updateDashboardMetrics() {
         }
         
         console.info('Dashboard metrics updated successfully');
+        
+        // Update progress circles to reflect new values
+        updateProgressCircles();
         
     } catch (error) {
         console.error('Error updating dashboard metrics:', error);
@@ -816,6 +888,252 @@ if (document.readyState === 'loading') {
     setInterval(updateRecentUpdatesWithRealPrices, 90000);
 }
 
+/**
+ * Open metrics modal with detailed information
+ * @param {string} type - Type of metric: 'portfolio', 'pnl', or 'winrate'
+ */
+function openMetricsModal(type) {
+    var modal = document.getElementById('metricsModal');
+    var title = document.getElementById('metricsModalTitle');
+    var body = document.getElementById('metricsModalBody');
+    
+    if (!modal || !title || !body) return;
+    
+    // Set title based on type
+    var titles = {
+        portfolio: 'Total Position Breakdown',
+        pnl: 'Profit & Loss Analysis',
+        winrate: 'Win Rate Analytics'
+    };
+    title.textContent = titles[type] || 'Metrics';
+    
+    // Generate content based on type
+    var content = '';
+    
+    if (type === 'portfolio') {
+        content = generatePortfolioModalContent();
+    } else if (type === 'pnl') {
+        content = generatePnLModalContent();
+    } else if (type === 'winrate') {
+        content = generateWinRateModalContent();
+    }
+    
+    body.innerHTML = content;
+    modal.style.display = 'block';
+    // Add active class after a small delay for animation
+    setTimeout(function() {
+        modal.classList.add('active');
+    }, 10);
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Close metrics modal
+ */
+function closeMetricsModal() {
+    var modal = document.getElementById('metricsModal');
+    if (modal) {
+        modal.classList.remove('active');
+        // Wait for animation before hiding
+        setTimeout(function() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }, 300);
+    }
+}
+
+/**
+ * Generate portfolio breakdown content
+ */
+function generatePortfolioModalContent() {
+    if (typeof DashboardData === 'undefined' || typeof Orders === 'undefined') {
+        return '<p>Data not available</p>';
+    }
+    
+    var totalValue = DashboardData.getTotalPortfolioValue();
+    var activeOrders = Orders.filter(function(o) { return o.shipping === 'Active'; });
+    
+    var html = '<div class="modal-stats-grid">';
+    html += '<div class="modal-stat-card"><div class="modal-stat-label">Total Portfolio Value</div><div class="modal-stat-value">$' + totalValue.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</div></div>';
+    html += '<div class="modal-stat-card"><div class="modal-stat-label">Active Positions</div><div class="modal-stat-value">' + activeOrders.length + '</div></div>';
+    html += '<div class="modal-stat-card"><div class="modal-stat-label">Pending Orders</div><div class="modal-stat-value">' + DashboardData.getPendingOrdersCount() + '</div></div>';
+    html += '<div class="modal-stat-card"><div class="modal-stat-label">Total Volume</div><div class="modal-stat-value">' + (DashboardData.getTotalVolume() / 1000000).toFixed(1) + 'M</div></div>';
+    html += '</div>';
+    
+    html += '<h3 style="margin: 2rem 0 1rem 0; color: var(--color-dark);">Position Breakdown</h3>';
+    html += '<table style="width: 100%; border-collapse: collapse;">';
+    html += '<thead><tr><th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--color-light);">Asset</th>';
+    html += '<th style="text-align: right; padding: 0.75rem; border-bottom: 2px solid var(--color-light);">Quantity</th>';
+    html += '<th style="text-align: right; padding: 0.75rem; border-bottom: 2px solid var(--color-light);">Current Value</th>';
+    html += '<th style="text-align: right; padding: 0.75rem; border-bottom: 2px solid var(--color-light);">% of Portfolio</th></tr></thead><tbody>';
+    
+    activeOrders.forEach(function(order) {
+        var currentPrice = order.currentPrice || getCurrentPrice(order.productName);
+        var value = currentPrice * order.quantity;
+        var percentage = (value / totalValue * 100).toFixed(1);
+        
+        html += '<tr>';
+        html += '<td style="padding: 0.75rem; border-bottom: 1px solid var(--color-light);"><strong>' + order.productName + '</strong></td>';
+        html += '<td style="text-align: right; padding: 0.75rem; border-bottom: 1px solid var(--color-light);">' + order.quantity + '</td>';
+        html += '<td style="text-align: right; padding: 0.75rem; border-bottom: 1px solid var(--color-light);">$' + value.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</td>';
+        html += '<td style="text-align: right; padding: 0.75rem; border-bottom: 1px solid var(--color-light);">' + percentage + '%</td>';
+        html += '</tr>';
+    });
+    
+    html += '</tbody></table>';
+    return html;
+}
+
+/**
+ * Generate P&L analysis content
+ */
+function generatePnLModalContent() {
+    if (typeof DashboardData === 'undefined' || typeof Orders === 'undefined') {
+        return '<p>Data not available</p>';
+    }
+    
+    var totalPnL = DashboardData.getTotalPnL();
+    var totalValue = DashboardData.getTotalPortfolioValue();
+    var pnlPercentage = (totalPnL / totalValue * 100).toFixed(2);
+    
+    var winners = [];
+    var losers = [];
+    
+    Orders.filter(function(o) { return o.shipping === 'Active'; }).forEach(function(order) {
+        var currentPrice = order.currentPrice || getCurrentPrice(order.productName);
+        var pnl = (currentPrice - order.entryPrice) * order.quantity;
+        var actualPnL = order.orderType === 'Long' ? pnl : -pnl;
+        var percentage = ((currentPrice - order.entryPrice) / order.entryPrice * 100);
+        var actualPercentage = order.orderType === 'Long' ? percentage : -percentage;
+        
+        if (actualPnL >= 0) {
+            winners.push({ name: order.productName, pnl: actualPnL, percentage: actualPercentage });
+        } else {
+            losers.push({ name: order.productName, pnl: actualPnL, percentage: actualPercentage });
+        }
+    });
+    
+    var html = '<div class="modal-stats-grid">';
+    html += '<div class="modal-stat-card"><div class="modal-stat-label">Total P&L</div><div class="modal-stat-value" style="color: ' + (totalPnL >= 0 ? 'var(--color-success)' : 'var(--color-danger)') + ';">' + (totalPnL >= 0 ? '+' : '') + '$' + totalPnL.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</div></div>';
+    html += '<div class="modal-stat-card"><div class="modal-stat-label">P&L Percentage</div><div class="modal-stat-value" style="color: ' + (totalPnL >= 0 ? 'var(--color-success)' : 'var(--color-danger)') + ';">' + (totalPnL >= 0 ? '+' : '') + pnlPercentage + '%</div></div>';
+    html += '<div class="modal-stat-card"><div class="modal-stat-label">Winning Positions</div><div class="modal-stat-value">' + winners.length + '</div></div>';
+    html += '<div class="modal-stat-card"><div class="modal-stat-label">Losing Positions</div><div class="modal-stat-value">' + losers.length + '</div></div>';
+    html += '</div>';
+    
+    if (winners.length > 0) {
+        html += '<h3 style="margin: 2rem 0 1rem 0; color: var(--color-success);">Winning Positions</h3>';
+        html += '<table style="width: 100%; border-collapse: collapse;">';
+        html += '<thead><tr><th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--color-light);">Asset</th>';
+        html += '<th style="text-align: right; padding: 0.75rem; border-bottom: 2px solid var(--color-light);">P&L</th>';
+        html += '<th style="text-align: right; padding: 0.75rem; border-bottom: 2px solid var(--color-light);">% Change</th></tr></thead><tbody>';
+        
+        winners.sort(function(a, b) { return b.pnl - a.pnl; }).forEach(function(w) {
+            html += '<tr>';
+            html += '<td style="padding: 0.75rem; border-bottom: 1px solid var(--color-light);"><strong>' + w.name + '</strong></td>';
+            html += '<td style="text-align: right; padding: 0.75rem; border-bottom: 1px solid var(--color-light); color: var(--color-success);">+$' + w.pnl.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</td>';
+            html += '<td style="text-align: right; padding: 0.75rem; border-bottom: 1px solid var(--color-light); color: var(--color-success);">+' + w.percentage.toFixed(2) + '%</td>';
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+    }
+    
+    if (losers.length > 0) {
+        html += '<h3 style="margin: 2rem 0 1rem 0; color: var(--color-danger);">Losing Positions</h3>';
+        html += '<table style="width: 100%; border-collapse: collapse;">';
+        html += '<thead><tr><th style="text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--color-light);">Asset</th>';
+        html += '<th style="text-align: right; padding: 0.75rem; border-bottom: 2px solid var(--color-light);">P&L</th>';
+        html += '<th style="text-align: right; padding: 0.75rem; border-bottom: 2px solid var(--color-light);">% Change</th></tr></thead><tbody>';
+        
+        losers.sort(function(a, b) { return a.pnl - b.pnl; }).forEach(function(l) {
+            html += '<tr>';
+            html += '<td style="padding: 0.75rem; border-bottom: 1px solid var(--color-light);"><strong>' + l.name + '</strong></td>';
+            html += '<td style="text-align: right; padding: 0.75rem; border-bottom: 1px solid var(--color-light); color: var(--color-danger);">$' + l.pnl.toLocaleString('en-US', {minimumFractionDigits: 2}) + '</td>';
+            html += '<td style="text-align: right; padding: 0.75rem; border-bottom: 1px solid var(--color-light); color: var(--color-danger);">' + l.percentage.toFixed(2) + '%</td>';
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+    }
+    
+    return html;
+}
+
+/**
+ * Generate win rate analytics content
+ */
+function generateWinRateModalContent() {
+    if (typeof DashboardData === 'undefined' || typeof Orders === 'undefined') {
+        return '<p>Data not available</p>';
+    }
+    
+    var winRate = DashboardData.getWinRate();
+    var activeOrders = Orders.filter(function(o) { return o.shipping === 'Active'; });
+    var totalOrders = Orders.length;
+    
+    var profitable = 0;
+    var unprofitable = 0;
+    
+    activeOrders.forEach(function(order) {
+        var currentPrice = order.currentPrice || getCurrentPrice(order.productName);
+        var pnl = (currentPrice - order.entryPrice) * order.quantity;
+        var actualPnL = order.orderType === 'Long' ? pnl : -pnl;
+        
+        if (actualPnL > 0) profitable++;
+        else if (actualPnL < 0) unprofitable++;
+    });
+    
+    var html = '<div class="modal-stats-grid">';
+    html += '<div class="modal-stat-card"><div class="modal-stat-label">Overall Win Rate</div><div class="modal-stat-value">' + winRate.toFixed(1) + '%</div></div>';
+    html += '<div class="modal-stat-card"><div class="modal-stat-label">Winning Trades</div><div class="modal-stat-value" style="color: var(--color-success);">' + profitable + '</div></div>';
+    html += '<div class="modal-stat-card"><div class="modal-stat-label">Losing Trades</div><div class="modal-stat-value" style="color: var(--color-danger);">' + unprofitable + '</div></div>';
+    html += '<div class="modal-stat-card"><div class="modal-stat-label">Total Trades</div><div class="modal-stat-value">' + totalOrders + '</div></div>';
+    html += '</div>';
+    
+    html += '<div style="margin-top: 2rem; padding: 1.5rem; background: var(--color-light); border-radius: 1rem;">';
+    html += '<h3 style="margin-top: 0; color: var(--color-dark);">Performance Insights</h3>';
+    html += '<div style="margin: 1rem 0;"><strong>Win Rate Analysis:</strong> ';
+    
+    if (winRate >= 70) {
+        html += 'Excellent performance! Your win rate is above 70%, indicating strong trading decisions and risk management.';
+    } else if (winRate >= 50) {
+        html += 'Good performance. Your win rate is above 50%, showing profitable trading overall. Consider optimizing entry and exit strategies.';
+    } else {
+        html += 'Below average performance. Focus on improving your trading strategy, risk management, and market analysis.';
+    }
+    
+    html += '</div>';
+    html += '<div style="margin: 1rem 0;"><strong>Risk/Reward Ratio:</strong> ';
+    
+    var avgWinSize = profitable > 0 ? DashboardData.getTotalPnL() / profitable : 0;
+    html += 'Average winning trade: $' + Math.abs(avgWinSize).toLocaleString('en-US', {minimumFractionDigits: 2});
+    html += '</div>';
+    
+    html += '<div style="margin: 1rem 0;"><strong>Recommendation:</strong> ';
+    if (winRate >= 60 && profitable > unprofitable) {
+        html += 'Continue with your current strategy. Consider increasing position sizes for high-confidence trades.';
+    } else {
+        html += 'Review losing positions to identify patterns. Focus on cutting losses early and letting winners run.';
+    }
+    html += '</div>';
+    html += '</div>';
+    
+    return html;
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+    var modal = document.getElementById('metricsModal');
+    if (modal && e.target === modal) {
+        closeMetricsModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeMetricsModal();
+    }
+});
+
 // Make functions globally available
 window.showOrderDetails = showOrderDetails;
 window.updateDashboardMetrics = updateDashboardMetrics;
@@ -823,3 +1141,5 @@ window.startRealTimeUpdates = startRealTimeUpdates;
 window.refreshDashboardData = refreshDashboardData;
 window.updateRecentUpdatesWithRealPrices = updateRecentUpdatesWithRealPrices;
 window.updateNotificationBadge = updateNotificationBadge;
+window.openMetricsModal = openMetricsModal;
+window.closeMetricsModal = closeMetricsModal;

@@ -111,7 +111,7 @@
  <!--((((((((((((((End of Date))))))))))))))-->
 
             <div class="insights" role="region" aria-label="Portfolio metrics">
-                <div class="sales" role="article" aria-labelledby="total-position-label">
+                <div class="sales metric-card-clickable" role="article" aria-labelledby="total-position-label" onclick="openMetricsModal('portfolio')" style="cursor: pointer;" title="Click for detailed breakdown">
                     <span class="material-icons-sharp" aria-hidden="true">attach_money</span>
                     <div class="middle">
                         <div class="left">
@@ -134,7 +134,7 @@
                 </div>
                 <!--(((((((((((((End of Sales)))))))))))))-->
 
-                <div class="expenses" role="article" aria-labelledby="pnl-label">
+                <div class="expenses metric-card-clickable" role="article" aria-labelledby="pnl-label" onclick="openMetricsModal('pnl')" style="cursor: pointer;" title="Click for detailed breakdown">
                     <span class="material-icons-sharp" aria-hidden="true">trending_up</span>
                     <div class="middle">
                         <div class="left">
@@ -155,7 +155,7 @@
                 </div>
                 <!--(((((((((((((End of Expenses)))))))))))))-->
 
-                <div class="income" role="article" aria-labelledby="win-rate-label">
+                <div class="income metric-card-clickable" role="article" aria-labelledby="win-rate-label" onclick="openMetricsModal('winrate')" style="cursor: pointer;" title="Click for detailed breakdown">
                     
                     <span class="material-icons-sharp" aria-hidden="true">assessment</span>
 
@@ -416,6 +416,22 @@
                         Close Position
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metrics Modal -->
+    <div id="metricsModal" class="modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-container" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 id="metricsModalTitle">Portfolio Metrics</h2>
+                <button class="modal-close" onclick="closeMetricsModal()">
+                    <span class="material-icons-sharp">close</span>
+                </button>
+            </div>
+            <div class="modal-body" id="metricsModalBody">
+                <!-- Content will be dynamically loaded -->
             </div>
         </div>
     </div>
