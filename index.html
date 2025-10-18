@@ -467,7 +467,45 @@
         </div>
     </div>
 
+    <!-- TradingView Chart Modal (Full Page) -->
+    <div id="tradingViewModal" class="trading-view-modal" style="display: none;">
+        <div class="trading-view-modal-overlay"></div>
+        <div class="trading-view-modal-container">
+            <div class="trading-view-modal-header">
+                <div class="trading-view-modal-title-section">
+                    <h2 id="tradingViewModalTitle">Live Chart</h2>
+                    <span class="live-indicator"><span class="live-dot"></span>Live Data</span>
+                </div>
+                <button class="modal-close" onclick="closeTradingViewModal()">
+                    <span class="material-icons-sharp">close</span>
+                </button>
+            </div>
+            <div class="trading-view-modal-body">
+                <div class="trading-view-chart-info">
+                    <div class="chart-info-item">
+                        <span class="chart-info-label">Current Price</span>
+                        <span class="chart-info-value" id="tvCurrentPrice">Loading...</span>
+                    </div>
+                    <div class="chart-info-item">
+                        <span class="chart-info-label">24h Change</span>
+                        <span class="chart-info-value" id="tv24hChange">--</span>
+                    </div>
+                    <div class="chart-info-item">
+                        <span class="chart-info-label">24h High</span>
+                        <span class="chart-info-value" id="tv24hHigh">--</span>
+                    </div>
+                    <div class="chart-info-item">
+                        <span class="chart-info-label">24h Low</span>
+                        <span class="chart-info-value" id="tv24hLow">--</span>
+                    </div>
+                </div>
+                <div id="tradingViewChartContainer" style="width: 100%; height: calc(100vh - 300px); min-height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
     <script src="scripts/error-handler.js"></script>
     <script src="scripts/security-utils.js"></script>
     <script src="scripts/performance-utils.js"></script>
@@ -483,6 +521,356 @@
     <script src="scripts/chart-tooltip.js"></script>
     <script src="scripts/main.js"></script>
     
+    <!-- TradingView Chart Modal Script -->
+    <script>
+    let tvModalChart = null;
+    let tvModalSeries = null;
+    let tvModalHoverTimeout = null;
+    let tvCurrentAsset = null;
+
+    // Asset symbol mapping for different data sources
+    const assetSymbolMap = {
+        'Gold': { type: 'commodity', symbol: 'XAU/USD', coinGeckoId: null },
+        'S&P 500': { type: 'index', symbol: 'SPY', coinGeckoId: null },
+        'Bitcoin': { type: 'crypto', symbol: 'BTC', coinGeckoId: 'bitcoin' },
+        'Ethereum': { type: 'crypto', symbol: 'ETH', coinGeckoId: 'ethereum' },
+        'Oil': { type: 'commodity', symbol: 'CL', coinGeckoId: null }
+    };
+
+    // Generate historical chart data from current price
+    function generateChartData(currentPrice, days = 30) {
+        const data = [];
+        const now = Math.floor(Date.now() / 1000);
+        const dayInSeconds = 24 * 60 * 60;
+        let price = currentPrice * 0.92; // Start 8% lower for upward trend
+        const volatility = currentPrice * 0.015; // 1.5% volatility
+        const trend = (currentPrice - price) / days;
+        
+        for (let i = days; i >= 0; i--) {
+            const time = now - (i * dayInSeconds);
+            const randomChange = (Math.random() - 0.5) * volatility;
+            price += trend + randomChange;
+            
+            data.push({
+                time: time,
+                value: parseFloat(price.toFixed(2))
+            });
+        }
+        
+        // Ensure last point is current price
+        data[data.length - 1].value = currentPrice;
+        return data;
+    }
+
+    // Fetch live crypto data
+    async function fetchCryptoDataForChart(assetName) {
+        try {
+            const assetInfo = assetSymbolMap[assetName];
+            if (!assetInfo || !assetInfo.coinGeckoId) {
+                console.warn('[TradingView Modal] No CoinGecko ID for:', assetName);
+                return null;
+            }
+
+            if (typeof DataService !== 'undefined' && DataService.fetchCryptoPrices) {
+                const data = await DataService.fetchCryptoPrices([assetInfo.coinGeckoId]);
+                if (data && data[assetInfo.coinGeckoId]) {
+                    return data[assetInfo.coinGeckoId];
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error('[TradingView Modal] Error fetching crypto data:', error);
+            return null;
+        }
+    }
+
+    // Extract price from update message
+    function extractPriceFromMessage(message) {
+        // Look for patterns like "$1,234.56" or "trading at $1,234"
+        const priceMatch = message.match(/\$([\d,]+\.?\d*)/); 
+        if (priceMatch) {
+            return parseFloat(priceMatch[1].replace(/,/g, ''));
+        }
+        return null;
+    }
+
+    // Open TradingView modal with asset data
+    async function openTradingViewModal(assetName, messageText) {
+        console.log('[TradingView Modal] Opening for:', assetName);
+        
+        tvCurrentAsset = assetName;
+        const modal = document.getElementById('tradingViewModal');
+        const titleEl = document.getElementById('tradingViewModalTitle');
+        const currentPriceEl = document.getElementById('tvCurrentPrice');
+        const changeEl = document.getElementById('tv24hChange');
+        const highEl = document.getElementById('tv24hHigh');
+        const lowEl = document.getElementById('tv24hLow');
+        
+        if (!modal) return;
+        
+        // Show modal
+        modal.style.display = 'block';
+        setTimeout(() => modal.classList.add('active'), 10);
+        document.body.style.overflow = 'hidden';
+        
+        // Set title
+        if (titleEl) titleEl.textContent = `${assetName} - Live Chart`;
+        
+        // Extract price from message or fetch live data
+        let currentPrice = extractPriceFromMessage(messageText);
+        let change24h = null;
+        let high24h = null;
+        let low24h = null;
+        
+        // Try to get live data
+        const assetInfo = assetSymbolMap[assetName];
+        if (assetInfo && assetInfo.type === 'crypto') {
+            const liveData = await fetchCryptoDataForChart(assetName);
+            if (liveData) {
+                currentPrice = liveData.usd;
+                change24h = liveData.usd_24h_change;
+                high24h = liveData.high_24h;
+                low24h = liveData.low_24h;
+            }
+        }
+        
+        // Update price info
+        if (currentPrice && currentPriceEl) {
+            currentPriceEl.textContent = `$${currentPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+        
+        if (change24h !== null && changeEl) {
+            const changeClass = change24h >= 0 ? 'success' : 'danger';
+            const changeSign = change24h >= 0 ? '+' : '';
+            changeEl.textContent = `${changeSign}${change24h.toFixed(2)}%`;
+            changeEl.className = `chart-info-value ${changeClass}`;
+        }
+        
+        if (high24h && highEl) {
+            highEl.textContent = `$${high24h.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        }
+        
+        if (low24h && lowEl) {
+            lowEl.textContent = `$${low24h.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        }
+        
+        // Initialize chart
+        initTradingViewChart(assetName, currentPrice || 1000);
+    }
+
+    // Initialize the TradingView chart
+    function initTradingViewChart(assetName, currentPrice) {
+        const container = document.getElementById('tradingViewChartContainer');
+        if (!container) return;
+        
+        // Clear existing chart
+        if (tvModalChart) {
+            try {
+                tvModalChart.remove();
+            } catch (e) {
+                console.warn('[TradingView Modal] Error removing chart:', e);
+            }
+            tvModalChart = null;
+            tvModalSeries = null;
+        }
+        
+        // Check if LightweightCharts is available
+        if (typeof LightweightCharts === 'undefined') {
+            console.error('[TradingView Modal] LightweightCharts library not loaded');
+            container.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--color-info-dark);"><p>Chart library not loaded. Please refresh the page.</p></div>';
+            return;
+        }
+        
+        try {
+            // Create chart
+            tvModalChart = LightweightCharts.createChart(container, {
+                width: container.clientWidth,
+                height: container.clientHeight,
+                layout: {
+                    background: { color: 'transparent' },
+                    textColor: getComputedStyle(document.documentElement).getPropertyValue('--color-dark').trim() || '#111827',
+                },
+                grid: {
+                    vertLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                    horzLines: { color: 'rgba(107, 114, 128, 0.1)' },
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                },
+                rightPriceScale: {
+                    borderColor: 'rgba(107, 114, 128, 0.2)',
+                },
+                timeScale: {
+                    borderColor: 'rgba(107, 114, 128, 0.2)',
+                    timeVisible: true,
+                    secondsVisible: false,
+                },
+            });
+            
+            // Determine chart style based on asset
+            const assetInfo = assetSymbolMap[assetName];
+            if (assetInfo && assetInfo.type === 'crypto') {
+                // Use area chart for crypto
+                tvModalSeries = tvModalChart.addAreaSeries({
+                    topColor: 'rgba(239, 142, 66, 0.4)',
+                    bottomColor: 'rgba(239, 142, 66, 0.0)',
+                    lineColor: '#f59e0b',
+                    lineWidth: 2,
+                });
+            } else {
+                // Use candlestick or line chart for stocks/commodities
+                tvModalSeries = tvModalChart.addLineSeries({
+                    color: '#2d6cdf',
+                    lineWidth: 2,
+                });
+            }
+            
+            // Generate and set data
+            const chartData = generateChartData(currentPrice, 30);
+            tvModalSeries.setData(chartData);
+            
+            console.log('[TradingView Modal] Chart initialized with', chartData.length, 'points');
+        } catch (error) {
+            console.error('[TradingView Modal] Error creating chart:', error);
+            container.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--color-danger);"><p>Error loading chart. Please try again.</p></div>`;
+        }
+    }
+
+    // Close TradingView modal
+    function closeTradingViewModal() {
+        const modal = document.getElementById('tradingViewModal');
+        if (!modal) return;
+        
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Clean up chart
+            if (tvModalChart) {
+                try {
+                    tvModalChart.remove();
+                } catch (e) {
+                    console.warn('[TradingView Modal] Error removing chart on close:', e);
+                }
+                tvModalChart = null;
+                tvModalSeries = null;
+            }
+        }, 300);
+    }
+
+    // Add hover event listeners to recent updates
+    function initRecentUpdatesHoverListeners() {
+        const updates = document.querySelectorAll('.recent-updates .update');
+        
+        updates.forEach(update => {
+            const messageEl = update.querySelector('.message p');
+            if (!messageEl) return;
+            
+            // Add hover cursor
+            update.style.cursor = 'pointer';
+            update.style.transition = 'transform 0.2s ease, box-shadow 0.2s ease';
+            
+            // Mouse enter - start timer
+            update.addEventListener('mouseenter', function() {
+                // Add hover effect
+                this.style.transform = 'scale(1.02)';
+                this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                
+                const messageText = messageEl.textContent;
+                const assetMatch = messageText.match(/\*\*([^*]+)\*\*|<b>([^<]+)<\/b>|^([A-Za-z&\s0-9]+)/);
+                const assetName = assetMatch ? (assetMatch[1] || assetMatch[2] || assetMatch[3]).trim() : null;
+                
+                if (!assetName) return;
+                
+                // Set timeout to open modal after hover for 500ms
+                tvModalHoverTimeout = setTimeout(() => {
+                    openTradingViewModal(assetName, messageText);
+                }, 500);
+            });
+            
+            // Mouse leave - cancel timer and remove effect
+            update.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = '';
+                
+                if (tvModalHoverTimeout) {
+                    clearTimeout(tvModalHoverTimeout);
+                    tvModalHoverTimeout = null;
+                }
+            });
+            
+            // Click - open immediately
+            update.addEventListener('click', function() {
+                if (tvModalHoverTimeout) {
+                    clearTimeout(tvModalHoverTimeout);
+                    tvModalHoverTimeout = null;
+                }
+                
+                const messageText = messageEl.textContent;
+                const assetMatch = messageText.match(/\*\*([^*]+)\*\*|<b>([^<]+)<\/b>|^([A-Za-z&\s0-9]+)/);
+                const assetName = assetMatch ? (assetMatch[1] || assetMatch[2] || assetMatch[3]).trim() : null;
+                
+                if (assetName) {
+                    openTradingViewModal(assetName, messageText);
+                }
+            });
+        });
+        
+        console.log('[TradingView Modal] Hover listeners initialized for', updates.length, 'updates');
+    }
+
+    // Handle window resize for chart
+    window.addEventListener('resize', () => {
+        if (tvModalChart) {
+            const container = document.getElementById('tradingViewChartContainer');
+            if (container) {
+                tvModalChart.applyOptions({ 
+                    width: container.clientWidth,
+                    height: container.clientHeight 
+                });
+            }
+        }
+    });
+
+    // Close modal when clicking overlay
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('tradingViewModal');
+        if (modal && e.target.classList.contains('trading-view-modal-overlay')) {
+            closeTradingViewModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('tradingViewModal');
+            if (modal && modal.classList.contains('active')) {
+                closeTradingViewModal();
+            }
+        }
+    });
+
+    // Initialize after page load and after updates are populated
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait a bit for updates to be populated
+            setTimeout(initRecentUpdatesHoverListeners, 1000);
+        });
+    } else {
+        setTimeout(initRecentUpdatesHoverListeners, 1000);
+    }
+
+    // Reinitialize after updates are refreshed
+    if (typeof updateRecentUpdatesWithRealPrices !== 'undefined') {
+        const originalUpdate = updateRecentUpdatesWithRealPrices;
+        updateRecentUpdatesWithRealPrices = async function() {
+            await originalUpdate.apply(this, arguments);
+            setTimeout(initRecentUpdatesHoverListeners, 500);
+        };
+    }
+    </script>
+
     <!-- Win Rate Gauge Initialization -->
     <script>
     // Win rate gauge chart

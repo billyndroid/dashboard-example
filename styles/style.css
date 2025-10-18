@@ -528,6 +528,199 @@ textarea:focus,
 
 /* =================== End Modal Styles =================== */
 
+/* =================== TradingView Chart Modal Styles =================== */
+
+.trading-view-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10001;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.trading-view-modal.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.trading-view-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.trading-view-modal-container {
+    position: relative;
+    width: 95%;
+    max-width: 1600px;
+    height: 90vh;
+    margin: 5vh auto;
+    background: var(--color-white);
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.trading-view-modal.active .trading-view-modal-container {
+    transform: scale(1);
+}
+
+.trading-view-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--color-light);
+}
+
+.trading-view-modal-title-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.trading-view-modal-title-section h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-dark);
+    margin: 0;
+}
+
+.trading-view-modal-body {
+    flex: 1;
+    padding: 1.5rem 2rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.trading-view-chart-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.chart-info-item {
+    background: var(--color-light);
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius-2);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.chart-info-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-info-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.chart-info-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-dark);
+}
+
+.chart-info-value.success {
+    color: var(--color-success);
+}
+
+.chart-info-value.danger {
+    color: var(--color-danger);
+}
+
+.live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    background: var(--color-success);
+    color: white;
+    border-radius: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+}
+
+/* Dark theme adjustments */
+.dark-theme-variables .trading-view-modal-container {
+    background: var(--color-white);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.dark-theme-variables .chart-info-item {
+    background: var(--color-light);
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    .trading-view-modal-container {
+        width: 100%;
+        height: 100vh;
+        margin: 0;
+        border-radius: 0;
+    }
+    
+    .trading-view-modal-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .trading-view-modal-body {
+        padding: 1rem 1.5rem;
+    }
+    
+    .trading-view-chart-info {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .chart-info-item {
+        padding: 0.75rem 1rem;
+    }
+    
+    .chart-info-value {
+        font-size: 1.25rem;
+    }
+    
+    .trading-view-modal-title-section h2 {
+        font-size: 1.25rem;
+    }
+}
+
+/* =================== End TradingView Chart Modal Styles =================== */
+
 * {
     margin: 0;
     padding: 0;
