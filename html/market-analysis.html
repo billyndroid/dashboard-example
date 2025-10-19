@@ -219,35 +219,7 @@
             <div class="recent-updates" role="region" aria-labelledby="updates-heading">
                 <h2 id="updates-heading">Market Insights</h2>
                 <div class="updates" id="recentUpdates" aria-live="polite" aria-atomic="false">
-                    <div class="update" role="article">
-                        <div class="profile-photo update-icon primary">
-                            <span class="material-icons-sharp" aria-hidden="true">trending_up</span>
-                        </div>
-                        <div class="message">
-                            <p><b>Earnings Season</b> Q4 2024 earnings season underway</p>
-                            <small class="text-muted">Monitor major tech earnings</small>
-                        </div>
-                    </div>
-                    
-                    <div class="update" role="article">
-                        <div class="profile-photo update-icon success">
-                            <span class="material-icons-sharp" aria-hidden="true">account_balance</span>
-                        </div>
-                        <div class="message">
-                            <p><b>Institutional Activity</b> Increased buying in tech sector</p>
-                            <small class="text-muted">Smart money tracking</small>
-                        </div>
-                    </div>
-                    
-                    <div class="update" role="article">
-                        <div class="profile-photo update-icon warning">
-                            <span class="material-icons-sharp" aria-hidden="true">info</span>
-                        </div>
-                        <div class="message">
-                            <p><b>Market Alert</b> High volatility expected</p>
-                            <small class="text-muted">Fed meeting this week</small>
-                        </div>
-                    </div>
+                    <!-- Live market insights will be injected here -->
                 </div>
             </div>
             <!--((((((((((((((End of Recent Updates)))))))))))))-->
@@ -260,6 +232,95 @@
                         <span class="material-icons-sharp" aria-hidden="true">event</span>
                     </div>
                     <div class="right">
+                    <script src="../scripts/earnings-data.js"></script>
+                    <script src="../scripts/institutional-orderflow-viewer.js"></script>
+                    <script src="../scripts/data-service.js"></script>
+                    <script src="../scripts/news-service.js"></script>
+                    <script>
+                    async function loadLiveMarketInsights() {
+                        const updatesContainer = document.getElementById('recentUpdates');
+                        if (!updatesContainer) return;
+                        updatesContainer.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--color-info-dark)"><span class="material-icons-sharp" style="font-size:2rem;animation:spin 1s linear infinite;">sync</span> Loading live insights...</div>';
+
+                        let html = '';
+                        // Earnings (from earningsData)
+                        if (window.earningsData && window.earningsData.length) {
+                            const latestEarnings = window.earningsData.slice(0, 2);
+                            latestEarnings.forEach(e => {
+                                html += `<div class=\"update\" role=\"article\">
+                                    <div class=\"profile-photo update-icon primary\">
+                                        <span class=\"material-icons-sharp\" aria-hidden=\"true\">trending_up</span>
+                                    </div>
+                                    <div class=\"message\">
+                                        <p><b>Earnings</b> ${e.company} (${e.symbol}) ${e.date} | EPS: ${e.epsActual} | Rev: ${e.revenue}</p>
+                                        <small class=\"text-muted\">${e.status}</small>
+                                    </div>
+                                </div>`;
+                            });
+                        }
+                        // Institutional Order Flow (from CSV)
+                        if (window.InstitutionalOrderFlowViewer) {
+                            try {
+                                const viewer = new window.InstitutionalOrderFlowViewer();
+                                const parsed = await viewer.loadCSVData();
+                                const flowRows = parsed.dataRows.slice(0, 2);
+                                flowRows.forEach(o => {
+                                    html += `<div class=\"update\" role=\"article\">
+                                        <div class=\"profile-photo update-icon success\">
+                                            <span class=\"material-icons-sharp\" aria-hidden=\"true\">account_balance</span>
+                                        </div>
+                                        <div class=\"message\">
+                                            <p><b>Institutional Flow</b> ${o[1]} ${o[3]} ${o[2]} (${o[4]} shares)</p>
+                                            <small class=\"text-muted\">${o[6]}</small>
+                                        </div>
+                                    </div>`;
+                                });
+                            } catch (err) {}
+                        }
+                        // News (from NewsService)
+                        if (window.NewsService) {
+                            try {
+                                const newsService = new window.NewsService();
+                                const news = await newsService.fetchNews({ category: 'markets', pageSize: 2 });
+                                news.forEach(n => {
+                                    html += `<div class=\"update\" role=\"article\">
+                                        <div class=\"profile-photo update-icon warning\">
+                                            <span class=\"material-icons-sharp\" aria-hidden=\"true\">info</span>
+                                        </div>
+                                        <div class=\"message\">
+                                            <p><b>Market News</b> <a href=\"${n.url}\" target=\"_blank\">${n.title}</a></p>
+                                            <small class=\"text-muted\">${n.source} | ${n.publishedAt.toLocaleDateString()}</small>
+                                        </div>
+                                    </div>`;
+                                });
+                            } catch (err) {}
+                        }
+                        // Crypto (from DataService)
+                        if (window.DataService) {
+                            try {
+                                const crypto = await window.DataService.fetchCryptoPrices(['bitcoin','ethereum']);
+                                if (crypto) {
+                                    Object.entries(crypto).forEach(([key, val]) => {
+                                        html += `<div class=\"update\" role=\"article\">
+                                            <div class=\"profile-photo update-icon info\">
+                                                <span class=\"material-icons-sharp\" aria-hidden=\"true\">currency_bitcoin</span>
+                                            </div>
+                                            <div class=\"message\">
+                                                <p><b>Crypto</b> ${key}: $${val.usd} (${val.usd_24h_change?.toFixed(2) || '--'}% 24h)</p>
+                                                <small class=\"text-muted\">Live price</small>
+                                            </div>
+                                        </div>`;
+                                    });
+                                }
+                            } catch (err) {}
+                        }
+                        if (!html) {
+                            html = '<div style="text-align:center;padding:2rem;color:var(--color-info-dark)">No live insights available</div>';
+                        }
+                        updatesContainer.innerHTML = html;
+                    }
+                    document.addEventListener('DOMContentLoaded', loadLiveMarketInsights);
+                    </script>
                         <div class="info">
                             <h3>UPCOMING EARNINGS</h3>
                             <small class="text-muted">This Week</small>
