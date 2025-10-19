@@ -44,63 +44,55 @@
                     <span class="material-icons-sharp">grid_view</span>
                     <h3>Dashboard</h3>
                 </a>
-
+                <a href="market-analysis.html">
+                    <span class="material-icons-sharp">assessment</span>
+                    <h3>Market Analysis</h3>
+                </a>
+                <a href="#" onclick="openEarningsCSVModal(); return false;">
+                    <span class="material-icons-sharp">table_chart</span>
+                    <h3>Full Earnings CSV</h3>
+                </a>
                 <a href="news.html">
                     <span class="material-icons-sharp">newspaper</span>
                     <h3>Financial News</h3>
                 </a>
-
                 <a href="stocks.html">
                     <span class="material-icons-sharp">trending_up</span>
                     <h3>Stocks</h3>
                 </a>
-
                 <a href="indecescommodities.html">
                     <span class="material-icons-sharp">show_chart</span>
                     <h3>Indices & Commodities</h3>
                 </a>
-
                 <a href="crypto.html">
                     <span class="material-icons-sharp">currency_bitcoin</span>
                     <h3>Cryptocurrency</h3>
                 </a>
-
                 <a href="analytics.html">
                     <span class="material-icons-sharp">insights</span>
                     <h3>Analytics</h3>
                 </a>
-
-                <a href="#" aria-current="page">
-                    <span class="material-icons-sharp">assessment</span>
-                    <h3>Market Analysis</h3>
-                </a>
-
                 <a href="messages.html">
                     <span class="material-icons-sharp" aria-hidden="true">mail_outline</span>
                     <h3>Messages</h3>
                     <span class="message-count" aria-label="21 unread messages">21</span>
                 </a>
-
                 <a href="orders.html">
                     <span class="material-icons-sharp">inventory</span>
                     <h3>Orders</h3>
                 </a>
-
                 <a href="reports.html">
                     <span class="material-icons-sharp">error</span>
                     <h3>Reports</h3>
                 </a>
-
                 <a href="settings.html">
                     <span class="material-icons-sharp">settings</span>
                     <h3>Settings</h3>
                 </a>
-
                 <a href="#">
                     <span class="material-icons-sharp">add</span>
                     <h3>Add Commodity</h3>
                 </a>
-
                 <a href="#">
                     <span class="material-icons-sharp">logout</span>
                     <h3>Logout</h3>
@@ -119,10 +111,16 @@
                         <span class="material-icons-sharp" style="vertical-align: middle; margin-right: 0.5rem;">attach_money</span>
                         Earnings
                     </h2>
-                    <button onclick="openFullEarningsModal()" style="padding: 0.75rem 1.5rem; background: var(--color-primary); color: white; border: none; border-radius: 0.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='var(--color-primary-variant)'" onmouseout="this.style.background='var(--color-primary)'">
-                        <span class="material-icons-sharp" style="font-size: 1.2rem;">table_view</span>
-                        View Full Earnings
-                    </button>
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="openFullEarningsModal()" style="padding: 0.75rem 1.5rem; background: var(--color-primary); color: white; border: none; border-radius: 0.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='var(--color-primary-variant)'" onmouseout="this.style.background='var(--color-primary)'">
+                            <span class="material-icons-sharp" style="font-size: 1.2rem;">table_view</span>
+                            View Full Earnings
+                        </button>
+                        <button onclick="openEarningsCSVModal()" style="padding: 0.75rem 1.5rem; background: var(--color-primary); color: white; border: none; border-radius: 0.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='var(--color-primary-variant)'" onmouseout="this.style.background='var(--color-primary)'">
+                            <span class="material-icons-sharp" style="font-size: 1.2rem;">table_chart</span>
+                            View Full Earnings CSV
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="recent-orders" role="region" aria-labelledby="earnings-heading">
@@ -412,6 +410,36 @@
         </div>
     </div>
 
+    <!-- Earnings CSV Modal -->
+    <div id="earningsCSVModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeEarningsCSVModal()"></div>
+        <div class="modal-container" style="max-width: 98vw; max-height: 95vh; width: 98vw;">
+            <div class="modal-header" style="position: sticky; top: 0; background: white; z-index: 10; border-bottom: 2px solid var(--color-light);">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div>
+                        <h2 style="margin: 0;">
+                            <span class="material-icons-sharp" style="vertical-align: middle; margin-right: 0.5rem;">table_chart</span>
+                            Full Earnings CSV Data
+                        </h2>
+                        <small class="text-muted" style="display: block; margin-top: 0.25rem;">Complete raw earnings and fundamentals dataset</small>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <input type="text" id="earningsCSVSearch" placeholder="Search companies, symbols, values..." style="padding: 0.5rem 1rem; border: 1px solid var(--color-light); border-radius: 0.5rem; width: 300px;" oninput="filterEarningsCSVTable(this.value)">
+                        <button class="modal-close" onclick="closeEarningsCSVModal()" style="position: relative;">
+                            <span class="material-icons-sharp">close</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body" style="padding: 0; overflow: auto; max-height: calc(95vh - 100px);">
+                <div id="earningsCSVContent" style="overflow-x: auto;"></div>
+                <div id="earningsCSVLoadingMessage" style="text-align: center; padding: 3rem; color: var(--color-info-dark);">
+                    <span class="material-icons-sharp" style="font-size: 3rem; animation: spin 1s linear infinite;">sync</span>
+                    <p style="margin-top: 1rem;">Loading earnings CSV data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
     <style>
         @keyframes spin {
             from { transform: rotate(0deg); }
@@ -480,6 +508,7 @@
     <script src="../scripts/earnings-data.js"></script>
     <script src="../scripts/full-earnings-viewer.js"></script>
     <script src="../scripts/google-sheets-sync.js"></script>
+    <script src="../scripts/earnings-csv-viewer.js"></script>
     <script src="../scripts/institutional-orderflow-viewer.js"></script>
     
     <script>

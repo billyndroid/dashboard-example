@@ -144,6 +144,13 @@ class InstitutionalOrderFlowViewer {
 
         const { headers, rows } = this.parsedData;
 
+        // Rainbow CSV colors (pastel, high-contrast, looped)
+        const rainbowColors = [
+            '#ffe4e1', '#e0ffff', '#fffacd', '#e6e6fa', '#f0fff0', '#f5f5dc', '#f0f8ff', '#ffe4b5', '#e0ebeb', '#f8f8ff',
+            '#f5e6ff', '#e1ffe4', '#e1e4ff', '#fff0f5', '#e4ffe1', '#e1fff4', '#f4e1ff', '#e1f4ff', '#f4ffe1', '#e1fff4',
+            '#f4e1e1', '#e1f4e1', '#e1e1f4', '#f4f4e1', '#e1f4f4', '#f4e1f4', '#e1f4e1', '#f4e1e1', '#e1e1f4', '#f4f4e1',
+        ];
+
         let html = '<table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">';
         
         // Generate header with sectors and categories
@@ -164,7 +171,6 @@ class InstitutionalOrderFlowViewer {
             } else {
                 sectorColspan++;
             }
-            
             // Last column
             if (index === headers.length - 1 && sectorColspan > 0) {
                 html += `<th colspan="${sectorColspan}" style="padding: 0.5rem; text-align: center; border: 1px solid rgba(255,255,255,0.2); font-weight: 700;">${this.escapeHtml(currentSector || 'Data')}</th>`;
@@ -176,7 +182,7 @@ class InstitutionalOrderFlowViewer {
         html += '<tr style="background: var(--color-primary-variant); color: white;">';
         headers.forEach((header, index) => {
             const title = header.category || header.sector || `Col ${index}`;
-            html += `<th style="padding: 0.75rem 0.5rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap; font-size: 0.8rem; min-width: ${index === 0 ? '120px' : '90px'};">
+            html += `<th style="padding: 0.75rem 0.5rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap; font-size: 0.8rem; min-width: ${index === 0 ? '120px' : '90px'}; background: ${rainbowColors[index % rainbowColors.length]};">
                 ${this.escapeHtml(title)}
             </th>`;
         });
@@ -187,15 +193,12 @@ class InstitutionalOrderFlowViewer {
         // Generate body rows
         html += '<tbody>';
         rows.forEach((row, rowIndex) => {
-            const bgColor = rowIndex % 2 === 0 ? 'var(--color-light)' : 'transparent';
-            html += `<tr style="background: ${bgColor};" onmouseover="this.style.background='rgba(45, 108, 223, 0.1)'" onmouseout="this.style.background='${bgColor}'">`;
-            
+            html += `<tr>`;
             row.forEach((cell, colIndex) => {
-                html += `<td style="padding: 0.75rem 0.5rem; border: 1px solid var(--color-light); white-space: nowrap; text-align: ${colIndex === 0 ? 'left' : 'center'};">
+                html += `<td style="padding: 0.75rem 0.5rem; border: 1px solid var(--color-light); white-space: nowrap; text-align: ${colIndex === 0 ? 'left' : 'center'}; background: ${rainbowColors[colIndex % rainbowColors.length]};">
                     ${this.formatCellValue(cell, colIndex)}
                 </td>`;
             });
-            
             html += '</tr>';
         });
         html += '</tbody>';
