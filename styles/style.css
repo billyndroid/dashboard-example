@@ -203,6 +203,7 @@ textarea:focus,
     max-height: 90vh;
     margin: 5vh auto;
     background: var(--color-white);
+    color: #222831; /* dark readable text */
     border-radius: var(--border-radius-3);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     overflow: hidden;
@@ -252,6 +253,7 @@ textarea:focus,
     padding: 2rem;
     max-height: calc(90vh - 80px);
     overflow-y: auto;
+    color: #f5f8fd; /* dark readable text */
 }
 
 .modal-asset-header {
