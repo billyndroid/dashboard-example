@@ -13,6 +13,10 @@ if (typeof AppConfig !== 'undefined') {
     AppConfig.thirdPartyApis.newsapi.key = 'YOUR_NEWSAPI_KEY_HERE';
     AppConfig.thirdPartyApis.alphaVantage.key = 'YOUR_ALPHA_VANTAGE_KEY_HERE';
     
+    // Google Sheets API Configuration
+    AppConfig.googleSheetsApiKey = 'YOUR_GOOGLE_SHEETS_API_KEY_HERE';
+    AppConfig.spreadsheetId = 'YOUR_SPREADSHEET_ID_HERE';
+    
     // Toggle mock data mode
     AppConfig.useMockData = false; // Set to false to use real APIs
     
@@ -21,6 +25,7 @@ if (typeof AppConfig !== 'undefined') {
         coingecko: AppConfig.thirdPartyApis.coingecko.enabled,
         twelveData: AppConfig.thirdPartyApis.twelveData.enabled && !!AppConfig.thirdPartyApis.twelveData.key,
         newsapi: AppConfig.thirdPartyApis.newsapi.enabled && !!AppConfig.thirdPartyApis.newsapi.key,
-        alphaVantage: AppConfig.thirdPartyApis.alphaVantage.enabled && !!AppConfig.thirdPartyApis.alphaVantage.key
+        alphaVantage: AppConfig.thirdPartyApis.alphaVantage.enabled && !!AppConfig.thirdPartyApis.alphaVantage.key,
+        googleSheets: !!AppConfig.googleSheetsApiKey && !!AppConfig.spreadsheetId
     });
 }

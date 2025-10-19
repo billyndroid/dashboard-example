@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Analysis</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <div class="container">
+        <aside class="top">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="48" height="48" role="img" aria-labelledby="logoTitle logoDesc">
+                  <title id="logoTitle">SQU^RE DOFF Trading Dashboard</title>
+                  <desc id="logoDesc">Square logo with an upward trending chart line indicating market performance.</desc>
+                  <g opacity="0.08" fill="none" class="logo-grid" stroke-width="0.8">
+                    <path d="M10 48 L54 48" />
+                    <path d="M10 36 L54 36" />
+                    <path d="M10 24 L54 24" />
+                    <path d="M22 10 L22 54" />
+                    <path d="M34 10 L34 54" />
+                    <path d="M46 10 L46 54" />
+                  </g>
+                  <rect x="12" y="36" width="6" height="10" rx="1" class="logo-bar" opacity="0.18" />
+                  <rect x="22" y="30" width="6" height="16" rx="1" class="logo-bar" opacity="0.22" />
+                  <rect x="32" y="22" width="6" height="24" rx="1" class="logo-bar-active" />
+                  <rect x="42" y="16" width="6" height="30" rx="1" class="logo-bar" opacity="0.18" />
+                  <polyline points="12,42 20,34 28,26 36,20 44,16" fill="none" class="logo-line" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <circle cx="44" cy="16" r="3.2" class="logo-accent" />
+                </svg>
+                <h2>SQU^RE<span class="danger">DOFF</span></h2>
+            </div>
+            <div class="close" id="close-btn" role="button" aria-label="Close sidebar" tabindex="0">
+                <span class="material-icons-sharp" aria-hidden="true">close</span>
+            </div>
+
+            <nav class="sidebar" role="navigation" aria-label="Main navigation">
+                <a href="../index.html">
+                    <span class="material-icons-sharp">grid_view</span>
+                    <h3>Dashboard</h3>
+                </a>
+
+                <a href="news.html">
+                    <span class="material-icons-sharp">newspaper</span>
+                    <h3>Financial News</h3>
+                </a>
+
+                <a href="stocks.html">
+                    <span class="material-icons-sharp">trending_up</span>
+                    <h3>Stocks</h3>
+                </a>
+
+                <a href="indecescommodities.html">
+                    <span class="material-icons-sharp">show_chart</span>
+                    <h3>Indices & Commodities</h3>
+                </a>
+
+                <a href="crypto.html">
+                    <span class="material-icons-sharp">currency_bitcoin</span>
+                    <h3>Cryptocurrency</h3>
+                </a>
+
+                <a href="analytics.html">
+                    <span class="material-icons-sharp">insights</span>
+                    <h3>Analytics</h3>
+                </a>
+
+                <a href="#" aria-current="page">
+                    <span class="material-icons-sharp">assessment</span>
+                    <h3>Market Analysis</h3>
+                </a>
+
+                <a href="messages.html">
+                    <span class="material-icons-sharp" aria-hidden="true">mail_outline</span>
+                    <h3>Messages</h3>
+                    <span class="message-count" aria-label="21 unread messages">21</span>
+                </a>
+
+                <a href="orders.html">
+                    <span class="material-icons-sharp">inventory</span>
+                    <h3>Orders</h3>
+                </a>
+
+                <a href="reports.html">
+                    <span class="material-icons-sharp">error</span>
+                    <h3>Reports</h3>
+                </a>
+
+                <a href="settings.html">
+                    <span class="material-icons-sharp">settings</span>
+                    <h3>Settings</h3>
+                </a>
+
+                <a href="#">
+                    <span class="material-icons-sharp">add</span>
+                    <h3>Add Commodity</h3>
+                </a>
+
+                <a href="#">
+                    <span class="material-icons-sharp">logout</span>
+                    <h3>Logout</h3>
+                </a>
+            </nav>
+        </aside>
+        <!--((((((((((((((End of Aside Section))))))))))))))-->
+
+        <main id="main-content" role="main" aria-label="Market Analysis content">
+            <h1>Market Analysis</h1>
+
+            <!-- Earnings Section -->
+            <section class="earnings-section" style="margin-bottom: 3rem;">
+                <h2 style="margin-bottom: 1.5rem;">
+                    <span class="material-icons-sharp" style="vertical-align: middle; margin-right: 0.5rem;">attach_money</span>
+                    Earnings
+                </h2>
+                
+                <div class="recent-orders" role="region" aria-labelledby="earnings-heading">
+                    <table role="table" aria-label="Earnings calendar and reports">
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Symbol</th>
+                                <th>Date</th>
+                                <th>EPS Est.</th>
+                                <th>EPS Actual</th>
+                                <th>Revenue</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="earningsTableBody">
+                            <!-- Earnings data will be populated here -->
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--color-info-dark);">
+                                    No earnings data available
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Institutional Order Flow Section -->
+            <section class="order-flow-section">
+                <h2 style="margin-bottom: 1.5rem;">
+                    <span class="material-icons-sharp" style="vertical-align: middle; margin-right: 0.5rem;">account_balance</span>
+                    Institutional Order Flow 2024
+                </h2>
+                
+                <div class="recent-orders" role="region" aria-labelledby="orderflow-heading">
+                    <table role="table" aria-label="Institutional order flow data">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Institution</th>
+                                <th>Symbol</th>
+                                <th>Action</th>
+                                <th>Shares</th>
+                                <th>Value</th>
+                                <th>Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderFlowTableBody">
+                            <!-- Order flow data will be populated here -->
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--color-info-dark);">
+                                    No institutional order flow data available
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+        <!--((((((((((((((End of MAIN)))))))))))))-->
+
+        <div class="right">
+            <div class="top">
+                <button id="menu-btn" aria-label="Open menu" aria-expanded="false">
+                    <span class="material-icons-sharp" aria-hidden="true">menu</span>
+                </button>    
+                <div class="theme-toggler" role="group" aria-label="Theme selection">
+                    <span class="material-icons-sharp active" role="button" aria-label="Light mode" aria-pressed="true" tabindex="0">light_mode</span>
+                    <span class="material-icons-sharp" role="button" aria-label="Dark mode" aria-pressed="false" tabindex="0">dark_mode</span>
+                </div>
+                
+                <!-- Manual Refresh Button -->
+                <button onclick="window.GoogleSheetsSync?.manualRefresh()" style="padding: 0.5rem 1rem; background: var(--color-primary); color: white; border: none; border-radius: 0.5rem; cursor: pointer; margin-left: 1rem; display: flex; align-items: center; gap: 0.5rem;" title="Manually refresh data from Google Sheets">
+                    <span class="material-icons-sharp" style="font-size: 1rem;">refresh</span>
+                    Refresh
+                </button>
+                
+                <div class="profile">
+                    <div class="info">
+                        <p> Key: <b>Gavin</b></p>
+                        <small class="text-muted">Admin</small>
+                    </div>
+                    <div class="profile-pic">
+                        <img src="../assets/profile-pic-1.png" alt="Gavin's profile picture" height="50px" width="50px">
+                    </div>
+                </div>
+            </div>
+            <!--((((((((((((((End of Top)))))))))))))-->
+
+            <div class="recent-updates" role="region" aria-labelledby="updates-heading">
+                <h2 id="updates-heading">Market Insights</h2>
+                <div class="updates" id="recentUpdates" aria-live="polite" aria-atomic="false">
+                    <div class="update" role="article">
+                        <div class="profile-photo update-icon primary">
+                            <span class="material-icons-sharp" aria-hidden="true">trending_up</span>
+                        </div>
+                        <div class="message">
+                            <p><b>Earnings Season</b> Q4 2024 earnings season underway</p>
+                            <small class="text-muted">Monitor major tech earnings</small>
+                        </div>
+                    </div>
+                    
+                    <div class="update" role="article">
+                        <div class="profile-photo update-icon success">
+                            <span class="material-icons-sharp" aria-hidden="true">account_balance</span>
+                        </div>
+                        <div class="message">
+                            <p><b>Institutional Activity</b> Increased buying in tech sector</p>
+                            <small class="text-muted">Smart money tracking</small>
+                        </div>
+                    </div>
+                    
+                    <div class="update" role="article">
+                        <div class="profile-photo update-icon warning">
+                            <span class="material-icons-sharp" aria-hidden="true">info</span>
+                        </div>
+                        <div class="message">
+                            <p><b>Market Alert</b> High volatility expected</p>
+                            <small class="text-muted">Fed meeting this week</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--((((((((((((((End of Recent Updates)))))))))))))-->
+
+            <div class="sales-analytics" role="region" aria-labelledby="analytics-heading">
+                <h2 id="analytics-heading">Quick Stats</h2>
+
+                <div class="item customers" role="article">
+                    <div class="icon">
+                        <span class="material-icons-sharp" aria-hidden="true">event</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3>UPCOMING EARNINGS</h3>
+                            <small class="text-muted">This Week</small>
+                        </div>
+                        <h5 class="success">--</h5>
+                        <h3>Companies</h3>
+                    </div>   
+                </div>
+
+                <div class="item offline" role="article">
+                    <div class="icon">
+                        <span class="material-icons-sharp" aria-hidden="true">insights</span>
+                    </div>
+                    <div class="right">
+                        <div class="info">
+                            <h3>INSTITUTIONAL FLOW</h3>
+                            <small class="text-muted">Today</small>
+                        </div>
+                        <h5 class="primary">--</h5>
+                        <h3>Transactions</h3>
+                    </div>
+                </div>   
+
+                <div class="item add-product" role="button" tabindex="0" aria-label="View detailed reports">
+                    <div>
+                        <span class="material-icons-sharp" aria-hidden="true">assessment</span>
+                        <h3>View Reports</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/error-handler.js"></script>
+    <script src="../scripts/security-utils.js"></script>
+    <script src="../scripts/performance-utils.js"></script>
+    <script src="../scripts/config.js"></script>
+    <script src="../scripts/config.local.js"></script>
+    <script src="../scripts/utils.js"></script>
+    <script src="../scripts/earnings-data.js"></script>
+    <script src="../scripts/google-sheets-sync.js"></script>
+    
+    <script>
+        // Theme toggler functionality
+        const themeToggler = document.querySelector('.theme-toggler');
+        if (themeToggler) {
+            themeToggler.addEventListener('click', () => {
+                document.body.classList.toggle('dark-theme-variables');
+                themeToggler.querySelector('span:nth-child(1)').classList.toggle('active');
+                themeToggler.querySelector('span:nth-child(2)').classList.toggle('active');
+            });
+        }
+
+        // Sidebar toggle functionality
+        const menuBtn = document.querySelector('#menu-btn');
+        const closeBtn = document.querySelector('#close-btn');
+        const sidebar = document.querySelector('aside');
+
+        if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+                sidebar.style.display = 'block';
+            });
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                sidebar.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>

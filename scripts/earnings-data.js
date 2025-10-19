@@ -1,0 +1,226 @@
+/**
+ * CSV Parser for Earnings Data
+ * Parses the earnings CSV file and populates the market-analysis page
+ */
+
+// Sample earnings data extracted from CSV
+const earningsData = [
+    // Semiconductors - XLK
+    { company: "NVIDIA", symbol: "NVDA", date: "27/8/25", quarter: "Q2", epsEst: "$5.98", epsActual: "$1.04", revenue: "$46.74B", consensus: "$46.05B", status: "Beat", sector: "Semiconductors" },
+    { company: "Micron Technology", symbol: "MU", date: "23/9/25", quarter: "Q4", epsEst: "$14.94", epsActual: "$3.03", revenue: "$11.32B", consensus: "$10.65B", status: "Beat", sector: "Semiconductors" },
+    { company: "AMD", symbol: "AMD", date: "5/8/25", quarter: "Q2", epsEst: "$3.66", epsActual: "$1.74", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Semiconductors" },
+    { company: "Intel", symbol: "INTC", date: "23/10/25", quarter: "Q3", epsEst: "-$0.16", epsActual: "-$4.76", revenue: "TBD", consensus: "TBD", status: "Miss", sector: "Semiconductors" },
+    { company: "Qualcomm", symbol: "QCOM", date: "29/10/25", quarter: "Q4", epsEst: "$10.48", epsActual: "$10.37", revenue: "TBD", consensus: "TBD", status: "Met", sector: "Semiconductors" },
+    { company: "ASML", symbol: "ASML", date: "20/10/25", quarter: "Q3", epsEst: "$28.83", epsActual: "$26.10", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Semiconductors" },
+    { company: "ARM Holdings", symbol: "ARM", date: "29/10/25", quarter: "Q2", epsEst: "$1.44", epsActual: "$2.25", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Semiconductors" },
+    { company: "TSMC", symbol: "TSM", date: "17/10/25", quarter: "Q3", epsEst: "$11.06", epsActual: "$8.78", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Semiconductors" },
+    { company: "Broadcom", symbol: "AVGO", date: "4/12/25", quarter: "Q4", epsEst: "$6.46", epsActual: "$1.23", revenue: "$51.57B", consensus: "TBD", status: "Pending", sector: "Semiconductors" },
+    { company: "Marvell Technology", symbol: "MRVL", date: "28/8/25", quarter: "Q2", epsEst: "$1.77", epsActual: "$0.67", revenue: "$2.01B", consensus: "$2.01B", status: "Met", sector: "Semiconductors" },
+    
+    // Software - XLK
+    { company: "Microsoft", symbol: "MSFT", date: "29/10/25", quarter: "Q1", epsEst: "$15.51", epsActual: "$13.64", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Software Infrastructure" },
+    { company: "Oracle", symbol: "ORCL", date: "9/9/25", quarter: "Q1", epsEst: "$6.54", epsActual: "$1.47", revenue: "$15.04B", consensus: "$13.30B", status: "Beat", sector: "Software Infrastructure" },
+    { company: "Adobe", symbol: "ADBE", date: "11/12/25", quarter: "Q4", epsEst: "$18.70", epsActual: "$5.31", revenue: "$5.99B", consensus: "$5.91B", status: "Beat", sector: "Software Infrastructure" },
+    { company: "CrowdStrike", symbol: "CRWD", date: "27/8/25", quarter: "Q2", epsEst: "$0.41", epsActual: "$0.93", revenue: "$1.17B", consensus: "$1.15B", status: "Beat", sector: "Software Application" },
+    { company: "Palantir", symbol: "PLTR", date: "3/11/25", quarter: "Q3", epsEst: "$0.59", epsActual: "TBD", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Software Application" },
+    { company: "ServiceNow", symbol: "NOW", date: "22/10/25", quarter: "Q3", epsEst: "$10.89", epsActual: "TBD", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Software Application" },
+    { company: "Salesforce", symbol: "CRM", date: "3/9/25", quarter: "Q2", epsEst: "$8.41", epsActual: "TBD", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Software Application" },
+    { company: "Snowflake", symbol: "SNOW", date: "26/11/25", quarter: "Q3", epsEst: "-$3.69", epsActual: "$0.35", revenue: "$1.14B", consensus: "$1.09B", status: "Beat", sector: "Software Application" },
+    
+    // Communication Services - XLC
+    { company: "Alphabet (Google)", symbol: "GOOG", date: "22/10/25", quarter: "Q3", epsEst: "$10.64", epsActual: "$2.31", revenue: "$96.43B", consensus: "$94.04B", status: "Beat", sector: "Internet Content" },
+    { company: "Meta Platforms", symbol: "META", date: "TBD", quarter: "Q2", epsEst: "TBD", epsActual: "TBD", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Internet Content" },
+    { company: "Netflix", symbol: "NFLX", date: "16/10/25", quarter: "Q3", epsEst: "$32.28", epsActual: "TBD", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Entertainment" },
+    
+    // Consumer Electronics - XLY
+    { company: "Apple", symbol: "AAPL", date: "30/10/25", quarter: "Q4", epsEst: "$7.95", epsActual: "TBD", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Consumer Electronics" },
+    { company: "Dell Technologies", symbol: "DELL", date: "28/8/25", quarter: "Q2", epsEst: "$7.53", epsActual: "$2.32", revenue: "$29.78B", consensus: "$29.02B", status: "Beat", sector: "Computer Hardware" },
+    { company: "Cisco Systems", symbol: "CSCO", date: "13/8/25", quarter: "Q4", epsEst: "$2.91", epsActual: "TBD", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Computer Equipment" },
+    { company: "IBM", symbol: "IBM", date: "21/10/25", quarter: "Q3", epsEst: "$10.36", epsActual: "TBD", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "IT Services" },
+    
+    // Healthcare - XLV
+    { company: "Johnson & Johnson", symbol: "JNJ", date: "15/10/25", quarter: "Q3", epsEst: "$10.04", epsActual: "$2.29", revenue: "$23.74B", consensus: "$22.85B", status: "Beat", sector: "Drug Manufacturers" },
+    { company: "AbbVie", symbol: "ABBV", date: "30/10/25", quarter: "Q3", epsEst: "$9.05", epsActual: "$0.52", revenue: "$15.42B", consensus: "$15.03B", status: "Beat", sector: "Drug Manufacturers" },
+    
+    // Financials - XLF
+    { company: "JPMorgan Chase", symbol: "JPM", date: "14/10/25", quarter: "Q3", epsEst: "$20.13", epsActual: "$5.07", revenue: "$46.43B", consensus: "$45.47B", status: "Beat", sector: "Bank Diversified" },
+    { company: "Goldman Sachs", symbol: "GS", date: "15/10/25", quarter: "Q3", epsEst: "$52.91", epsActual: "$10.91", revenue: "$14.58B", consensus: "$13.51B", status: "Beat", sector: "Capital Markets" },
+    { company: "Morgan Stanley", symbol: "MS", date: "15/10/25", quarter: "Q3", epsEst: "$9.64", epsActual: "$7.95", revenue: "$61.76B", consensus: "$60.48B", status: "Beat", sector: "Capital Markets" },
+    
+    // Industrials - XLI
+    { company: "General Electric", symbol: "GE", date: "16/10/25", quarter: "Q3", epsEst: "$7.34", epsActual: "$1.01", revenue: "$11.14B", consensus: "$11.09B", status: "Beat", sector: "Aerospace" },
+    { company: "Delta Air Lines", symbol: "DAL", date: "9/10/25", quarter: "Q3", epsEst: "$6.99", epsActual: "$3.27", revenue: "$15.51B", consensus: "$15.46B", status: "Beat", sector: "Airline" },
+    
+    // Consumer Staples - XLP
+    { company: "Costco", symbol: "COST", date: "TBD", quarter: "Q1", epsEst: "$20.21", epsActual: "$5.87", revenue: "$86.16B", consensus: "$58.84B", status: "Beat", sector: "Discount Stores" },
+    
+    // Materials - XLB
+    { company: "Linde", symbol: "LIN", date: "31/10/25", quarter: "Q3", epsEst: "$16.61", epsActual: "$14.07", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Specialty Chemicals" },
+    { company: "Air Products", symbol: "APD", date: "30/10/25", quarter: "Q4", epsEst: "$12.82", epsActual: "$6.96", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Specialty Chemicals" },
+    { company: "Ecolab", symbol: "ECL", date: "28/10/25", quarter: "Q3", epsEst: "$8.36", epsActual: "$7.48", revenue: "TBD", consensus: "TBD", status: "Pending", sector: "Specialty Chemicals" },
+];
+
+/**
+ * Parse date string (format: DD/MM/YY or similar)
+ */
+function parseEarningsDate(dateStr) {
+    if (!dateStr || dateStr === 'TBD') return 'TBD';
+    
+    // Try to parse various date formats
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+        const day = parts[0].padStart(2, '0');
+        const month = parts[1].padStart(2, '0');
+        let year = parts[2];
+        
+        // Handle 2-digit year
+        if (year.length === 2) {
+            year = '20' + year;
+        }
+        
+        return `${year}-${month}-${day}`;
+    }
+    
+    return dateStr;
+}
+
+/**
+ * Get status class for styling
+ */
+function getStatusClass(status) {
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes('beat') || statusLower.includes('exceeded')) {
+        return 'success';
+    } else if (statusLower.includes('miss') || statusLower.includes('below')) {
+        return 'danger';
+    } else if (statusLower.includes('met') || statusLower.includes('inline')) {
+        return 'primary';
+    }
+    return 'warning';
+}
+
+/**
+ * Populate earnings table
+ */
+function populateEarningsTable() {
+    const tableBody = document.getElementById('earningsTableBody');
+    if (!tableBody) {
+        console.warn('[Earnings] Table body not found');
+        return;
+    }
+    
+    // Clear existing rows
+    tableBody.innerHTML = '';
+    
+    // Sort by date (most recent first)
+    const sortedData = [...earningsData].sort((a, b) => {
+        const dateA = new Date(parseEarningsDate(a.date));
+        const dateB = new Date(parseEarningsDate(b.date));
+        return dateB - dateA;
+    });
+    
+    // Populate table
+    sortedData.forEach(earning => {
+        const tr = document.createElement('tr');
+        
+        // Company
+        const companyCell = document.createElement('td');
+        companyCell.textContent = earning.company;
+        tr.appendChild(companyCell);
+        
+        // Symbol
+        const symbolCell = document.createElement('td');
+        symbolCell.innerHTML = `<strong>${earning.symbol}</strong>`;
+        tr.appendChild(symbolCell);
+        
+        // Date
+        const dateCell = document.createElement('td');
+        const parsedDate = parseEarningsDate(earning.date);
+        if (parsedDate !== 'TBD') {
+            const date = new Date(parsedDate);
+            dateCell.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        } else {
+            dateCell.textContent = 'TBD';
+        }
+        tr.appendChild(dateCell);
+        
+        // EPS Estimate
+        const epsEstCell = document.createElement('td');
+        epsEstCell.textContent = earning.epsEst;
+        tr.appendChild(epsEstCell);
+        
+        // EPS Actual
+        const epsActualCell = document.createElement('td');
+        epsActualCell.textContent = earning.epsActual;
+        tr.appendChild(epsActualCell);
+        
+        // Revenue
+        const revenueCell = document.createElement('td');
+        revenueCell.textContent = earning.revenue;
+        tr.appendChild(revenueCell);
+        
+        // Status
+        const statusCell = document.createElement('td');
+        const statusClass = getStatusClass(earning.status);
+        statusCell.innerHTML = `<span class="${statusClass}">${earning.status}</span>`;
+        tr.appendChild(statusCell);
+        
+        tableBody.appendChild(tr);
+    });
+    
+    console.log('[Earnings] Table populated with', sortedData.length, 'entries');
+}
+
+/**
+ * Get upcoming earnings count
+ */
+function getUpcomingEarningsCount() {
+    const today = new Date();
+    const oneWeekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    
+    return earningsData.filter(earning => {
+        if (earning.status !== 'Pending') return false;
+        const parsedDate = parseEarningsDate(earning.date);
+        if (parsedDate === 'TBD') return false;
+        
+        const earningDate = new Date(parsedDate);
+        return earningDate >= today && earningDate <= oneWeekFromNow;
+    }).length;
+}
+
+/**
+ * Update earnings stats in sidebar
+ */
+function updateEarningsStats() {
+    const upcomingCount = getUpcomingEarningsCount();
+    
+    // Update the upcoming earnings stat
+    const statElements = document.querySelectorAll('.sales-analytics .item h5');
+    if (statElements.length > 0) {
+        statElements[0].textContent = upcomingCount;
+    }
+}
+
+/**
+ * Initialize earnings data
+ */
+function initEarningsData() {
+    console.log('[Earnings] Initializing with', earningsData.length, 'entries');
+    populateEarningsTable();
+    updateEarningsStats();
+}
+
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEarningsData);
+} else {
+    initEarningsData();
+}
+
+// Export for external use
+window.EarningsData = {
+    data: earningsData,
+    populate: populateEarningsTable,
+    updateStats: updateEarningsStats,
+    getUpcoming: getUpcomingEarningsCount
+};
