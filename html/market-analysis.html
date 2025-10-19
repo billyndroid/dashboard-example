@@ -379,6 +379,11 @@
             to { transform: rotate(360deg); }
         }
         
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
         #fullEarningsTable tbody tr {
             transition: background-color 0.2s;
         }
@@ -410,6 +415,20 @@
                 opacity: 1;
                 transform: translateX(-50%) translateY(0);
             }
+        }
+        
+        /* Live market cap indicator */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--color-success);
+            font-weight: 600;
+        }
+        
+        .live-indicator .material-icons-sharp {
+            font-size: 0.9rem;
+            animation: pulse 2s infinite;
         }
     </style>
 

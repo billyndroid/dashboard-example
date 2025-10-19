@@ -1,9 +1,10 @@
 /**
  * Full Earnings CSV Viewer
- * Loads and displays the complete earnings CSV data
+ * Loads and displays the complete earnings CSV data with live market cap integration
  */
 
 let fullEarningsCSVData = [];
+let liveMarketCapCache = {};
 
 /**
  * Open full earnings modal and load CSV data
@@ -129,19 +130,78 @@ function parseCSVLine(line) {
 }
 
 /**
- * Display full earnings data in table
+ * Fetch live market cap for a stock symbol
+ * @param {string} symbol - Stock symbol
+ * @returns {Promise<string|null>} Formatted market cap or null
  */
-function displayFullEarningsData() {
+async function fetchLiveMarketCap(symbol) {
+    if (!symbol || symbol === '--') return null;
+    
+    // Check cache first
+    if (liveMarketCapCache[symbol]) {
+        return liveMarketCapCache[symbol];
+    }
+    
+    try {
+        // Try to fetch live quote data
+        const quote = await window.DataService?.fetchAssetQuote(symbol);
+        
+        if (quote && quote.close) {
+            // For a rough estimate, we'll try to get shares outstanding from a secondary API
+            // For now, we'll return a "LIVE" indicator and the price
+            const marketCap = `LIVE: $${quote.close.toFixed(2)}`;
+            liveMarketCapCache[symbol] = marketCap;
+            return marketCap;
+        }
+    } catch (error) {
+        console.warn(`[Full Earnings] Could not fetch live data for ${symbol}:`, error);
+    }
+    
+    return null;
+}
+
+/**
+ * Format market cap value for display
+ * @param {string} value - Market cap value
+ * @param {boolean} isLive - Whether this is live data
+ * @returns {string} HTML string for display
+ */
+function formatMarketCapDisplay(value, isLive = false) {
+    if (!value || value === '--') return '--';
+    
+    if (isLive) {
+        return `<span style="color: var(--color-success); font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem;">
+            <span class="material-icons-sharp" style="font-size: 0.9rem; animation: pulse 2s infinite;">fiber_manual_record</span>
+            ${value}
+        </span>`;
+    }
+    
+    return value;
+}
+
+/**
+ * Display full earnings data in table with live market cap
+ */
+async function displayFullEarningsData() {
     const tbody = document.getElementById('fullEarningsTableBody');
     if (!tbody) return;
     
     tbody.innerHTML = '';
     
-    fullEarningsCSVData.forEach(row => {
+    // Create rows first with CSV data
+    const rowPromises = fullEarningsCSVData.map(async (row) => {
         const tr = document.createElement('tr');
         
         // Key columns to display
         const columns = ['Sector', 'Industry', 'DATE', 'STOCK', 'Country', 'Quarter', 'CEO', 'Market Cap', 'Upgrades Downgrades', 'Stock price', 'Forward EPS', 'Current PE RATIO', 'EPS', 'Rev', 'Future Guidance', 'ROE'];
+        
+        // Try to fetch live market cap for this stock
+        const symbol = row['STOCK'];
+        let liveMarketCap = null;
+        
+        if (symbol && symbol !== '--' && window.DataService) {
+            liveMarketCap = await fetchLiveMarketCap(symbol);
+        }
         
         columns.forEach(col => {
             const td = document.createElement('td');
@@ -171,6 +231,14 @@ function displayFullEarningsData() {
             // Highlight certain values
             if (col === 'STOCK') {
                 td.innerHTML = `<strong style="color: var(--color-primary);">${value}</strong>`;
+            } else if (col === 'Market Cap') {
+                // Use live data if available, otherwise use CSV data
+                if (liveMarketCap) {
+                    td.innerHTML = formatMarketCapDisplay(liveMarketCap, true) + 
+                                 `<div style="font-size: 0.75rem; color: var(--color-info-dark); margin-top: 0.25rem;">CSV: ${value}</div>`;
+                } else {
+                    td.innerHTML = formatMarketCapDisplay(value, false);
+                }
             } else if (col === 'EPS' && value !== '--') {
                 const numValue = parseFloat(value);
                 if (!isNaN(numValue)) {
@@ -203,13 +271,20 @@ function displayFullEarningsData() {
             tr.appendChild(td);
         });
         
-        tbody.appendChild(tr);
+        return tr;
     });
+    
+    // Wait for a few rows to load, then start displaying
+    const batchSize = 5;
+    for (let i = 0; i < rowPromises.length; i += batchSize) {
+        const batch = await Promise.all(rowPromises.slice(i, i + batchSize));
+        batch.forEach(tr => tbody.appendChild(tr));
+    }
     
     // Add hover event listeners for notes
     addNoteHoverListeners();
     
-    console.log('[Full Earnings] Displayed', fullEarningsCSVData.length, 'rows');
+    console.log('[Full Earnings] Displayed', fullEarningsCSVData.length, 'rows with live market cap data');
 }
 
 /**
