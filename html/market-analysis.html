@@ -114,10 +114,16 @@
 
             <!-- Earnings Section -->
             <section class="earnings-section" style="margin-bottom: 3rem;">
-                <h2 style="margin-bottom: 1.5rem;">
-                    <span class="material-icons-sharp" style="vertical-align: middle; margin-right: 0.5rem;">attach_money</span>
-                    Earnings
-                </h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="margin: 0;">
+                        <span class="material-icons-sharp" style="vertical-align: middle; margin-right: 0.5rem;">attach_money</span>
+                        Earnings
+                    </h2>
+                    <button onclick="openFullEarningsModal()" style="padding: 0.75rem 1.5rem; background: var(--color-primary); color: white; border: none; border-radius: 0.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='var(--color-primary-variant)'" onmouseout="this.style.background='var(--color-primary)'">
+                        <span class="material-icons-sharp" style="font-size: 1.2rem;">table_view</span>
+                        View Full Earnings
+                    </button>
+                </div>
                 
                 <div class="recent-orders" role="region" aria-labelledby="earnings-heading">
                     <table role="table" aria-label="Earnings calendar and reports">
@@ -304,6 +310,109 @@
         </div>
     </div>
 
+    <!-- Full Earnings CSV Modal -->
+    <div id="fullEarningsModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeFullEarningsModal()"></div>
+        <div class="modal-container" style="max-width: 95vw; max-height: 95vh; width: 95vw;">
+            <div class="modal-header" style="position: sticky; top: 0; background: white; z-index: 10; border-bottom: 2px solid var(--color-light);">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div>
+                        <h2 style="margin: 0;">
+                            <span class="material-icons-sharp" style="vertical-align: middle; margin-right: 0.5rem;">table_chart</span>
+                            Full Earnings Data
+                        </h2>
+                        <small class="text-muted" style="display: block; margin-top: 0.25rem;">Complete earnings analysis and fundamental data</small>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <input type="text" id="earningsSearch" placeholder="Search companies, symbols..." style="padding: 0.5rem 1rem; border: 1px solid var(--color-light); border-radius: 0.5rem; width: 300px;" oninput="filterEarningsTable(this.value)">
+                        <button class="modal-close" onclick="closeFullEarningsModal()" style="position: relative;">
+                            <span class="material-icons-sharp">close</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body" style="padding: 0; overflow: auto; max-height: calc(95vh - 100px);">
+                <div id="fullEarningsContent" style="overflow-x: auto;">
+                    <table id="fullEarningsTable" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                        <thead style="position: sticky; top: 0; background: var(--color-primary); color: white; z-index: 5;">
+                            <tr>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">Sector</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">Industry</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">Date</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">Stock</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">Country</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">Quarter</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">CEO</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">Market Cap</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
+                                    Upgrades/Downgrades
+                                    <span class="material-icons-sharp" style="font-size: 0.9rem; vertical-align: middle; margin-left: 0.25rem;" title="Hover over cells for details">help_outline</span>
+                                </th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">Stock Price</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">Forward EPS</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">Current PE</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">EPS</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">Revenue</th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
+                                    Future Guidance
+                                    <span class="material-icons-sharp" style="font-size: 0.9rem; vertical-align: middle; margin-left: 0.25rem;" title="Hover over cells for details">help_outline</span>
+                                </th>
+                                <th style="padding: 0.75rem; text-align: left; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">ROE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fullEarningsTableBody">
+                            <!-- Content will be loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="earningsLoadingMessage" style="text-align: center; padding: 3rem; color: var(--color-info-dark);">
+                    <span class="material-icons-sharp" style="font-size: 3rem; animation: spin 1s linear infinite;">sync</span>
+                    <p style="margin-top: 1rem;">Loading earnings data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        #fullEarningsTable tbody tr {
+            transition: background-color 0.2s;
+        }
+        
+        #fullEarningsTable tbody tr:nth-child(even) {
+            background-color: var(--color-light);
+        }
+        
+        #fullEarningsTable tbody tr:hover {
+            background-color: rgba(45, 108, 223, 0.1);
+        }
+        
+        #fullEarningsTable td {
+            padding: 0.75rem;
+            border: 1px solid var(--color-light);
+            white-space: nowrap;
+        }
+        
+        .note-tooltip {
+            animation: fadeIn 0.2s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+    </style>
+
     <script src="../scripts/error-handler.js"></script>
     <script src="../scripts/security-utils.js"></script>
     <script src="../scripts/performance-utils.js"></script>
@@ -311,6 +420,7 @@
     <script src="../scripts/config.local.js"></script>
     <script src="../scripts/utils.js"></script>
     <script src="../scripts/earnings-data.js"></script>
+    <script src="../scripts/full-earnings-viewer.js"></script>
     <script src="../scripts/google-sheets-sync.js"></script>
     
     <script>
