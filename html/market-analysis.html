@@ -245,7 +245,7 @@
             <div class="sales-analytics" role="region" aria-labelledby="analytics-heading">
                 <h2 id="analytics-heading">Quick Stats</h2>
 
-                <div class="item customers" role="article">
+                <div class="item customers" role="article" onclick="openUpcomingEarningsModal()" style="cursor: pointer;" title="Click for details">
                     <div class="icon">
                         <span class="material-icons-sharp" aria-hidden="true">event</span>
                     </div>
@@ -254,7 +254,7 @@
                             <h3>UPCOMING EARNINGS</h3>
                             <small class="text-muted">This Week</small>
                         </div>
-                        <h5 class="success">--</h5>
+                        <h5 class="success" id="upcomingEarningsCount">--</h5>
                         <h3>Companies</h3>
                     </div>   
                 </div>
@@ -278,6 +278,27 @@
                         <span class="material-icons-sharp" aria-hidden="true">assessment</span>
                         <h3>View Reports</h3>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Earnings Modal -->
+    <div id="upcomingEarningsModal" class="modal" style="display: none;">
+        <div class="modal-overlay" onclick="closeUpcomingEarningsModal()"></div>
+        <div class="modal-container" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h2>
+                    <span class="material-icons-sharp" style="vertical-align: middle; margin-right: 0.5rem;">event</span>
+                    Upcoming Earnings This Week
+                </h2>
+                <button class="modal-close" onclick="closeUpcomingEarningsModal()">
+                    <span class="material-icons-sharp">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="upcomingEarningsContent" style="max-height: 600px; overflow-y: auto;">
+                    <!-- Content will be dynamically loaded -->
                 </div>
             </div>
         </div>

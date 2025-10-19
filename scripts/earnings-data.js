@@ -194,11 +194,16 @@ function getUpcomingEarningsCount() {
 function updateEarningsStats() {
     const upcomingCount = getUpcomingEarningsCount();
     
-    // Update the upcoming earnings stat
-    const statElements = document.querySelectorAll('.sales-analytics .item h5');
-    if (statElements.length > 0) {
-        statElements[0].textContent = upcomingCount;
+    // Update the upcoming earnings stat by ID
+    const countElement = document.getElementById('upcomingEarningsCount');
+    if (countElement) {
+        countElement.textContent = upcomingCount;
+        console.log('[Earnings] Updated upcoming earnings count to:', upcomingCount);
     }
+    
+    // Also get total pending earnings for additional context
+    const totalPending = earningsData.filter(e => e.status === 'Pending').length;
+    console.log('[Earnings] Total pending earnings:', totalPending);
 }
 
 /**
@@ -217,10 +222,166 @@ if (document.readyState === 'loading') {
     initEarningsData();
 }
 
+/**
+ * Get upcoming earnings with details
+ */
+function getUpcomingEarningsDetails() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
+    const oneWeekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    
+    const upcoming = earningsData.filter(earning => {
+        if (earning.status !== 'Pending') return false;
+        const parsedDate = parseEarningsDate(earning.date);
+        if (parsedDate === 'TBD') return false;
+        
+        const earningDate = new Date(parsedDate);
+        earningDate.setHours(0, 0, 0, 0);
+        return earningDate >= today && earningDate <= oneWeekFromNow;
+    });
+    
+    // Sort by date
+    return upcoming.sort((a, b) => {
+        const dateA = new Date(parseEarningsDate(a.date));
+        const dateB = new Date(parseEarningsDate(b.date));
+        return dateA - dateB;
+    });
+}
+
+/**
+ * Open upcoming earnings modal
+ */
+function openUpcomingEarningsModal() {
+    const modal = document.getElementById('upcomingEarningsModal');
+    const content = document.getElementById('upcomingEarningsContent');
+    
+    if (!modal || !content) return;
+    
+    const upcomingEarnings = getUpcomingEarningsDetails();
+    
+    if (upcomingEarnings.length === 0) {
+        content.innerHTML = `
+            <div style="text-align: center; padding: 3rem; color: var(--color-info-dark);">
+                <span class="material-icons-sharp" style="font-size: 4rem; opacity: 0.3;">event_busy</span>
+                <h3 style="margin-top: 1rem;">No Upcoming Earnings This Week</h3>
+                <p>Check back later for updates on upcoming earnings reports.</p>
+            </div>
+        `;
+    } else {
+        // Group by date
+        const groupedByDate = {};
+        upcomingEarnings.forEach(earning => {
+            const parsedDate = parseEarningsDate(earning.date);
+            const dateObj = new Date(parsedDate);
+            const dateKey = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            
+            if (!groupedByDate[dateKey]) {
+                groupedByDate[dateKey] = [];
+            }
+            groupedByDate[dateKey].push(earning);
+        });
+        
+        let html = `
+            <div style="margin-bottom: 1rem; padding: 1rem; background: var(--color-light); border-radius: 0.5rem;">
+                <h3 style="margin: 0; color: var(--color-primary);">
+                    <span class="material-icons-sharp" style="vertical-align: middle; font-size: 1.2rem;">info</span>
+                    ${upcomingEarnings.length} companies reporting this week
+                </h3>
+            </div>
+        `;
+        
+        Object.keys(groupedByDate).forEach(dateKey => {
+            const earnings = groupedByDate[dateKey];
+            
+            html += `
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="padding: 0.75rem 1rem; background: var(--color-primary); color: white; border-radius: 0.5rem; margin-bottom: 1rem;">
+                        <span class="material-icons-sharp" style="vertical-align: middle; margin-right: 0.5rem;">calendar_today</span>
+                        ${dateKey}
+                    </h3>
+                    <div style="display: grid; gap: 1rem;">
+            `;
+            
+            earnings.forEach(earning => {
+                html += `
+                    <div style="border: 1px solid var(--color-light); border-radius: 0.5rem; padding: 1rem; background: var(--color-white); transition: transform 0.2s, box-shadow 0.2s;" 
+                         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';"
+                         onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0 0 0.25rem 0; font-size: 1.1rem; color: var(--color-dark);">
+                                    ${earning.company}
+                                </h4>
+                                <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                                    <span style="font-weight: 600; color: var(--color-primary); font-size: 1rem;">
+                                        ${earning.symbol}
+                                    </span>
+                                    <span class="text-muted" style="font-size: 0.9rem;">
+                                        ${earning.sector}
+                                    </span>
+                                    <span style="background: var(--color-light); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.85rem;">
+                                        ${earning.quarter}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-light);">
+                            <div>
+                                <small class="text-muted" style="display: block; margin-bottom: 0.25rem;">EPS Estimate</small>
+                                <strong style="font-size: 1.1rem; color: var(--color-dark);">${earning.epsEst}</strong>
+                            </div>
+                            <div>
+                                <small class="text-muted" style="display: block; margin-bottom: 0.25rem;">Expected Revenue</small>
+                                <strong style="font-size: 1.1rem; color: var(--color-dark);">${earning.revenue !== 'TBD' ? earning.revenue : 'To Be Determined'}</strong>
+                            </div>
+                            <div>
+                                <small class="text-muted" style="display: block; margin-bottom: 0.25rem;">Consensus</small>
+                                <strong style="font-size: 1.1rem; color: var(--color-dark);">${earning.consensus !== 'TBD' ? earning.consensus : 'N/A'}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+        
+        content.innerHTML = html;
+    }
+    
+    // Show modal
+    modal.style.display = 'block';
+    setTimeout(() => modal.classList.add('active'), 10);
+    document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Close upcoming earnings modal
+ */
+function closeUpcomingEarningsModal() {
+    const modal = document.getElementById('upcomingEarningsModal');
+    if (!modal) return;
+    
+    modal.classList.remove('active');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }, 300);
+}
+
+// Make functions globally available
+window.openUpcomingEarningsModal = openUpcomingEarningsModal;
+window.closeUpcomingEarningsModal = closeUpcomingEarningsModal;
+
 // Export for external use
 window.EarningsData = {
     data: earningsData,
     populate: populateEarningsTable,
     updateStats: updateEarningsStats,
-    getUpcoming: getUpcomingEarningsCount
+    getUpcoming: getUpcomingEarningsCount,
+    getUpcomingDetails: getUpcomingEarningsDetails
 };
